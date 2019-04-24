@@ -1,0 +1,7 @@
+{
+  "skipCI": true,
+  "hooks": {
+    "pre-commit": "lint-staged",
+    "pre-push": "node -e \"console.log('Checking with prettier if files are correctly formatted. Errors will be listed below.')\" && ./node_modules/.bin/prettier src/**/*.{json,ts,html} --list-different && npm run lint"
+  }
+}

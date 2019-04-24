@@ -1,0 +1,80 @@
+var_1: &default_docker_image circleci/node:10.12
+var_2: &browsers_docker_image circleci/node:10.12-browsers
+var_3: &cache_key va-schematics-{{ checksum "package-lock.json" }}
+
+# Settings common to each job
+anchor_1: &defaults
+  working_directory: ~/va
+  docker:
+    - image: *default_docker_image
+
+# After checkout, rebase on top of target branch.
+anchor_2: &post_checkout
+  run:
+    name: Rebase PR on target branch
+    command: >
+      if [[ -n "${CIRCLE_PR_NUMBER}" ]]; then
+        # User is required for rebase.
+        git config user.name "va-ci"
+        git config user.email "va-ci"
+        # Rebase PR on top of target branch.
+        node tools/rebase-pr.js valueadd-poland/va-schematics ${CIRCLE_PR_NUMBER}
+      else
+        echo "This build is not over a PR, nothing to do."
+      fi
+
+anchor_3: &restore_cache
+  restore_cache:
+    keys:
+      - *cache_key
+      # This fallback should be the cache_key without variables.
+      - va-schematics-
+
+anchor_4: &attach_options
+  at: .
+
+# Job definitions
+version: 2
+jobs:
+  install:
+    <<: *defaults
+    steps:
+      - checkout
+      - *post_checkout
+      - *restore_cache
+      - run: npm install
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./*
+      - save_cache:
+          key: *cache_key
+          paths:
+            - ~/.cache/npm
+
+  lint:
+    <<: *defaults
+    steps:
+      - attach_workspace: *attach_options
+      - run: './node_modules/.bin/prettier src/**/*.{json,ts,html} --list-different'
+      - run: npm run lint
+
+  test:
+    <<: *defaults
+    steps:
+      - attach_workspace: *attach_options
+      - run: npm run test
+      - run: npm run test:cov
+      - run: npm run coveralls
+
+workflows:
+  version: 2
+  default_workflow:
+    jobs:
+      - install
+      - lint:
+          requires:
+            - install
+      - test:
+          requires:
+            - lint
