@@ -33,6 +33,15 @@ anchor_3: &restore_cache
 anchor_4: &attach_options
   at: .
 
+# Initializes the CI environment by setting up common environment variables.
+anchor_5: &init_environment
+  run:
+    name: Initializing environment (setting up variables, overwriting Yarn)
+    command: |
+      # use git+ssh instead of https
+      git config --global url."ssh://git@github.com".insteadOf "https://github.com" || true
+      git config --global gc.auto 0 || true
+
 # Job definitions
 version: 2
 jobs:
@@ -42,7 +51,9 @@ jobs:
       - checkout
       - *post_checkout
       - *restore_cache
+      - *init_environment
       - run: npm install
+      - run: npm run validate
       - persist_to_workspace:
           root: .
           paths:
