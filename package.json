@@ -8,7 +8,8 @@
     "lint": "./node_modules/.bin/tslint --project tsconfig.json ./src/**/*.ts --exclude **/*.d.ts",
     "test": "npm run build && jasmine src/**/*_spec.js",
     "test:cov": "istanbul cover --include-all-sources --root ./src jasmine.js && istanbul check-coverage",
-    "watch": "./node_modules/.bin/nodemon --watch src --ext ts,json --ignore *.d.ts --exec 'npm run test'"
+    "watch": "./node_modules/.bin/nodemon --watch src --ext ts,json --ignore *.d.ts --exec 'npm run test'",
+    "validate": "node ./tools/tasks/validate-commit-message.js"
   },
   "keywords": [
     "schematics"
@@ -33,6 +34,8 @@
     "lint-staged": "^8.1.5",
     "nodemon": "^1.18.11",
     "prettier": "^1.17.0",
+    "semver": "^6.0.0",
+    "shelljs": "^0.8.3",
     "standard-version": "^5.0.2",
     "supertest": "^4.0.2",
     "tslint": "^5.16.0",
