@@ -6,7 +6,7 @@
     "build": "tsc -p tsconfig.json",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
     "lint": "./node_modules/.bin/tslint --project tsconfig.json ./src/**/*.ts --exclude **/*.d.ts",
-    "test": "npm run build && jasmine src/**/*_spec.js",
+    "test": "npm run build && node jasmine.js",
     "test:cov": "istanbul cover --include-all-sources --root ./src jasmine.js && istanbul check-coverage",
     "watch": "./node_modules/.bin/nodemon --watch src --ext ts,json --ignore *.d.ts --exec 'npm run test'",
     "validate": "node ./tools/tasks/validate-commit-message.js"
@@ -19,9 +19,13 @@
   "schematics": "./src/collection.json",
   "dependencies": {
     "@angular-devkit/core": "^7.3.8",
-    "@angular-devkit/schematics": "^7.3.8"
+    "@angular-devkit/schematics": "^7.3.8",
+    "@schematics/angular": "^7.3.8",
+    "fs-extra": "^7.0.1",
+    "import": "0.0.6"
   },
   "devDependencies": {
+    "@types/fs-extra": "^5.0.5",
     "@types/jasmine": "^3.3.12",
     "@types/node": "^11.13.7",
     "coveralls": "^3.0.3",
