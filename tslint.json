@@ -3,7 +3,7 @@
   "rulesDirectory": [],
   "rules": {
     "max-union-size": false,
-    "cognitive-complexity": [true, 15],
+    "cognitive-complexity": [true, 40],
     "prefer-object-spread": true,
     "no-submodule-imports": false,
     "no-implicit-dependencies": false,
