@@ -1,5 +1,5 @@
 {
   "maxLength": 120,
   "types": ["build", "ci", "docs", "feat", "fix", "perf", "refactor", "release", "style", "test"],
-  "scopes": ["action", "reducer", "data-service", "ngrx-crud", "project", "readme", "misc", "utils"]
+  "scopes": ["action", "reducer", "data-service", "ngrx", "project", "readme", "misc", "utils"]
 }

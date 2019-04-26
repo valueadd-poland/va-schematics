@@ -1,9 +1,10 @@
 {
   "$schema": "../node_modules/@angular-devkit/schematics/collection-schema.json",
   "schematics": {
-    "va-schematics": {
-      "description": "A blank schematic.",
-      "factory": "./va-schematics/index#vaSchematics"
+    "ngrx": {
+      "description": "Add NgRx support to a module.",
+      "factory": "./collection/ngrx/index#ngrx",
+      "schema": "./collection/ngrx/ngrx-schema.json"
     }
   }
 }
