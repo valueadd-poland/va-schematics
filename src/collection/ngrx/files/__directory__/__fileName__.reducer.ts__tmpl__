@@ -1,0 +1,21 @@
+import { from<%= className %>Actions } from './<%= fileName %>.actions';
+
+export const <%= className.toUpperCase() %>_FEATURE_KEY = '<%= propertyName %>';
+
+export interface <%= className %>State {
+};
+
+export interface <%= className %>PartialState {
+    readonly [<%= className.toUpperCase() %>_FEATURE_KEY]: <%= className %>State;
+}
+
+export const initialState: <%= className %>State = {};
+
+export function <%= propertyName %>Reducer(
+    state: <%= className %>State = initialState,
+    action: from<%= className %>Actions.CollectiveType
+): <%= className %>State {
+    switch (action.type) {}
+
+    return state;
+}

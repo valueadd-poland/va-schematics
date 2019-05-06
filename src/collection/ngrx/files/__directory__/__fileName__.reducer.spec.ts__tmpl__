@@ -1,0 +1,19 @@
+import { from<%= className %>Actions } from './<%= fileName %>.actions';
+import { <%= className %>State, initialState, <%= propertyName %>Reducer } from './<%= fileName %>.reducer';
+
+describe('<%= className %> Reducer', () => {
+    let state: <%= className %>State;
+
+    beforeEach(() => {
+        state = { ...initialState };
+    });
+
+    describe('unknown action', () => {
+        it('should return the initial state', () => {
+            const action = {} as any;
+            const result = <%= propertyName %>Reducer(state, action);
+
+            expect(result).toBe(state);
+        });
+    });
+});
