@@ -1,23 +1,33 @@
-import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import * as path from 'path';
+import { Tree, VirtualTree } from '@angular-devkit/schematics';
+import { getFileContent } from '@schematics/angular/utility/test';
+import { createApp, createEmptyWorkspace, runSchematic } from '../../utils/testing.utils';
 import { NgrxSchema } from './ngrx-schema.interface';
 
-const collectionPath = path.join(__dirname, '../../collection.json');
-
 describe('ngrx', () => {
-  it('works', () => {
-    const runner = new SchematicTestRunner('schematics', collectionPath);
-    const tree = runner.runSchematic<NgrxSchema>(
+  let appTree: Tree;
+
+  beforeEach(() => {
+    appTree = new VirtualTree();
+    appTree = createEmptyWorkspace(appTree);
+    appTree = createApp(appTree, 'myapp');
+  });
+
+  it('should add empty root', async () => {
+    const tree = await runSchematic(
       'ngrx',
       {
         name: 'state',
         module: 'apps/myapp/src/app/app.module.ts',
         onlyEmptyRoot: true
-      },
-      Tree.empty()
+      } as NgrxSchema,
+      appTree
     );
+    const appModule = getFileContent(tree, '/apps/myapp/src/app/app.module.ts');
 
-    expect(tree.files).toEqual([]);
+    expect(tree.exists('apps/myapp/src/app/+state/state.actions.ts')).toBeFalsy();
+
+    expect(appModule).toContain('StoreModule.forRoot(');
+    expect(appModule).toContain('{ metaReducers : !environment.production ? [storeFreeze] : [] }');
+    expect(appModule).toContain('EffectsModule.forRoot');
   });
 });
