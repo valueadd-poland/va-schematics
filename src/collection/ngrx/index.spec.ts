@@ -1,13 +1,14 @@
-import { Tree, VirtualTree } from '@angular-devkit/schematics';
+import { VirtualTree } from '@angular-devkit/schematics';
+import { UnitTestTree } from '@angular-devkit/schematics/testing';
 import { getFileContent } from '@schematics/angular/utility/test';
 import { createApp, createEmptyWorkspace, runSchematic } from '../../utils/testing.utils';
 import { NgrxSchema } from './ngrx-schema.interface';
 
 describe('ngrx', () => {
-  let appTree: Tree;
+  let appTree: UnitTestTree;
 
   beforeEach(() => {
-    appTree = new VirtualTree();
+    appTree = new UnitTestTree(new VirtualTree());
     appTree = createEmptyWorkspace(appTree);
     appTree = createApp(appTree, 'myapp');
   });
