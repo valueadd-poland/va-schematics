@@ -1,5 +1,6 @@
 import { Tree } from '@angular-devkit/schematics';
 import * as ts from 'typescript';
+import { config } from '../collection/config';
 import {
   createFilesArrayFromDir,
   findDeclarationNodeByName,
@@ -46,16 +47,22 @@ function isNodeType(node: ts.Node, type: NodeType): boolean {
   return false;
 }
 
-function findNodesByTypeAndNameInTree(
+export function findNodesByTypeAndNameInTree(
   tree: Tree,
   type: NodeType | NodeType[],
   name: string
 ): string[] {
-  const dir = tree.getDir('.');
+  let tsFilePaths: string[] = [];
 
-  const tsFilePaths = createFilesArrayFromDir(dir).filter(
-    filePath => !filePath.endsWith('spec.ts') && filePath.endsWith('.ts')
-  );
+  config.global.sources.forEach(source => {
+    const dir = tree.getDir(source);
+
+    tsFilePaths = tsFilePaths.concat(
+      createFilesArrayFromDir(dir).filter(
+        filePath => filePath.endsWith('.ts') && !filePath.endsWith('spec.ts')
+      )
+    );
+  });
 
   const nodes: any[] = [];
 

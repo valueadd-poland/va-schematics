@@ -88,3 +88,21 @@ export function isBaseType(type: string): boolean {
     ].indexOf(type) !== -1
   );
 }
+
+export function parseInterfaceMembers(
+  members: ts.NodeArray<ts.TypeElement>
+): Array<[ts.Identifier, ts.Node]> {
+  const props: Array<[ts.Identifier, ts.Node]> = [];
+
+  members.forEach(member => {
+    const nodes = member
+      .getChildren()
+      .filter(
+        node => node.kind !== ts.SyntaxKind.QuestionToken && node.kind !== ts.SyntaxKind.ColonToken
+      ) as [ts.Identifier, ts.Node];
+
+    props.push(nodes);
+  });
+
+  return props;
+}

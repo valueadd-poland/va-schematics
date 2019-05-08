@@ -10,6 +10,11 @@
       "description": "A blank schematic.",
       "factory": "./collection/action/index#action",
       "schema": "./collection/action/action-schema.json"
+    },
+    "reducer": {
+      "description": "A blank schematic.",
+      "factory": "./collection/reducer/index#reducer",
+      "schema": "./collection/reducer/reducer-schema.json"
     }
   }
 }
