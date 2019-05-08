@@ -4,27 +4,26 @@
   "title": "Create action in ngrx store module.",
   "type": "object",
   "properties": {
-    "action": {
+    "name": {
       "type": "string",
-      "description": "Action name to add.",
-      "x-prompt": "What is the action name?"
+      "description": "Action's name.",
+      "x-prompt": "What is the action's name?"
     },
     "stateDir": {
       "type": "string",
       "description": "Path to state directory.",
-      "x-prompt": "What is the path to state directory?"
+      "x-prompt": "What is the path to state directory (+state)?"
     },
-    "payloadType": {
+    "payload": {
       "type": "string",
       "default": "",
       "description": "Type of action's payload.",
       "x-prompt": "What is the type of action's payload?"
     },
-    "actionPrefix": {
+    "prefix": {
       "type": "string",
-      "default": "",
-      "description": "Action prefix type string.",
-      "x-prompt": "What is the action prefix of action's type string?"
+      "description": "Action's enum type prefix ('[__PREFIX__] Get Test').",
+      "x-prompt": "What is the action's prefix?"
     }
   }
 }

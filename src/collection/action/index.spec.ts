@@ -76,7 +76,7 @@ describe('action', () => {
     expect(content).toContain(`export class GetTests implements Action`);
     expect(content).toContain(`readonly type = Types.GetTests;`);
 
-    expect(content).toContain(`import { TestModel } from '../resources/models/test-model.ts'`);
+    expect(content).toContain(`import { TestModel } from '../resources/models/test-model'`);
     expect(content).toContain(`UpdateTest = '[Test] Update Test'`);
     expect(content).toContain(`export class UpdateTest implements Action`);
     expect(content).toContain(`readonly type = Types.UpdateTest;`);

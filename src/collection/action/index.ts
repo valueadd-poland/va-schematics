@@ -23,6 +23,7 @@ export function action(options: ActionSchema): Rule {
     const rules: Rule[] = [];
 
     if (options.payload) {
+      // @Todo: add possibility to provide path to import or skip time consuming searching for type.
       rules.push(addImportToProvidedType(stateDir.actions, options.payload));
     }
 
