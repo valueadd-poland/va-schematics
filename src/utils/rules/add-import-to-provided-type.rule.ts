@@ -19,7 +19,7 @@ function createImport(
   const typeFile = findTypeDeclarationFile(host, type);
 
   if (typeFile) {
-    const path = buildRelativePath(fileToEdit, typeFile);
+    const path = buildRelativePath(fileToEdit, typeFile).slice(0, -3);
     if (!isImported(sourceFile, type, path)) {
       return insertImport(sourceFile, fileToEdit, type, path);
     }
