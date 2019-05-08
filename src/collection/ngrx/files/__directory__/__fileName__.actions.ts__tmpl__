@@ -3,6 +3,5 @@ import { Action } from '@ngrx/store';
 export namespace from<%= className %>Actions {
     export enum Types {}
 
-    // Remove this comment and Action from below type
     export type CollectiveType = Action;
 }

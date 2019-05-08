@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "id": "SchematicsVaAction",
+  "title": "Create action in ngrx store module.",
+  "type": "object",
+  "properties": {
+    "action": {
+      "type": "string",
+      "description": "Action name to add.",
+      "x-prompt": "What is the action name?"
+    },
+    "stateDir": {
+      "type": "string",
+      "description": "Path to state directory.",
+      "x-prompt": "What is the path to state directory?"
+    },
+    "payloadType": {
+      "type": "string",
+      "default": "",
+      "description": "Type of action's payload.",
+      "x-prompt": "What is the type of action's payload?"
+    },
+    "actionPrefix": {
+      "type": "string",
+      "default": "",
+      "description": "Action prefix type string.",
+      "x-prompt": "What is the action prefix of action's type string?"
+    }
+  }
+}

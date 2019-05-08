@@ -19,7 +19,7 @@ export function addImportsToModule(context: RequestContext): Rule {
       return insertImport(source, modulePath, symbolName, fileName);
     };
 
-    const dir = `./${toFileName(context.options.directory)}`;
+    const dir = `./${toFileName(context.options.directory || '')}`;
     const pathPrefix = `${dir}/${toFileName(context.featureName)}`;
     const reducerPath = `${pathPrefix}.reducer`;
     const effectsPath = `${pathPrefix}.effects`;

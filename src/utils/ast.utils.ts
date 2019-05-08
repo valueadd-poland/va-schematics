@@ -159,8 +159,8 @@ export function getSourceNodes(sourceFile: ts.SourceFile): ts.Node[] {
   return result;
 }
 
-export function findNode(node: ts.Node, kind: ts.SyntaxKind, text: string): ts.Node | null {
-  if (node.kind === kind && node.getText() === text) {
+export function findNode(node: ts.Node, kind: ts.SyntaxKind, text?: string): ts.Node | null {
+  if (node.kind === kind && (!!text ? node.getText() === text : true)) {
     return node;
   }
 

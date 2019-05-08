@@ -5,6 +5,11 @@
       "description": "Add NgRx support to a module.",
       "factory": "./collection/ngrx/index#ngrx",
       "schema": "./collection/ngrx/ngrx-schema.json"
+    },
+    "action": {
+      "description": "A blank schematic.",
+      "factory": "./collection/action/index#action",
+      "schema": "./collection/action/action-schema.json"
     }
   }
 }

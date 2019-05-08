@@ -36,7 +36,7 @@ export function runSchematic(name: string, options: any, tree: Tree): Promise<Un
     .toPromise();
 }
 
-export function createEmptyWorkspace(tree: Tree): Tree {
+export function createEmptyWorkspace(tree: UnitTestTree): UnitTestTree {
   tree.create('/angular.json', JSON.stringify({ projects: {}, newProjectRoot: '' }));
   tree.create(
     '/package.json',
@@ -65,7 +65,11 @@ export function createEmptyWorkspace(tree: Tree): Tree {
   return tree;
 }
 
-export function createApp(tree: Tree, appName: string, routing: boolean = true): Tree {
+export function createApp(
+  tree: UnitTestTree,
+  appName: string,
+  routing: boolean = true
+): UnitTestTree {
   // save for getAppDir() lookup by external *.spec.ts tests
   appConfig = {
     appName,
@@ -142,7 +146,7 @@ export function createApp(tree: Tree, appName: string, routing: boolean = true):
   return tree;
 }
 
-export function createLib(tree: Tree, libName: string): Tree {
+export function createLib(tree: UnitTestTree, libName: string): UnitTestTree {
   const { name, className, fileName, propertyName } = names(libName);
 
   libConfig = {
