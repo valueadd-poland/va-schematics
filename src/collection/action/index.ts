@@ -1,6 +1,6 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
+import { insertTypeImport } from '../../utils/import.utils';
 import { parseStateDir } from '../../utils/options-parsing.utils';
-import { addImportToProvidedType } from '../../utils/rules/add-import-to-provided-type.rule';
 import { formatFiles } from '../../utils/rules/format-files';
 import { ActionSchema } from './action-schema.interface';
 import { addActionClassDeclaration } from './rules/add-action-class-declaration.rule';
@@ -23,8 +23,7 @@ export function action(options: ActionSchema): Rule {
     const rules: Rule[] = [];
 
     if (options.payload) {
-      // @Todo: add possibility to provide path to import or skip time consuming searching for type.
-      rules.push(addImportToProvidedType(stateDir.actions, options.payload));
+      insertTypeImport(host, stateDir.actions, options.payload);
     }
 
     rules.push(

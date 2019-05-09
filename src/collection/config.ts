@@ -5,5 +5,8 @@ export const config = {
   action: {
     typesEnumName: 'Types',
     collectiveTypeName: 'CollectiveType'
+  },
+  dataServiceMethod: {
+    endpointsField: 'endpoints'
   }
 };

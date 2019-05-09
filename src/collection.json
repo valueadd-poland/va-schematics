@@ -7,14 +7,19 @@
       "schema": "./collection/ngrx/ngrx-schema.json"
     },
     "action": {
-      "description": "A blank schematic.",
+      "description": "Add an action to actions file.",
       "factory": "./collection/action/index#action",
       "schema": "./collection/action/action-schema.json"
     },
     "reducer": {
-      "description": "A blank schematic.",
+      "description": "Add reducer and selectors.",
       "factory": "./collection/reducer/index#reducer",
       "schema": "./collection/reducer/reducer-schema.json"
+    },
+    "data-service-method": {
+      "description": "Add data service method.",
+      "factory": "./collection/data-service-method/index#dataServiceMethod",
+      "schema": "./collection/data-service-method/data-service-method-schema.json"
     }
   }
 }

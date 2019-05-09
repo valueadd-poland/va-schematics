@@ -56,6 +56,28 @@ export function findDeclarationNodeByName<T extends ts.Node>(
   return null;
 }
 
+export function findDeclarationNodeByPartialName<T extends ts.Node>(
+  node: ts.Node,
+  name: string
+): T | null {
+  const n = (node as any).name;
+
+  if (n && n.escapedText.indexOf(name) !== -1) {
+    return node as T;
+  }
+
+  const children = node.getChildren();
+  for (let i = 0; i < children.length; i++) {
+    const foundNode = findDeclarationNodeByPartialName(children[i], name);
+
+    if (foundNode) {
+      return foundNode as T;
+    }
+  }
+
+  return null;
+}
+
 export function guessType(value: string): string {
   if (value.includes('false') || value.includes('true')) {
     return 'boolean';
@@ -72,6 +94,17 @@ export function guessType(value: string): string {
   return 'any';
 }
 
+export function parseType(type: string): string[] {
+  const types: string[] = [];
+  const generics = type.split('<').map(t => t.replace('>', ''));
+
+  generics.forEach(g => {
+    types.push(...g.split('|'));
+  });
+
+  return types.map(t => t.trim());
+}
+
 export function isBaseType(type: string): boolean {
   return (
     [
@@ -83,6 +116,8 @@ export function isBaseType(type: string): boolean {
       'null[]',
       'undefined',
       'undefined[]',
+      'string',
+      'string[]',
       'any',
       'any[]'
     ].indexOf(type) !== -1
