@@ -1,5 +1,12 @@
 import { normalize } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
+import { guessType } from './ts.utils';
+
+export interface StateProperty {
+  key: string;
+  type: string;
+  value: string;
+}
 
 export interface StateFilePaths {
   actions: string;
@@ -31,4 +38,17 @@ export function parseStateDir(path: string, host: Tree): StateFilePaths {
     selectors: normalize(statePath + '/' + findFileByEnding('.selectors.ts')),
     selectorsSpec: normalize(statePath + '/' + findFileByEnding('.selectors.spec.ts'))
   };
+}
+
+export function parsePropsToUpdate(propsToUpdate: string): StateProperty[] {
+  return propsToUpdate
+    .split(',')
+    .map(prop => prop.split(':'))
+    .map(prop => {
+      return {
+        key: prop[0],
+        value: prop[1],
+        type: prop[2] || guessType(prop[1])
+      };
+    });
 }

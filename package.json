@@ -38,7 +38,7 @@
     "istanbul": "^0.4.5",
     "jasmine": "^3.4.0",
     "jasmine-console-reporter": "^3.1.0",
-    "jasmine-node": "^1.16.2",
+    "jasmine-node": "^2.0.1",
     "jasmine-supertest": "^1.0.0",
     "lint-staged": "^8.1.5",
     "nodemon": "^1.18.11",
