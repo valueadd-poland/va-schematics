@@ -6,7 +6,8 @@ var reporter = new JasmineConsoleReporter({
   cleanStack: 3,
   verbosity: 4,
   listStyle: 'indent',
-  activity: false
+  activity: false,
+  DEFAULT_TIMEOUT_INTERVAL: 15000
 });
 jasmine.addReporter(reporter);
 jasmine.showColors(true);

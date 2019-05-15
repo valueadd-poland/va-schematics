@@ -1,12 +1,6 @@
 import { Tree } from '@angular-devkit/schematics';
 import * as ts from 'typescript';
-import { config } from '../collection/config';
-import {
-  createFilesArrayFromDir,
-  findDeclarationNodeByName,
-  isBaseType,
-  readIntoSourceFile
-} from './ts.utils';
+import { createFilesArrayFromDir, findDeclarationNodeByName, readIntoSourceFile } from './ts.utils';
 
 export type NodeType = 'enum' | 'namespace' | 'class' | 'type' | 'const' | 'interface';
 
@@ -54,15 +48,15 @@ export function findNodesByTypeAndNameInTree(
 ): string[] {
   let tsFilePaths: string[] = [];
 
-  config.global.sources.forEach(source => {
-    const dir = tree.getDir(source);
+  /*config.global.sources.forEach(source => {*/
+  const dir = tree.getDir('.');
 
-    tsFilePaths = tsFilePaths.concat(
-      createFilesArrayFromDir(dir).filter(
-        filePath => filePath.endsWith('.ts') && !filePath.endsWith('spec.ts')
-      )
-    );
-  });
+  tsFilePaths = tsFilePaths.concat(
+    createFilesArrayFromDir(dir).filter(
+      filePath => filePath.endsWith('.ts') && !filePath.endsWith('spec.ts')
+    )
+  );
+  /*});*/
 
   const nodes: any[] = [];
 
@@ -79,12 +73,4 @@ export function findNodesByTypeAndNameInTree(
   });
 
   return nodes;
-}
-
-export function findTypeDeclarationFile(tree: Tree, type: string): string | null {
-  if (isBaseType(type)) {
-    return null;
-  }
-
-  return findNodesByTypeAndNameInTree(tree, ['class', 'interface', 'enum', 'type'], type)[0];
 }

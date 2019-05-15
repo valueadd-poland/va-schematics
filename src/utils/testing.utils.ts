@@ -1,7 +1,13 @@
-import { Tree } from '@angular-devkit/schematics';
+import { Tree, VirtualTree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
+import { Schema as ClassSchema } from '@schematics/angular/class/schema';
+import { Schema as ServiceSchema } from '@schematics/angular/service/schema';
 import * as path from 'path';
+import { ActionSchema } from '../collection/action/action-schema.interface';
+import { NgrxSchema } from '../collection/ngrx/ngrx-schema.interface';
+import { ReducerSchema } from '../collection/reducer/reducer-schema.interface';
 import { names } from './name.utils';
+import { dasherize } from './string.utils';
 
 export interface AppConfig {
   appModule: string; // app/app.module.ts in the above sourceDir
@@ -176,4 +182,87 @@ export function createLib(tree: UnitTestTree, libName: string): UnitTestTree {
   `
   );
   return tree;
+}
+
+export async function createTestAppWithStore(): Promise<UnitTestTree> {
+  const collectionPath = path.join(__dirname, '../collection.json');
+  let appTree: UnitTestTree;
+  const runner = new SchematicTestRunner('va-schematics', collectionPath);
+  const stateDirPath = '/libs/testlib/src/lib/+state';
+
+  const ngrxOpts: NgrxSchema = {
+    name: 'test',
+    module: '/libs/testlib/src/lib/testlib.module.ts',
+    facade: true
+  };
+
+  const classOpts: ClassSchema = {
+    name: 'TestModel',
+    project: 'testlib',
+    path: '/libs/testlib/src/lib/resources/models'
+  };
+
+  const serviceOpts: ServiceSchema = {
+    name: 'test-data',
+    path: '/libs/testlib/src/lib/services',
+    project: 'testlib'
+  };
+
+  const getTestsOpts: ActionSchema = {
+    name: 'GetTests',
+    stateDir: stateDirPath,
+    prefix: 'Test'
+  };
+
+  const getTestOpts: ActionSchema = {
+    name: 'GetTest',
+    stateDir: stateDirPath,
+    prefix: 'Test',
+    payload: 'string'
+  };
+
+  const updateTestOpts: ActionSchema = {
+    name: 'UpdateTest',
+    stateDir: stateDirPath,
+    prefix: 'Test',
+    payload: 'TestModel'
+  };
+
+  const removeTestOpts: ActionSchema = {
+    name: 'RemoveTest',
+    stateDir: stateDirPath,
+    prefix: 'Test',
+    payload: 'TestModel'
+  };
+
+  const reducerOpts: ReducerSchema = {
+    propsToUpdate:
+      'loadingTest:false,test:action.payload:Test,loadingTestApiError:null:ApiError|null',
+    actionName: 'GetTest',
+    stateDir: stateDirPath,
+    selectors: true
+  };
+
+  return new Promise<UnitTestTree>(async resolve => {
+    appTree = new UnitTestTree(new VirtualTree());
+    appTree = createEmptyWorkspace(appTree);
+    appTree = createApp(appTree, 'testapp');
+    appTree = createLib(appTree, 'testlib');
+    appTree = await runner
+      .runExternalSchematicAsync('va-schematics', 'ngrx', ngrxOpts, appTree)
+      .toPromise();
+    appTree = await runner
+      .runExternalSchematicAsync('@schematics/angular', 'class', classOpts, appTree)
+      .toPromise();
+    appTree.create(classOpts.path + '/index.ts', `export * from './${dasherize(classOpts.name)}';`);
+    appTree = await runner
+      .runExternalSchematicAsync('@schematics/angular', 'service', serviceOpts, appTree)
+      .toPromise();
+    appTree = await runner.runSchematicAsync('action', getTestsOpts, appTree).toPromise();
+    appTree = await runner.runSchematicAsync('action', getTestOpts, appTree).toPromise();
+    appTree = await runner.runSchematicAsync('action', updateTestOpts, appTree).toPromise();
+    appTree = await runner.runSchematicAsync('action', removeTestOpts, appTree).toPromise();
+    appTree = await runner.runSchematicAsync('reducer', reducerOpts, appTree).toPromise();
+    resolve(appTree);
+  });
 }

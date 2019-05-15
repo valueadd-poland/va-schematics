@@ -609,3 +609,150 @@ export function insert(host: Tree, modulePath: string, changes: Change[]): void 
   }
   host.commitUpdate(recorder);
 }
+
+export function findDescribeBlockNode(sourceFile: ts.SourceFile): ts.Block | null {
+  const describeIdentifierNode = findNode(sourceFile, ts.SyntaxKind.Identifier, 'describe');
+
+  if (!describeIdentifierNode) {
+    return null;
+  }
+
+  return findNode(describeIdentifierNode.parent, ts.SyntaxKind.Block);
+}
+
+export function findNodesInBlock<T extends ts.Node = ts.Node>(
+  node: ts.Node,
+  kind: ts.SyntaxKind
+): T[] {
+  const arr: ts.Node[] = [];
+
+  if (node.kind === kind) {
+    arr.push(node);
+  }
+
+  for (const child of node.getChildren()) {
+    if (child.kind === ts.SyntaxKind.Block) {
+      break;
+    }
+
+    findNodesInBlock(child, kind).forEach(n => {
+      arr.push(n);
+    });
+  }
+
+  return arr as T[];
+}
+
+export function addSymbolToObject(
+  source: ts.SourceFile,
+  objectLiteralExpression: ts.ObjectLiteralExpression,
+  filePath: string,
+  field: string,
+  expression: string
+): Change[] {
+  let node: any = objectLiteralExpression;
+
+  // Find the decorator declaration.
+  if (!node) {
+    return [];
+  }
+  // Get all the children property assignment of object literals.
+  const matchingProperties: ts.ObjectLiteralElement[] = (node as ts.ObjectLiteralExpression).properties
+    .filter(prop => prop.kind === ts.SyntaxKind.PropertyAssignment)
+    // Filter out every fields that's not "metadataField". Also handles string literals
+    // (but not expressions).
+    .filter((prop: ts.PropertyAssignment) => {
+      const name = prop.name;
+      switch (name.kind) {
+        case ts.SyntaxKind.Identifier:
+          return name.getText(source) === field;
+        case ts.SyntaxKind.StringLiteral:
+          return name.text === field;
+      }
+
+      return false;
+    });
+
+  // Get the last node of the array literal.
+  if (!matchingProperties) {
+    return [];
+  }
+  if (matchingProperties.length === 0) {
+    // We haven't found the field in the metadata declaration. Insert a new field.
+    const expr = node as ts.ObjectLiteralExpression;
+    let pos: number;
+    let toIns: string;
+    if (expr.properties.length === 0) {
+      pos = expr.getEnd() - 1;
+      toIns = `  ${field}: [${expression}]\n`;
+    } else {
+      node = expr.properties[expr.properties.length - 1];
+      pos = node.getEnd();
+      // Get the indentation of the last element, if any.
+      const text = node.getFullText(source);
+      toIns = text.match('^\r?\r?\n')
+        ? `,${text.match(/^\r?\n\s+/)[0]}${field}: [${expression}]`
+        : `, ${field}: [${expression}]`;
+    }
+    const newMetadataProperty = new InsertChange(filePath, pos, toIns);
+    return [newMetadataProperty];
+  }
+
+  const assignment = matchingProperties[0] as ts.PropertyAssignment;
+
+  // If it's not an array, nothing we can do really.
+  if (assignment.initializer.kind !== ts.SyntaxKind.ArrayLiteralExpression) {
+    return [];
+  }
+
+  const arrLiteral = assignment.initializer as ts.ArrayLiteralExpression;
+  node = arrLiteral.elements.length === 0 ? arrLiteral : arrLiteral.elements;
+
+  if (!node) {
+    console.log('No app module found. Please add your new class to your component.');
+
+    return [];
+  }
+
+  if (Array.isArray(node)) {
+    const nodeArray = (node as {}) as ts.Node[];
+    const symbolsArray = nodeArray.map(n => n.getText());
+    if (symbolsArray.includes(expression)) {
+      return [];
+    }
+
+    node = node[node.length - 1];
+  }
+
+  let toInsert: string;
+  let position = node.getEnd();
+  if (node.kind === ts.SyntaxKind.ObjectLiteralExpression) {
+    // We haven't found the field in the metadata declaration. Insert a new
+    // field.
+    const expr = node as ts.ObjectLiteralExpression;
+    if (expr.properties.length === 0) {
+      position = expr.getEnd() - 1;
+      toInsert = `  ${field}: [${expression}]\n`;
+    } else {
+      node = expr.properties[expr.properties.length - 1];
+      position = node.getEnd();
+      // Get the indentation of the last element, if any.
+      const text = node.getFullText(source);
+      toInsert = text.match('^\r?\r?\n')
+        ? `,${text.match(/^\r?\n\s+/)[0]}${field}: [${expression}]`
+        : `, ${field}: [${expression}]`;
+    }
+  } else if (node.kind === ts.SyntaxKind.ArrayLiteralExpression) {
+    // We found the field but it's empty. Insert it just before the `]`.
+    position--;
+    toInsert = `${expression}`;
+  } else {
+    // Get the indentation of the last element, if any.
+    const text = node.getFullText(source);
+    toInsert = text.match(/^\r?\n/)
+      ? `,${text.match(/^\r?\n(\r?)\s+/)[0]}${expression}`
+      : `, ${expression}`;
+  }
+  const ins = new InsertChange(filePath, position, toInsert);
+  return [ins];
+}
