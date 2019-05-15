@@ -5,12 +5,18 @@ import * as ts from 'typescript';
 import { findNode, getSourceNodes, insert, insertImport, isImported } from './ast.utils';
 import { createFilesArrayFromDir, isBaseType, parseType, readIntoSourceFile } from './ts.utils';
 
+const cache: { [key: string]: string[] } = {};
+
 export function findDeclarationFileByName(host: Tree, name: string): string[] {
+  if (cache[name]) {
+    return cache[name];
+  }
+
   const files = createFilesArrayFromDir(host.getDir('.')).filter(
     f => !f.endsWith('spec.ts') && f.endsWith('.ts') && !f.startsWith('/node_modules')
   );
 
-  return files.filter(file => {
+  const paths = files.filter(file => {
     const buff = host.read(file);
     if (buff) {
       const content = buff.toString('utf8');
@@ -32,8 +38,12 @@ export function findDeclarationFileByName(host: Tree, name: string): string[] {
         content.includes(`export let ${name}=`)
       );
     }
+
+    cache[name] = [paths[0]];
     return false;
   });
+
+  return paths;
 }
 
 function isExportedByBarrel(host: Tree, path: string, fileNameNoExt: string): boolean {
@@ -115,14 +125,15 @@ export function insertTypeImport(host: Tree, filePath: string, type: string): vo
 
   types.forEach(t => {
     if (isBaseType(t)) {
-      return null;
+      return;
     }
+    t = t.split('[')[0];
 
-    const typeFile = findDeclarationFileByName(host, type)[0];
+    const typeFile = findDeclarationFileByName(host, t)[0];
     if (typeFile) {
       const importPath = buildImportPath(host, filePath, typeFile);
-      if (!isImported(sourceFile, type, filePath)) {
-        const importChange = insertImport(sourceFile, filePath, type, importPath);
+      if (!isImported(sourceFile, t, filePath)) {
+        const importChange = insertImport(sourceFile, filePath, t, importPath);
         insert(host, filePath, [importChange]);
       }
     }

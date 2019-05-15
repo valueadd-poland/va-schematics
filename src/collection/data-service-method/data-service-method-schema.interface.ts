@@ -8,4 +8,5 @@ export interface DataServiceMethodSchema {
   responseType?: string;
   returnType?: string;
   mapResponse?: string;
+  skipFormat?: boolean;
 }

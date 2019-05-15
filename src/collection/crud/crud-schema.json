@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "id": "SchematicsVaCrud",
+  "title": "Create crud operation in data access module",
+  "type": "object",
+  "properties": {
+    "entity": {
+      "type": "string",
+      "format": "path",
+      "description": "Entity name",
+      "x-prompt": "What is the entity name?"
+    },
+    "operation": {
+      "type": "string",
+      "description": "Crud operation; available: create, read, update, delete",
+      "x-prompt": "What type of the operations should be added (c - create, r - read, u - update, d - delete)?"
+    },
+    "stateDir": {
+      "type": "string",
+      "format": "path",
+      "description": "Path to +state directory.",
+      "x-prompt": "What is the path to the +state directory where this crud operation should be added to?"
+    },
+    "dataService": {
+      "type": "string",
+      "format": "path",
+      "description": "Path to data service file.",
+      "x-prompt": "What is the path to the data service file?"
+    },
+    "actionsPrefix": {
+      "type": "string",
+      "description": "Actions' prefix",
+      "x-prompt": "What is the actions prefix (default is entity class name)?",
+      "default": ""
+    },
+    "isCollection": {
+      "type": "boolean",
+      "description": "Defines what to generate; collection of entities or single entity",
+      "x-prompt": "Is collection of entities?",
+      "default": true
+    },
+    "responseType": {
+      "type": "string",
+      "description": "Response return type.",
+      "x-prompt": "What is the response return type?",
+      "default": "any"
+    },
+    "mapResponse": {
+      "type": "string",
+      "description": "Add map operator to response pipe.",
+      "x-prompt": "What is response object path to map?"
+    }
+  }
+}

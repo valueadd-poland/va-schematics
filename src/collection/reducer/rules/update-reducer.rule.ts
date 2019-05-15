@@ -1,16 +1,15 @@
 import { Rule, Tree } from '@angular-devkit/schematics';
-import { Change, InsertChange } from '@schematics/angular/utility/change';
-import { buildRelativePath } from '@schematics/angular/utility/find-module';
+import { InsertChange } from '@schematics/angular/utility/change';
 import * as ts from 'typescript';
-import { findNode, insert, insertImport, isImported } from '../../../utils/ast.utils';
+import { findNode, insert } from '../../../utils/ast.utils';
 import { ParsedReducerFile } from '../../../utils/file-parsing.utils';
-import { findNodesByTypeAndNameInTree } from '../../../utils/find-type-declaration-file.util';
+import { insertTypeImport } from '../../../utils/import.utils';
 import {
   parsePropsToUpdate,
   StateFilePaths,
   StateProperty
 } from '../../../utils/options-parsing.utils';
-import { isBaseType, parseInterfaceMembers } from '../../../utils/ts.utils';
+import { parseInterfaceMembers, parseType } from '../../../utils/ts.utils';
 import { config } from '../../config';
 import { ReducerSchema } from '../reducer-schema.interface';
 
@@ -27,72 +26,24 @@ function guessInitialValue(type: string): string {
     return type;
   }
 
+  if (type.includes('[]')) {
+    return '[]';
+  }
+
   return 'null';
 }
 
-function findTypeFile(tree: Tree, type: string): string | null {
-  if (isBaseType(type)) {
-    return null;
-  }
-
-  return findNodesByTypeAndNameInTree(tree, ['class', 'interface', 'enum', 'type'], type)[0];
-}
-
-function createImport(
-  sourceFile: ts.SourceFile,
-  tree: Tree,
+function createImportsForTypes(
   fileToEdit: string,
-  type: string
-): Change | null {
-  if (isBaseType(type)) {
-    return null;
-  }
-
-  const typeFile = findTypeFile(tree, type);
-
-  if (typeFile) {
-    const path = buildRelativePath(fileToEdit, typeFile);
-    if (!isImported(sourceFile, type, path)) {
-      return insertImport(sourceFile, fileToEdit, type, path);
-    }
-  }
-
-  return null;
-}
-
-function createImports(
-  sourceFile: ts.SourceFile,
-  fileToEdit: string,
-  tree: Tree,
+  host: Tree,
   stateProperties: StateProperty[]
-): any {
-  const changes: Change[] = [];
-
-  stateProperties.forEach(stateProperty => {
-    const type = stateProperty.type;
-
-    if (isBaseType(type)) {
-      return;
-    }
-
-    if (type.includes('|')) {
-      type.split('|').forEach(t => {
-        const change = createImport(sourceFile, tree, fileToEdit, t);
-
-        if (change) {
-          changes.push(change);
-        }
-      });
-    } else {
-      const change = createImport(sourceFile, tree, fileToEdit, type);
-
-      if (change) {
-        changes.push(change);
-      }
-    }
+): void {
+  stateProperties.forEach(sp => {
+    const types = parseType(sp.type);
+    types.forEach(type => {
+      insertTypeImport(host, fileToEdit, type);
+    });
   });
-
-  return changes;
 }
 
 function createStateProperties(
@@ -102,8 +53,8 @@ function createStateProperties(
   stateProperties: StateProperty[]
 ): InsertChange[] {
   const changes: InsertChange[] = [];
-  let leadingComma = !!(reducerFile.initialState.initializer as ts.ObjectLiteralExpression)
-    .properties.length;
+  const initializer = reducerFile.initialState.initializer as ts.ObjectLiteralExpression;
+  let leadingComma = initializer.properties ? !!initializer.properties.length : true;
 
   stateProperties.forEach(stateProperty => {
     const callExpression = findNode(reducerFile.initialState, ts.SyntaxKind.CallExpression);
@@ -156,7 +107,7 @@ function createCaseStatement(
   return new InsertChange(
     path,
     switchStatement.getEnd() - 1,
-    `\ncase ${actionsNamespace}.${config.action.collectiveTypeName}.${actionName}: {\n` +
+    `\ncase ${actionsNamespace}.${config.action.typesEnumName}.${actionName}: {\n` +
       `state = {\n` +
       `...state,\n` +
       `${props}\n` +
@@ -190,10 +141,11 @@ export function updateReducer(
         actionsNamespace,
         options.actionName,
         statePropertiesToUpdate
-      ),
-      ...createImports(reducerSourceFile, stateDir.reducer, host, statePropertiesToUpdate)
+      )
     ];
     insert(host, stateDir.reducer, changes);
+
+    createImportsForTypes(stateDir.reducer, host, statePropertiesToUpdate);
 
     return host;
   };

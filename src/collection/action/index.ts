@@ -31,7 +31,7 @@ export function action(options: ActionSchema): Rule {
         addActionType(options, stateDir),
         addActionClassDeclaration(options, stateDir),
         addActionClassToCollectiveType(options, stateDir),
-        formatFiles()
+        formatFiles({ skipFormat: !!options.skipFormat })
       ]
     );
 

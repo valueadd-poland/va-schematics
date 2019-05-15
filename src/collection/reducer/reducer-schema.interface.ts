@@ -3,4 +3,5 @@ export interface ReducerSchema {
   propsToUpdate: string;
   selectors: boolean;
   stateDir: string;
+  skipFormat?: boolean;
 }

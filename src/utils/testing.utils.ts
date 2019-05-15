@@ -153,12 +153,12 @@ export function createApp(
 }
 
 export function createLib(tree: UnitTestTree, libName: string): UnitTestTree {
-  const { name, className, fileName, propertyName } = names(libName);
+  const { name, className, fileName } = names(libName);
 
   libConfig = {
     name,
-    module: `/libs/${propertyName}/src/lib/${fileName}.module.ts`,
-    barrel: `/libs/${propertyName}/src/index.ts`
+    module: `/libs/${fileName}/src/lib/${fileName}.module.ts`,
+    barrel: `/libs/${fileName}/src/index.ts`
   };
 
   tree.create(

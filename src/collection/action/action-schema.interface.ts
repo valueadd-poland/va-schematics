@@ -3,4 +3,5 @@ export interface ActionSchema {
   payload?: string;
   prefix: string;
   stateDir: string;
+  skipFormat?: boolean;
 }
