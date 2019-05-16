@@ -48,7 +48,7 @@ export function reducer(options: ReducerSchema): Rule {
             updateSelectorsSpec(selectorsSpecSourceFile, stateDir, options)
           ]
         : []),
-      formatFiles()
+      formatFiles({ skipFormat: !!options.skipFormat })
     ];
 
     return chain(rules)(host, context);

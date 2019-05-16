@@ -33,7 +33,7 @@ export function dataServiceMethod(options: DataServiceMethodSchema): Rule {
       updateConstructor(options),
       addMethod(options),
       addMethodSpec(options),
-      formatFiles()
+      formatFiles({ skipFormat: !!options.skipFormat })
     ])(host, context);
   };
 }

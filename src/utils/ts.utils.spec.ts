@@ -9,6 +9,12 @@ describe('ts utils', () => {
     });
 
     it(`should parse type`, () => {
+      const types = parseType('TestModel[]');
+
+      expect(types).toEqual(['TestModel[]']);
+    });
+
+    it(`should parse type`, () => {
       const types = parseType('ApiError<CustomResponse>');
 
       expect(types).toEqual(['ApiError', 'CustomResponse']);

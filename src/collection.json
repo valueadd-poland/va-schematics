@@ -20,6 +20,11 @@
       "description": "Add data service method.",
       "factory": "./collection/data-service-method/index#dataServiceMethod",
       "schema": "./collection/data-service-method/data-service-method-schema.json"
+    },
+    "crud": {
+      "description": "A blank schematic.",
+      "factory": "./collection/crud/index#crud",
+      "schema": "./collection/crud/crud-schema.json"
     }
   }
 }

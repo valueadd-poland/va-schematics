@@ -16,6 +16,8 @@
     "no-object-literal-type-assertion": false,
     "no-hardcoded-credentials": false,
     "no-big-function": false,
+    "no-duplicate-string": false,
+    "no-identical-functions": false,
 
     "arrow-return-shorthand": true,
     "callable-types": true,
