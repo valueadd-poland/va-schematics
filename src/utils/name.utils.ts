@@ -1,9 +1,16 @@
 import * as path from 'path';
 
+export interface Names {
+  className: string;
+  fileName: string;
+  name: string;
+  propertyName: string;
+}
+
 /**
  * Build dictionary of names:
  */
-export function names(name: string): any {
+export function names(name: string): Names {
   return {
     name,
     className: toClassName(name),

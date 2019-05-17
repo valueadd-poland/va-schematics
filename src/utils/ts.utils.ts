@@ -1,6 +1,7 @@
 import { DirEntry, SchematicsException, Tree } from '@angular-devkit/schematics';
 import { normalize } from 'path';
 import * as ts from 'typescript';
+import { getSourceNodes } from './ast.utils';
 
 export function readIntoSourceFile(host: Tree, filePath: string): ts.SourceFile {
   const text = host.read(filePath);
@@ -140,4 +141,111 @@ export function parseInterfaceMembers(
   });
 
   return props;
+}
+
+export function findClassBodyInFile(host: Tree, filePath: string): ts.SyntaxList {
+  const sourceFile = readIntoSourceFile(host, filePath);
+  const nodes = getSourceNodes(sourceFile);
+  const classNode = nodes.find(n => n.kind === ts.SyntaxKind.ClassKeyword);
+
+  if (!classNode) {
+    throw new SchematicsException(`expected class in ${filePath}`);
+  }
+
+  if (!classNode.parent) {
+    throw new SchematicsException(`expected class in ${filePath} to have a parent node`);
+  }
+
+  let siblings = classNode.parent.getChildren();
+  const classIndex = siblings.indexOf(classNode);
+
+  siblings = siblings.slice(classIndex);
+
+  const classIdentifierNode = siblings.find(n => n.kind === ts.SyntaxKind.Identifier);
+
+  if (!classIdentifierNode) {
+    throw new SchematicsException(`expected class in ${filePath} to have an identifier`);
+  }
+
+  // Find opening curly braces (FirstPunctuation means '{' here).
+  const curlyNodeIndex = siblings.findIndex(n => n.kind === ts.SyntaxKind.FirstPunctuation);
+
+  siblings = siblings.slice(curlyNodeIndex);
+
+  const listNode = siblings.find(n => n.kind === ts.SyntaxKind.SyntaxList) as ts.SyntaxList;
+
+  if (!listNode) {
+    throw new SchematicsException(`expected first class in ${filePath} to have a body`);
+  }
+
+  return listNode;
+}
+
+export function findClassNameInFile(host: Tree, filePath: string): string {
+  const sourceFile = readIntoSourceFile(host, filePath);
+  const nodes = getSourceNodes(sourceFile);
+  const classNode = nodes.find(n => n.kind === ts.SyntaxKind.ClassKeyword);
+
+  if (!classNode) {
+    throw new SchematicsException(`expected class in ${filePath}`);
+  }
+
+  let siblings = classNode.parent.getChildren();
+  const classIndex = siblings.indexOf(classNode);
+
+  siblings = siblings.slice(classIndex);
+
+  const classIdentifierNode = siblings.find(n => n.kind === ts.SyntaxKind.Identifier);
+
+  if (!classIdentifierNode) {
+    throw new SchematicsException(`expected class in ${filePath} to have an identifier`);
+  }
+
+  return classIdentifierNode.getText();
+}
+
+export function findNamespaceName(host: Tree, filePath: string): string {
+  const sourceFile = readIntoSourceFile(host, filePath);
+  const nodes = getSourceNodes(sourceFile);
+  const namespaceNode = nodes.find(n => n.kind === ts.SyntaxKind.NamespaceKeyword);
+
+  if (!namespaceNode) {
+    throw new SchematicsException(`expected class in ${filePath}`);
+  }
+
+  let siblings = namespaceNode.parent.getChildren();
+  const namespaceIndex = siblings.indexOf(namespaceNode);
+
+  siblings = siblings.slice(namespaceIndex);
+
+  const namespaceIdentifierNode = siblings.find(n => n.kind === ts.SyntaxKind.Identifier);
+
+  if (!namespaceIdentifierNode) {
+    throw new SchematicsException(`expected namespace in ${filePath} to have an identifier`);
+  }
+
+  return namespaceIdentifierNode.getText();
+}
+
+export function findByIdentifier<T extends ts.Node>(
+  host: Tree,
+  filePath: string,
+  identifier: string
+): T {
+  const sourceFile = readIntoSourceFile(host, filePath);
+  const nodes = getSourceNodes(sourceFile);
+
+  const identifierNode = nodes.find(
+    n => n.kind === ts.SyntaxKind.Identifier && n.getText() === identifier
+  );
+
+  if (!identifierNode) {
+    throw new SchematicsException(`Identifier ${identifier} not found in ${filePath}.`);
+  }
+
+  if (!identifierNode.parent) {
+    throw new SchematicsException(`Expecting to identifier ${identifier} has parent node.`);
+  }
+
+  return identifierNode.parent as T;
 }

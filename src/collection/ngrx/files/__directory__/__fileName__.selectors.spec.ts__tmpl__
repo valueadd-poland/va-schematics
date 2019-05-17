@@ -1,5 +1,5 @@
 import { initialState, <%= className.toUpperCase() %>_FEATURE_KEY, <%= className %>State } from './<%= fileName %>.reducer';
-import { <%= className.toUpperCase() %>_FEATURE_KEY, <%= propertyName %>Query } from './<%= fileName %>.selectors';
+import { <%= propertyName %>Query } from './<%= fileName %>.selectors';
 
 describe('<%= className %> Selectors', () => {
   let storeState: { [<%= className.toUpperCase() %>_FEATURE_KEY]: <%= className %>State };

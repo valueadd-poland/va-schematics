@@ -14,6 +14,7 @@ import {
   ReplaceChange
 } from '@schematics/angular/utility/change';
 import * as ts from 'typescript';
+import { formatToCompare } from './string.utils';
 
 /**
  * Add Import `import { symbolName } from fileName` if the import doesn't exit
@@ -164,16 +165,21 @@ export function findNode<T extends ts.Node = ts.Node>(
   kind: ts.SyntaxKind,
   text?: string
 ): T | null {
-  if (node.kind === kind && (!!text ? node.getText() === text : true)) {
+  if (node.kind === kind && (text ? node.getText() === text : true)) {
     return node as T;
   }
 
   let foundNode: ts.Node | null = null;
-  ts.forEachChild(node, childNode => {
-    foundNode = foundNode || findNode(childNode, kind, text);
-  });
+  const children = node.getChildren();
+  for (let i = 0; i < children.length; i++) {
+    foundNode = foundNode || findNode(children[i], kind, text);
 
-  return foundNode;
+    if (foundNode) {
+      return foundNode as T;
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -716,8 +722,8 @@ export function addSymbolToObject(
 
   if (Array.isArray(node)) {
     const nodeArray = (node as {}) as ts.Node[];
-    const symbolsArray = nodeArray.map(n => n.getText());
-    if (symbolsArray.includes(expression)) {
+    const symbolsArray = nodeArray.map(n => formatToCompare(n.getText()));
+    if (symbolsArray.includes(formatToCompare(expression))) {
       return [];
     }
 

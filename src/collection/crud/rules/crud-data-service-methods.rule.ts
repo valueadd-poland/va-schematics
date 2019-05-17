@@ -3,7 +3,7 @@ import { dataServiceMethod } from '../../data-service-method';
 import { CrudOptions } from '../index';
 
 function createDataServiceMethodRules(options: CrudOptions): Rule[] {
-  const { toGenerate, isCollection, entity, dataServicePath, response } = options;
+  const { toGenerate, isCollection, entity, dataService, response } = options;
   const rules: Rule[] = [];
 
   if (toGenerate.read) {
@@ -13,7 +13,7 @@ function createDataServiceMethodRules(options: CrudOptions): Rule[] {
         properties: isCollection ? '' : 'id:string',
         mapResponse: response.read.map,
         name: `get${entity.name}${isCollection ? 's' : ''}`,
-        dataServiceFilePath: dataServicePath,
+        dataServiceFilePath: dataService.path,
         returnType: entity.name,
         responseType: response.read.type,
         skipFormat: true
@@ -28,7 +28,7 @@ function createDataServiceMethodRules(options: CrudOptions): Rule[] {
         properties: `data:${entity.name}`,
         mapResponse: response.create.map,
         name: `create${entity.name}`,
-        dataServiceFilePath: dataServicePath,
+        dataServiceFilePath: dataService.path,
         returnType: entity.name,
         responseType: response.create.type,
         skipFormat: true
@@ -43,7 +43,7 @@ function createDataServiceMethodRules(options: CrudOptions): Rule[] {
         properties: `data:${entity.name}`,
         mapResponse: response.update.map,
         name: `update${entity.name}`,
-        dataServiceFilePath: dataServicePath,
+        dataServiceFilePath: dataService.path,
         returnType: entity.name,
         responseType: response.update.type,
         skipFormat: true
@@ -58,7 +58,7 @@ function createDataServiceMethodRules(options: CrudOptions): Rule[] {
         properties: `id:string`,
         mapResponse: response.delete.map,
         name: `remove${entity.name}`,
-        dataServiceFilePath: dataServicePath,
+        dataServiceFilePath: dataService.path,
         returnType: entity.name,
         responseType: response.delete.type,
         skipFormat: true
