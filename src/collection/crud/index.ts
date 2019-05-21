@@ -7,6 +7,7 @@ import {
   Tree
 } from '@angular-devkit/schematics';
 import * as ts from 'typescript';
+import { findNode, findNodes } from '../../utils/ast.utils';
 import { findDeclarationFileByName } from '../../utils/import.utils';
 import { Names, names } from '../../utils/name.utils';
 import { parseStateDir, StateFilePaths } from '../../utils/options-parsing.utils';
@@ -22,6 +23,7 @@ import { CrudOptions } from './index';
 import { crudActions } from './rules/crud-actions.rule';
 import { crudDataServiceMethods } from './rules/crud-data-service-methods.rule';
 import { crudEffects } from './rules/crud-effects.rule';
+import { crudFacade } from './rules/crud-facade.rule';
 import { crudReducer } from './rules/crud-reducer.rule';
 
 export interface CrudOptions {
@@ -37,6 +39,9 @@ export interface CrudOptions {
   entity: {
     path: string;
     name: string;
+  };
+  facade: {
+    queryName: string;
   };
   isCollection: boolean;
   response: {
@@ -104,6 +109,19 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
     .find(n => n.kind === ts.SyntaxKind.Identifier) as ts.Identifier;
   const partialStateName = identifierNode.getText();
 
+  const queryVariableStatementNode = findNodes(
+    readIntoSourceFile(host, parsedStateDir.selectors),
+    ts.SyntaxKind.VariableStatement
+  )
+    .map(n => findNode(n, ts.SyntaxKind.Identifier))
+    .filter(n => (n ? n.getText().includes('Query') : false))[0];
+
+  if (!queryVariableStatementNode) {
+    throw new SchematicsException(
+      `Query variable declaration not found in ${parsedStateDir.selectors}`
+    );
+  }
+
   const mapResponseParts: string[] = mapResponse ? mapResponse.split(',') : [];
   const responseTypeParts: string[] = responseType ? responseType.split(',') : [];
   const createMapResponse = mapResponseParts.find(mrp => mrp.startsWith('c:'));
@@ -119,6 +137,9 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
     actionsNamespace: findNamespaceName(host, parsedStateDir.actions),
     effects: {
       name: findClassNameInFile(host, parsedStateDir.effects)
+    },
+    facade: {
+      queryName: queryVariableStatementNode.getText()
     },
     response: {
       create: {
@@ -172,6 +193,7 @@ export function crud(options: CrudSchema): Rule {
       crudActions(crudOptions),
       crudReducer(crudOptions),
       crudEffects(crudOptions),
+      crudFacade(crudOptions),
       formatFiles()
     ])(host, context);
   };
