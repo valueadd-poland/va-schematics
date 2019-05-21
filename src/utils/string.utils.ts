@@ -130,3 +130,7 @@ export function underscore(str: string): string {
 export function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.substr(1);
 }
+
+export function formatToCompare(str: string): string {
+  return str.replace(/\n|\r|\s+/g, '');
+}

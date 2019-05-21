@@ -6,18 +6,34 @@ import {
   SchematicsException,
   Tree
 } from '@angular-devkit/schematics';
+import * as ts from 'typescript';
 import { findDeclarationFileByName } from '../../utils/import.utils';
+import { Names, names } from '../../utils/name.utils';
 import { parseStateDir, StateFilePaths } from '../../utils/options-parsing.utils';
 import { formatFiles } from '../../utils/rules/format-files';
+import {
+  findClassNameInFile,
+  findDeclarationNodeByPartialName,
+  findNamespaceName,
+  readIntoSourceFile
+} from '../../utils/ts.utils';
 import { CrudSchema } from './crud-schema.interface';
 import { CrudOptions } from './index';
 import { crudActions } from './rules/crud-actions.rule';
 import { crudDataServiceMethods } from './rules/crud-data-service-methods.rule';
+import { crudEffects } from './rules/crud-effects.rule';
 import { crudReducer } from './rules/crud-reducer.rule';
 
 export interface CrudOptions {
   actionPrefix: string;
-  dataServicePath: string;
+  actionsNamespace: string;
+  dataService: {
+    names: Names;
+    path: string;
+  };
+  effects: {
+    name: string;
+  };
   entity: {
     path: string;
     name: string;
@@ -42,6 +58,7 @@ export interface CrudOptions {
     };
   };
   stateDir: StateFilePaths;
+  statePartialName: string;
   statePath: string;
   toGenerate: {
     create: boolean;
@@ -63,6 +80,7 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
     mapResponse
   } = options;
 
+  const parsedStateDir = parseStateDir(stateDir, host);
   const entityPath = findDeclarationFileByName(host, entity);
 
   if (!entityPath.length) {
@@ -74,6 +92,17 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
   if (!host.get(dataServicePath)) {
     throw new SchematicsException(`File ${dataServicePath} not found.`);
   }
+
+  const reducerSourceFile = readIntoSourceFile(host, parsedStateDir.reducer);
+  const statePartialNode = findDeclarationNodeByPartialName(reducerSourceFile, 'PartialState');
+
+  if (!statePartialNode) {
+    throw new SchematicsException(`PartialState not found in ${parsedStateDir.reducer}`);
+  }
+  const identifierNode = statePartialNode
+    .getChildren()
+    .find(n => n.kind === ts.SyntaxKind.Identifier) as ts.Identifier;
+  const partialStateName = identifierNode.getText();
 
   const mapResponseParts: string[] = mapResponse ? mapResponse.split(',') : [];
   const responseTypeParts: string[] = responseType ? responseType.split(',') : [];
@@ -87,6 +116,10 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
   const deleteResponseType = responseTypeParts.find(rtp => rtp.startsWith('d:'));
 
   return {
+    actionsNamespace: findNamespaceName(host, parsedStateDir.actions),
+    effects: {
+      name: findClassNameInFile(host, parsedStateDir.effects)
+    },
     response: {
       create: {
         type: responseTypeParts.length > 1 ? createResponseType || '' : responseType || '',
@@ -106,14 +139,18 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
       }
     },
     actionPrefix: actionsPrefix || entity,
-    stateDir: parseStateDir(stateDir, host),
+    stateDir: parsedStateDir,
+    statePartialName: partialStateName,
     toGenerate: {
       create: operation.includes('c'),
       read: operation.includes('r'),
       update: operation.includes('u'),
       delete: operation.includes('d')
     },
-    dataServicePath,
+    dataService: {
+      names: names(findClassNameInFile(host, dataServicePath)),
+      path: dataServicePath
+    },
     entity: {
       path: entityPath[0],
       name: entity
@@ -134,6 +171,7 @@ export function crud(options: CrudSchema): Rule {
       crudDataServiceMethods(crudOptions),
       crudActions(crudOptions),
       crudReducer(crudOptions),
+      crudEffects(crudOptions),
       formatFiles()
     ])(host, context);
   };

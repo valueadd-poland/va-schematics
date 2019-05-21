@@ -22,7 +22,7 @@ describe('data-service-method', () => {
       .runSchematicAsync('data-service-method', dataServiceGetMethodOpts, appTree)
       .toPromise();
 
-    /*#console.log(appTree.readContent('/libs/testlib/src/lib/services/test-data.service.spec.ts'));*/
+    // #console.log(appTree.readContent('/libs/testlib/src/lib/services/test-data.service.ts'));
     done();
   });
 });

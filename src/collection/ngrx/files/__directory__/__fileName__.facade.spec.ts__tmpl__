@@ -4,14 +4,11 @@ import { readFirst } from '@nrwl/nx/testing';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule, Store } from '@ngrx/store';
 import { NxModule } from '@nrwl/nx';
-
 import { <%= className %>Effects } from './<%= fileName %>.effects';
 import { <%= className %>Facade } from './<%= fileName %>.facade';
 import { <%= propertyName %>Query } from './<%= fileName %>.selectors';
-import { Load<%= className %>, <%= className %>Loaded } from './<%= fileName %>.actions';
 import {
   <%= className %>State,
-  Entity,
   initialState,
   <%= propertyName %>Reducer
 } from './<%= fileName %>.reducer';
