@@ -11,6 +11,7 @@ import {
   insert,
   insertImport
 } from '../../../utils/ast.utils';
+import { insertCustomImport } from '../../../utils/import.utils';
 import { parsePropsToUpdate } from '../../../utils/options-parsing.utils';
 import { findDeclarationNodeByPartialName, readIntoSourceFile } from '../../../utils/ts.utils';
 import { DataServiceMethodSchema } from '../data-service-method-schema.interface';
@@ -247,6 +248,8 @@ export function addMethodSpec(options: DataServiceMethodSchema): Rule {
       ...addTestBedConfiguration(sourceFile, specPath, dataServiceName),
       addTest(specPath, describeBlockNode, options)
     ]);
+
+    insertCustomImport(host, specPath, 'HttpClientTestingModule', '@angular/common/http/testing');
 
     return host;
   };

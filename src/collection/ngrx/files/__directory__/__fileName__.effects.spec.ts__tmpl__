@@ -1,10 +1,10 @@
-import { TestBed, async } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { NxModule, DataPersistence } from '@nrwl/nx';
-import { hot } from '@nrwl/angular/testing';
+import { cold, hot } from 'jasmine-marbles';
 import { <%= className %>Effects } from './<%= fileName %>.effects';
 
 describe('<%= className %>Effects', () => {
@@ -27,15 +27,4 @@ describe('<%= className %>Effects', () => {
 
     effects = TestBed.get(<%= className %>Effects);
   });
-
-/**
-  describe('load<%= className %>$', () => {
-    it('should work', () => {
-      actions = hot('-a-|', {a: new Load<%= className %>()});
-      expect(effects.load<%= className %>$).toBeObservable(
-        hot('-a-|', {a: new <%= className %>Loaded([])})
-      );
-    });
-  });
-*/
 });

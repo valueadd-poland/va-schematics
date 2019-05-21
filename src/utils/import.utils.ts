@@ -119,6 +119,17 @@ export function buildImportPath(host: Tree, from: string, to: string): string {
   return normalizeImport(relativePath);
 }
 
+export function insertCustomImport(
+  host: Tree,
+  filePath: string,
+  symbolName: string,
+  fileName: string
+): void {
+  insert(host, filePath, [
+    insertImport(readIntoSourceFile(host, filePath), filePath, symbolName, fileName)
+  ]);
+}
+
 export function insertTypeImport(host: Tree, filePath: string, type: string): void {
   const sourceFile = readIntoSourceFile(host, filePath);
   const types = parseType(type);
