@@ -1,19 +1,48 @@
-import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
+import { Rule, SchematicContext, SchematicsException, Tree } from '@angular-devkit/schematics';
 import { Change, InsertChange } from '@schematics/angular/utility/change';
+import * as ts from 'typescript';
 import { insert } from '../../../utils/ast.utils';
 import { configureTestingModule } from '../../../utils/configure-testing-module.util';
 import { insertConstructorArguments } from '../../../utils/constructor.utils';
-import { insertTypeImport } from '../../../utils/import.utils';
+import { insertCustomImport, insertTypeImport } from '../../../utils/import.utils';
 import { names } from '../../../utils/name.utils';
-import { findClassBodyInFile } from '../../../utils/ts.utils';
+import { findByIdentifier, findClassBodyInFile } from '../../../utils/ts.utils';
 import { config } from '../../config';
 import { CrudOptions } from '../index';
 
 function getEffectSpecTemplate(options: CrudOptions, actionName: string): string {
-  const { actionsNamespace } = options;
+  const { actionsNamespace, dataService } = options;
   const actionNames = names(actionName);
 
-  return ``;
+  return `\n\ndescribe('${actionNames.propertyName}$', () => {
+    it('should be successful', () => {
+      const payload = {} as any;
+      const action = new ${actionsNamespace}.${actionNames.className}({} as any);
+      const completion = new ${actionsNamespace}.${actionNames.className}Success(payload);
+      
+      actions = hot('-a', {a: action});
+      const response = cold('--b|', {b: payload});
+      const expected = cold('---c', {c: completion});
+      ${dataService.names.propertyName}.${actionNames.propertyName}.and.returnValue(response);
+      
+      expect(effects.${actionNames.propertyName}$).toBeObservable(expected);
+      expect(${dataService.names.propertyName}.${actionNames.propertyName}).toHaveBeenCalled();
+    });
+    
+    it('should fail', () => {
+      const payload = {} as any;
+      const action = new ${actionsNamespace}.${actionNames.className}({} as any);
+      const completion = new ${actionsNamespace}.${actionNames.className}Fail(payload);
+
+      actions = hot('-a', { a: action });
+      const response = cold('-#', {}, payload);
+      const expected = cold('--c', { c: completion });
+      ${dataService.names.propertyName}.${actionNames.propertyName}.and.returnValue(response);
+
+      expect(effects.${actionNames.propertyName}$).toBeObservable(expected);
+      expect(${dataService.names.propertyName}.${actionNames.propertyName}).toHaveBeenCalled();
+    });
+  });`;
 }
 
 function getEffectFetchTemplate(options: CrudOptions, actionName: string): string {
@@ -57,6 +86,99 @@ function getEffectUpdateTemplate(
       return new ${actionsNamespace}.${actionNames.className}Fail(error);
     }
   });\n\n`;
+}
+
+function createEffectsSpec(host: Tree, options: CrudOptions): Change[] {
+  const { isCollection, entity, toGenerate, stateDir, dataService, effects } = options;
+  const changes: Change[] = [];
+
+  configureTestingModule(host, stateDir.effectsSpec, [
+    {
+      name: 'actions',
+      type: 'Observable<any>',
+      config: {
+        metadataField: 'providers',
+        value: `provideMockActions(() => actions)`
+      }
+    },
+    {
+      name: 'effects',
+      type: effects.name,
+      config: {
+        assign: effects.name,
+        metadataField: 'providers',
+        value: effects.name
+      }
+    },
+    {
+      name: dataService.names.propertyName,
+      type: `jasmine.SpyObj<${dataService.names.className}>`,
+      config: {
+        assign: dataService.names.className,
+        metadataField: 'providers',
+        value: `{
+          provide: ${dataService.names.className},
+          useValue: jasmine.createSpyObj(
+            '${dataService.names.propertyName}',
+            getClassMethodsNames(${dataService.names.className})
+          )
+        }`
+      }
+    }
+  ]);
+
+  const describeFn = findByIdentifier<ts.CallExpression>(host, stateDir.effectsSpec, 'describe');
+  const describeFnSecondArgument = describeFn.arguments[1];
+
+  if (!describeFnSecondArgument) {
+    throw new SchematicsException(
+      `Expecting second argument in describe function call in ${stateDir.effectsSpec}.`
+    );
+  }
+
+  const effectsFilePath = stateDir.effects;
+
+  if (toGenerate.read) {
+    changes.push(
+      new InsertChange(
+        effectsFilePath,
+        describeFnSecondArgument.getEnd() - 1,
+        getEffectSpecTemplate(options, `Get${entity.name}${isCollection ? 's' : ''}`)
+      )
+    );
+  }
+
+  if (toGenerate.create) {
+    changes.push(
+      new InsertChange(
+        effectsFilePath,
+        describeFnSecondArgument.getEnd() - 1,
+        getEffectSpecTemplate(options, `Create${entity.name}`)
+      )
+    );
+  }
+
+  if (toGenerate.update) {
+    changes.push(
+      new InsertChange(
+        effectsFilePath,
+        describeFnSecondArgument.getEnd() - 1,
+        getEffectSpecTemplate(options, `Update${entity.name}`)
+      )
+    );
+  }
+
+  if (toGenerate.delete) {
+    changes.push(
+      new InsertChange(
+        effectsFilePath,
+        describeFnSecondArgument.getEnd() - 1,
+        getEffectSpecTemplate(options, `Remove${entity.name}`)
+      )
+    );
+  }
+
+  return changes;
 }
 
 function createEffects(host: Tree, options: CrudOptions): Change[] {
@@ -112,7 +234,7 @@ export function crudEffects(options: CrudOptions): Rule {
   return (host: Tree, context: SchematicContext) => {
     context.logger.info(`Generating effects.`);
 
-    const { dataService, stateDir, statePartialName, effects } = options;
+    const { actionsNamespace, dataService, stateDir, statePartialName } = options;
 
     insertConstructorArguments(host, options.stateDir.effects, [
       {
@@ -130,43 +252,17 @@ export function crudEffects(options: CrudOptions): Rule {
     insertTypeImport(host, stateDir.effects, dataService.names.className);
     insertTypeImport(host, stateDir.effects, `DataPersistence`);
     insertTypeImport(host, stateDir.effects, statePartialName);
+    insertCustomImport(host, stateDir.effects, 'HttpErrorResponse', '@angular/common/http');
+    insertCustomImport(host, stateDir.effects, 'map', 'rxjs/operators');
+
+    insertTypeImport(host, stateDir.effectsSpec, actionsNamespace);
+    insertTypeImport(host, stateDir.effectsSpec, dataService.names.className);
+    insertTypeImport(host, stateDir.effectsSpec, `DataPersistence`);
+    insertCustomImport(host, stateDir.effectsSpec, 'hot', 'jasmine-marbles');
+    insertCustomImport(host, stateDir.effectsSpec, 'cold', 'jasmine-marbles');
 
     insert(host, stateDir.effects, createEffects(host, options));
-
-    configureTestingModule(host, stateDir.effectsSpec, [
-      {
-        name: 'actions',
-        type: 'Observable<any>',
-        config: {
-          metadataField: 'providers',
-          value: `provideMockActions(() => actions)`
-        }
-      },
-      {
-        name: 'effects',
-        type: effects.name,
-        config: {
-          assign: effects.name,
-          metadataField: 'providers',
-          value: effects.name
-        }
-      },
-      {
-        name: dataService.names.propertyName,
-        type: dataService.names.className,
-        config: {
-          assign: dataService.names.className,
-          metadataField: 'providers',
-          value: `{
-          provide: ${dataService.names.className},
-          useValue: jasmine.createSpyObj(
-            '${dataService.names.propertyName}',
-            getClassMethodsNames(${dataService.names.className})
-          )
-        }`
-        }
-      }
-    ]);
+    insert(host, stateDir.effectsSpec, createEffectsSpec(host, options));
 
     return host;
   };

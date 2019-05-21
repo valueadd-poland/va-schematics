@@ -29,11 +29,12 @@ function createTest(
     .join('\n');
   expects += `\nexpect(statesEqual(result, state, [${statePropertiesStringList}])).toBeTruthy()`;
 
+  // @Todo: check if action should have payload.
   return `
     describe('${actionName}', () => {
       it('should set ${statePropertiesList} and do not modify other state properties', () => {
-         ${hasPayload ? 'const payload = {} as any;' : ''}
-         const action = new ${actionsNamespace}.${actionName}(${hasPayload ? 'payload' : ''});
+         const payload = {} as any;
+         const action = new ${actionsNamespace}.${actionName}(payload);
          const result = ${parsedReducerFile.reducerFunction.name!.getText()}(state, action);
          
          ${expects}

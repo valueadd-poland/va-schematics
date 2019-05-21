@@ -1,6 +1,6 @@
 import { Rule, Tree } from '@angular-devkit/schematics';
 import { insert, insertImport } from '../../../utils/ast.utils';
-import { CtorArgument, insertConstructorArguments } from '../../../utils/constructor.utils';
+import { insertConstructorArguments } from '../../../utils/constructor.utils';
 import { readIntoSourceFile } from '../../../utils/ts.utils';
 import { DataServiceMethodSchema } from '../data-service-method-schema.interface';
 
