@@ -6,7 +6,7 @@ import { reducer } from '../../reducer';
 import { CrudOptions } from '../index';
 
 function createReducer(options: CrudOptions): Rule[] {
-  const { toGenerate, isCollection, entity, actionPrefix, statePath } = options;
+  const { toGenerate, isCollection, entity, statePath } = options;
   const entityPropertyName = toPropertyName(entity.name) + (isCollection ? 's' : '');
   const entityType = entity.name + (isCollection ? '[]' : ' | null');
   const entityValue = isCollection ? '[]' : 'null';
