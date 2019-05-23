@@ -15,6 +15,7 @@ import {
 } from '@schematics/angular/utility/change';
 import * as ts from 'typescript';
 import { formatToCompare } from './string.utils';
+import { readIntoSourceFile } from './ts.utils';
 
 /**
  * Add Import `import { symbolName } from fileName` if the import doesn't exit
@@ -110,21 +111,25 @@ export function insertImport(
  * @param max The maximum number of items to return.
  * @return all nodes of kind, or [] if none is found
  */
-export function findNodes(node: ts.Node, kind: ts.SyntaxKind, max = Infinity): ts.Node[] {
+export function findNodes<T extends ts.Node = ts.Node>(
+  node: ts.Node,
+  kind: ts.SyntaxKind,
+  max = Infinity
+): T[] {
   if (!node || max === 0) {
     return [];
   }
 
-  const arr: ts.Node[] = [];
+  const arr: T[] = [];
   if (node.kind === kind) {
-    arr.push(node);
+    arr.push(node as T);
     max--;
   }
   if (max > 0) {
     for (const child of node.getChildren()) {
       findNodes(child, kind, max).forEach(n => {
         if (max > 0) {
-          arr.push(n);
+          arr.push(n as T);
         }
         max--;
       });
@@ -212,10 +217,7 @@ export function insertAfterLastOccurrence(
 ): Change {
   // sort() has a side effect, so make a copy so that we won't overwrite the parent's object.
   let lastItem = [...nodes].sort(nodesByPosition).pop();
-  if (!lastItem) {
-    throw new Error();
-  }
-  if (syntaxKind) {
+  if (lastItem && syntaxKind) {
     lastItem = findNodes(lastItem, syntaxKind)
       .sort(nodesByPosition)
       .pop();
@@ -626,6 +628,17 @@ export function findDescribeBlockNode(node: ts.Node): ts.Block | null {
   return findNode(describeIdentifierNode.parent, ts.SyntaxKind.Block);
 }
 
+export function findSpecDefinition(node: ts.Node): ts.Node | null {
+  const describeIdentifierNode = findNode(node, ts.SyntaxKind.Identifier, 'describe');
+
+  if (!describeIdentifierNode) {
+    return null;
+  }
+
+  const parent = describeIdentifierNode.parent as ts.CallExpression;
+  return parent.arguments[1] || null;
+}
+
 export function findNodesInBlock<T extends ts.Node = ts.Node>(
   node: ts.Node,
   kind: ts.SyntaxKind
@@ -761,4 +774,18 @@ export function addSymbolToObject(
   }
   const ins = new InsertChange(filePath, position, toInsert);
   return [ins];
+}
+
+export function addExportAstrix(host: Tree, filePath: string, exportFilePath: string): Change {
+  const sourceFile = readIntoSourceFile(host, filePath);
+
+  const exportDeclarations = findNodes<ts.ExportDeclaration>(
+    sourceFile,
+    ts.SyntaxKind.ExportDeclaration
+  );
+  if (exportDeclarations.find(ed => ed.getText().includes(exportFilePath))) {
+    return new NoopChange();
+  }
+
+  return new InsertChange(filePath, sourceFile.getStart(), `export * from '${exportFilePath}';\n`);
 }

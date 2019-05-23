@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "id": "SchematicsVaDataServiceEmptyMethod",
+  "title": "Data service empty method schematic.",
+  "type": "object",
+  "properties": {
+    "methodName": {
+      "type": "string",
+      "description": "The name of the method.",
+      "x-prompt": "What is the name of the method?"
+    },
+    "methodProperties": {
+      "type": "string",
+      "description": "The method's properties.",
+      "x-prompt": "Provide the method's properties separated with comma ({name}:{type}):",
+      "default": ""
+    },
+    "methodReturnType": {
+      "type": "string",
+      "description": "The method's return type.",
+      "x-prompt": "What is the method's return type?",
+      "default": "void"
+    },
+    "skipTests": {
+      "type": "boolean",
+      "description": "Defines whether tests should be generated.",
+      "x-prompt": "Would you like to skip test generation?",
+      "default": false
+    }
+  }
+}

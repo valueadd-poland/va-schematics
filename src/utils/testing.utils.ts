@@ -6,7 +6,8 @@ import * as path from 'path';
 import { ActionSchema } from '../collection/action/action-schema.interface';
 import { NgrxSchema } from '../collection/ngrx/ngrx-schema.interface';
 import { ReducerSchema } from '../collection/reducer/reducer-schema.interface';
-import { names } from './name.utils';
+import { addExportAstrix, insert } from './ast.utils';
+import { names, toFileName } from './name.utils';
 import { dasherize } from './string.utils';
 
 export interface AppConfig {
@@ -181,6 +182,83 @@ export function createLib(tree: UnitTestTree, libName: string): UnitTestTree {
     export * from './lib/${fileName}.module';
   `
   );
+  return tree;
+}
+
+export function createServiceInLib(
+  tree: UnitTestTree,
+  serviceName: string,
+  libName: string
+): UnitTestTree {
+  const { name, className, fileName } = names(serviceName);
+  libName = toFileName(libName);
+
+  const serviceConfig = {
+    name,
+    service: `/libs/${libName}/src/lib/services/${fileName}.service.ts`,
+    barrel: `/libs/${libName}/src/lib/services/index.ts`
+  };
+
+  tree.create(
+    serviceConfig.service,
+    `
+      import { Injectable } from '@angular/core';
+
+      @Injectable({
+        providedIn: 'root'
+      })
+      export class ${className}Service {}
+  `
+  );
+  tree.create(
+    serviceConfig.barrel,
+    `
+    export * from './${fileName}.service';
+  `
+  );
+
+  return tree;
+}
+
+export function createModelInLib(
+  tree: UnitTestTree,
+  modelName: string,
+  libName: string
+): UnitTestTree {
+  const { name, className, fileName } = names(modelName);
+  libName = toFileName(libName);
+
+  const serviceConfig = {
+    name,
+    service: `/libs/${libName}/src/lib/resources/models/${fileName}.model.ts`,
+    barrel: `/libs/${libName}/src/lib/resources/models/index.ts`
+  };
+
+  tree.create(
+    serviceConfig.service,
+    `
+      export class ${className} {
+        id: string;
+        name: string;
+        data: any;
+        errors: any;
+      }
+  `
+  );
+
+  if (tree.exists(serviceConfig.barrel)) {
+    insert(tree, serviceConfig.barrel, [
+      addExportAstrix(tree, serviceConfig.barrel, `./${fileName}.model`)
+    ]);
+  } else {
+    tree.create(
+      serviceConfig.barrel,
+      `
+    export * from './${fileName}.model';
+  `
+    );
+  }
+
   return tree;
 }
 

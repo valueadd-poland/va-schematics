@@ -20,6 +20,11 @@ export interface StateFilePaths {
   selectorsSpec: string;
 }
 
+export interface TypedProperty {
+  name: string;
+  type: string;
+}
+
 export function parseStateDir(path: string, host: Tree): StateFilePaths {
   const statePath = normalize(path);
   const stateDir = host.getDir(statePath);
@@ -51,4 +56,22 @@ export function parsePropsToUpdate(propsToUpdate: string): StateProperty[] {
         type: prop[2] || guessType(prop[1])
       };
     });
+}
+
+export function parseTypedProperties(str: string): TypedProperty[] {
+  const props = str ? str.split(',') : [];
+  return props.map(prop => {
+    const p = prop.split(':');
+    return {
+      name: p[0],
+      type: p[1] || 'any'
+    };
+  });
+}
+
+export function typedPropertiesToString(
+  typedProperties: TypedProperty[],
+  separator = ', '
+): string {
+  return typedProperties.map(tp => `${tp.name}: ${tp.type}`).join(separator);
 }

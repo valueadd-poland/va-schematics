@@ -4,6 +4,7 @@ import { insert } from '../../../utils/ast.utils';
 import { insertTypeImport } from '../../../utils/import.utils';
 import { names, toPropertyName } from '../../../utils/name.utils';
 import { findClassBodyInFile } from '../../../utils/ts.utils';
+import { getRequestPayloadClass } from '../../data-service/utils/request-payload.utils';
 import { CrudOptions } from '../index';
 
 function getSelectorTemplate(statePropertyName: string, queryName: string): string {
@@ -24,12 +25,11 @@ function getMethodTemplate(
   }`;
 }
 
-function createFacade(host: Tree, options: CrudOptions): any {
+function createFacade(host: Tree, options: CrudOptions): Change[] {
   const { toGenerate, isCollection, entity, stateDir, facade, actionsNamespace } = options;
   const entityPropertyName = toPropertyName(entity.name) + (isCollection ? 's' : '');
   const selectorChanges: Change[] = [];
   const methodsChanges: Change[] = [];
-  const entityType = entity.name + (isCollection ? '[]' : '');
   const facadeClassBody = findClassBodyInFile(host, stateDir.facade);
 
   if (toGenerate.read) {
@@ -58,7 +58,7 @@ function createFacade(host: Tree, options: CrudOptions): any {
         getMethodTemplate(
           actionsNamespace,
           `Get${entity.name}${isCollection ? 's' : ''}`,
-          isCollection ? '' : 'string'
+          isCollection ? '' : getRequestPayloadClass(`Get${entity.name}`)
         )
       )
     );
@@ -82,7 +82,11 @@ function createFacade(host: Tree, options: CrudOptions): any {
       new InsertChange(
         stateDir.facade,
         facadeClassBody.getEnd(),
-        getMethodTemplate(actionsNamespace, `Create${entity.name}`, entityType)
+        getMethodTemplate(
+          actionsNamespace,
+          `Create${entity.name}`,
+          getRequestPayloadClass(`Create${entity.name}`)
+        )
       )
     );
   }
@@ -105,7 +109,11 @@ function createFacade(host: Tree, options: CrudOptions): any {
       new InsertChange(
         stateDir.facade,
         facadeClassBody.getEnd(),
-        getMethodTemplate(actionsNamespace, `Update${entity.name}`, entityType)
+        getMethodTemplate(
+          actionsNamespace,
+          `Update${entity.name}`,
+          getRequestPayloadClass(`Update${entity.name}`)
+        )
       )
     );
   }
@@ -128,7 +136,11 @@ function createFacade(host: Tree, options: CrudOptions): any {
       new InsertChange(
         stateDir.facade,
         facadeClassBody.getEnd(),
-        getMethodTemplate(actionsNamespace, `Remove${entity.name}`, 'string')
+        getMethodTemplate(
+          actionsNamespace,
+          `Remove${entity.name}`,
+          getRequestPayloadClass(`Remove${entity.name}`)
+        )
       )
     );
   }
@@ -145,6 +157,23 @@ export function crudFacade(options: CrudOptions): Rule {
     insertTypeImport(host, options.stateDir.facade, options.facade.queryName);
     insertTypeImport(host, options.stateDir.facade, options.actionsNamespace);
     insertTypeImport(host, options.stateDir.facade, options.entity.name);
+
+    if (options.toGenerate.read) {
+      const type = getRequestPayloadClass(`Get${options.entity.name}`);
+      insertTypeImport(host, options.stateDir.facade, type);
+    }
+    if (options.toGenerate.create) {
+      const type = getRequestPayloadClass(`Create${options.entity.name}`);
+      insertTypeImport(host, options.stateDir.facade, type);
+    }
+    if (options.toGenerate.update) {
+      const type = getRequestPayloadClass(`Update${options.entity.name}`);
+      insertTypeImport(host, options.stateDir.facade, type);
+    }
+    if (options.toGenerate.delete) {
+      const type = getRequestPayloadClass(`Remove${options.entity.name}`);
+      insertTypeImport(host, options.stateDir.facade, type);
+    }
 
     return host;
   };

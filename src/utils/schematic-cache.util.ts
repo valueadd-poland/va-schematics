@@ -12,16 +12,19 @@ export class SchematicCache {
 
   private constructor() {}
 
-  read<T extends object>(cacheName: string): T {
-    if (this.cacheOfCaches[cacheName]) {
-      return this.cacheOfCaches[cacheName];
-    }
-
-    this.cacheOfCaches[cacheName] = {};
-    return this.cacheOfCaches[cacheName] as T;
+  clear(cacheName: string): void {
+    this.cacheOfCaches[cacheName] = undefined;
   }
 
-  save(cacheName: string, value: object): void {
+  clearAll(): void {
+    this.cacheOfCaches = {};
+  }
+
+  read<T extends object>(cacheName: string): T | undefined {
+    return this.cacheOfCaches[cacheName];
+  }
+
+  save(cacheName: string, value: any): void {
     this.cacheOfCaches[cacheName] = value;
   }
 }

@@ -16,10 +16,25 @@
       "factory": "./collection/reducer/index#reducer",
       "schema": "./collection/reducer/reducer-schema.json"
     },
-    "data-service-method": {
+    "data-service": {
       "description": "Add data service method.",
-      "factory": "./collection/data-service-method/index#dataServiceMethod",
-      "schema": "./collection/data-service-method/data-service-method-schema.json"
+      "factory": "./collection/data-service/index#dataService",
+      "schema": "./collection/data-service/data-service-schema.json"
+    },
+    "data-service-empty-method": {
+      "description": "Adds an empty method to the date service.",
+      "factory": "./collection/data-service/schematics/empty-method/index#dataServiceEmptyMethod",
+      "schema": "./collection/data-service/schematics/empty-method/data-service-empty-method-schema.json"
+    },
+    "data-service-http-method": {
+      "description": "Adds an http method to the date service.",
+      "factory": "./collection/data-service/schematics/http-method/index#dataServiceHttpMethod",
+      "schema": "./collection/data-service/schematics/http-method/data-service-http-method-schema.json"
+    },
+    "data-service-local-storage-method": {
+      "description": "Adds a method with local storage to the date service.",
+      "factory": "./collection/data-service/schematics/local-storage-method/index#dataServiceLocalStorageMethod",
+      "schema": "./collection/data-service/schematics/local-storage-method/data-service-local-storage-method-schema.json"
     },
     "crud": {
       "description": "A blank schematic.",

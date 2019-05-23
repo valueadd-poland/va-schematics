@@ -1,7 +1,13 @@
+enum Backend {
+  LocalStorage = 'localStorage',
+  Http = 'http'
+}
+
 export interface ActionSchema {
+  backend?: Backend;
   name: string;
   payload?: string;
   prefix: string;
-  stateDir: string;
   skipFormat?: boolean;
+  stateDir: string;
 }

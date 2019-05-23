@@ -7,6 +7,7 @@ export const config = {
     collectiveTypeName: 'CollectiveType'
   },
   dataServiceMethod: {
-    endpointsField: 'endpoints'
+    endpointsField: 'endpoints',
+    collectionsField: 'collections'
   }
 };

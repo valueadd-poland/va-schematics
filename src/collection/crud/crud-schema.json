@@ -10,6 +10,26 @@
       "description": "Entity name",
       "x-prompt": "What is the entity name?"
     },
+    "backend": {
+      "type": "string",
+      "description": "Backend to use.",
+      "enum": ["http", "localStorage"],
+      "default": "http",
+      "x-prompt": {
+        "message": "Which backend should be used?",
+        "type": "list",
+        "items": [
+          {
+            "value": "http",
+            "label": "Http              [an entity will be queried/saved with an angular's HttpClient]"
+          },
+          {
+            "value": "localStorage",
+            "label": "Local storage     [an entity will be queried/saved to a browser's local storage]"
+          }
+        ]
+      }
+    },
     "operation": {
       "type": "string",
       "description": "Crud operation; available: create, read, update, delete",
