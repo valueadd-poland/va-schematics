@@ -38,20 +38,26 @@ function createSelector(
   );
   let leadingComma = !!queryObjectLiteralExpressionNode!.properties.length;
   propsToUpdate.forEach(prop => {
-    changes.push(
-      new InsertChange(
-        selectorsPath,
-        queryVariableStatementNode.getStart(),
-        generateSelectorTemplate(prop, featureSelectorName)
-      ),
-      new InsertChange(
-        selectorsPath,
-        queryObjectLiteralExpressionNode!.getEnd() - 1,
-        `${leadingComma ? ',' : ''}\nget${classify(prop.key)}`
+    if (
+      !queryObjectLiteralExpressionNode!.properties.find(
+        p => p.getText() === `get${classify(prop.key)}`
       )
-    );
+    ) {
+      changes.push(
+        new InsertChange(
+          selectorsPath,
+          queryVariableStatementNode.getStart(),
+          generateSelectorTemplate(prop, featureSelectorName)
+        ),
+        new InsertChange(
+          selectorsPath,
+          queryObjectLiteralExpressionNode!.getEnd() - 1,
+          `${leadingComma ? ',' : ''}\nget${classify(prop.key)}`
+        )
+      );
 
-    leadingComma = true;
+      leadingComma = true;
+    }
   });
 
   return changes;
