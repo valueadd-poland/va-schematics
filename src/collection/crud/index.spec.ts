@@ -63,7 +63,8 @@ describe('crud', () => {
     };
 
     appTree = await runner.runSchematicAsync('crud', crudOpts, appTree).toPromise();
-    console.log(appTree.readContent('/libs/data-access-test/src/lib/+state/test.facade.spec.ts'));
+    // console.log(appTree.readContent('/libs/data-access-test/src/lib/+state/test.facade.spec.ts'));
+    console.log(appTree.files);
 
     done();
   });
