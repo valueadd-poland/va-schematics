@@ -89,7 +89,7 @@ function createActionRules(options: CrudOptions): Rule[] {
   if (toGenerate.delete) {
     rules.push(
       action({
-        payload: entity.name,
+        payload: 'string',
         name: `Remove${entity.name}`,
         prefix: actionPrefix,
         stateDir: statePath,
@@ -103,7 +103,6 @@ function createActionRules(options: CrudOptions): Rule[] {
         skipFormat: true
       }),
       action({
-        payload: entity.name,
         name: `Remove${entity.name}Success`,
         prefix: actionPrefix,
         stateDir: statePath,
