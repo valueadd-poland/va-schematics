@@ -3,45 +3,60 @@ import { DirEntry, Tree } from '@angular-devkit/schematics';
 import { buildRelativePath } from '@schematics/angular/utility/find-module';
 import * as ts from 'typescript';
 import { findNode, getSourceNodes, insert, insertImport, isImported } from './ast.utils';
+import { SchematicCache } from './schematic-cache.util';
 import { createFilesArrayFromDir, isBaseType, parseType, readIntoSourceFile } from './ts.utils';
 
-const cache: { [key: string]: string[] } = {};
+interface Declarations {
+  [key: string]: string[];
+}
+
+let files: string[];
+
+function doesTextContainExport(text: string, name: string): boolean {
+  return (
+    text.includes(`export class ${name} `) ||
+    text.includes(`export class ${name}<`) ||
+    text.includes(`export interface ${name} `) ||
+    text.includes(`export interface ${name}<`) ||
+    text.includes(`export type ${name} `) ||
+    text.includes(`export type ${name}<`) ||
+    text.includes(`export enum ${name} `) ||
+    text.includes(`export namespace ${name} `) ||
+    text.includes(`export function ${name}(`) ||
+    text.includes(`export function ${name}<`) ||
+    text.includes(`export function ${name} (`) ||
+    text.includes(`export const ${name} =`) ||
+    text.includes(`export let ${name} =`) ||
+    text.includes(`export const ${name}=`) ||
+    text.includes(`export let ${name}=`)
+  );
+}
 
 export function findDeclarationFileByName(host: Tree, name: string): string[] {
+  const schematicCache = SchematicCache.getInstance();
+  const cache = schematicCache.read<Declarations>('declarationsPathsByDeclarationName');
+
   if (cache[name]) {
     return cache[name];
   }
 
-  const files = createFilesArrayFromDir(host.getDir('.')).filter(
-    f => !f.endsWith('spec.ts') && f.endsWith('.ts') && !f.startsWith('/node_modules')
-  );
+  if (!files) {
+    files = createFilesArrayFromDir(host.getDir('.')).filter(
+      f => !f.endsWith('spec.ts') && f.endsWith('.ts') && !f.startsWith('/node_modules')
+    );
+  }
 
   const paths = files.filter(file => {
     const buff = host.read(file);
     if (buff) {
       const content = buff.toString('utf8');
-      return (
-        content.includes(`export class ${name} `) ||
-        content.includes(`export class ${name}<`) ||
-        content.includes(`export interface ${name} `) ||
-        content.includes(`export interface ${name}<`) ||
-        content.includes(`export type ${name} `) ||
-        content.includes(`export type ${name}<`) ||
-        content.includes(`export enum ${name} `) ||
-        content.includes(`export namespace ${name} `) ||
-        content.includes(`export function ${name}(`) ||
-        content.includes(`export function ${name}<`) ||
-        content.includes(`export function ${name} (`) ||
-        content.includes(`export const ${name} =`) ||
-        content.includes(`export let ${name} =`) ||
-        content.includes(`export const ${name}=`) ||
-        content.includes(`export let ${name}=`)
-      );
+      return doesTextContainExport(content, name);
     }
-
-    cache[name] = [paths[0]];
     return false;
   });
+
+  cache[name] = paths;
+  schematicCache.save('declarationsPathsByDeclarationName', cache);
 
   return paths;
 }
