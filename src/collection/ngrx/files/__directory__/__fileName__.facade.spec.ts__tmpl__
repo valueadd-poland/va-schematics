@@ -2,24 +2,18 @@ import { NgModule } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { readFirst } from '@nrwl/nx/testing';
 import { EffectsModule } from '@ngrx/effects';
-import { StoreModule, Store } from '@ngrx/store';
+import { StoreModule } from '@ngrx/store';
 import { NxModule } from '@nrwl/nx';
 import { <%= className %>Effects } from './<%= fileName %>.effects';
 import { <%= className %>Facade } from './<%= fileName %>.facade';
-import { <%= propertyName %>Query } from './<%= fileName %>.selectors';
 import {
   <%= className %>State,
   initialState,
   <%= propertyName %>Reducer
 } from './<%= fileName %>.reducer';
 
-interface TestSchema {
-  '<%= propertyName %>' : <%= className %>State
-}
-
 describe('<%= className %>Facade', () => {
   let facade: <%= className %>Facade;
-  let store: Store<TestSchema>;
 
   describe('used in NgModule', () => {
 
@@ -44,7 +38,6 @@ describe('<%= className %>Facade', () => {
       class RootModule {}
       TestBed.configureTestingModule({ imports: [RootModule] });
 
-      store = TestBed.get(Store);
       facade = TestBed.get(<%= className %>Facade);
     });
   });

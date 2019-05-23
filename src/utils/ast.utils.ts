@@ -616,8 +616,8 @@ export function insert(host: Tree, modulePath: string, changes: Change[]): void 
   host.commitUpdate(recorder);
 }
 
-export function findDescribeBlockNode(sourceFile: ts.SourceFile): ts.Block | null {
-  const describeIdentifierNode = findNode(sourceFile, ts.SyntaxKind.Identifier, 'describe');
+export function findDescribeBlockNode(node: ts.Node): ts.Block | null {
+  const describeIdentifierNode = findNode(node, ts.SyntaxKind.Identifier, 'describe');
 
   if (!describeIdentifierNode) {
     return null;

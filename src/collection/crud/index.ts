@@ -23,6 +23,7 @@ import { CrudOptions } from './index';
 import { crudActions } from './rules/crud-actions.rule';
 import { crudDataServiceMethods } from './rules/crud-data-service-methods.rule';
 import { crudEffects } from './rules/crud-effects.rule';
+import { crudFacadeSpec } from './rules/crud-facade-spec.rule';
 import { crudFacade } from './rules/crud-facade.rule';
 import { crudReducer } from './rules/crud-reducer.rule';
 
@@ -194,6 +195,7 @@ export function crud(options: CrudSchema): Rule {
       crudReducer(crudOptions),
       crudEffects(crudOptions),
       crudFacade(crudOptions),
+      crudFacadeSpec(crudOptions),
       formatFiles()
     ])(host, context);
   };
