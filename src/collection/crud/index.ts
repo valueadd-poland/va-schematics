@@ -144,20 +144,60 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
     },
     response: {
       create: {
-        type: responseTypeParts.length > 1 ? createResponseType || '' : responseType || '',
-        map: mapResponseParts.length > 1 ? createMapResponse || '' : mapResponse || ''
+        type:
+          responseTypeParts.length > 1
+            ? createResponseType
+              ? createResponseType.substring(2)
+              : ''
+            : responseType || '',
+        map:
+          mapResponseParts.length > 1
+            ? createMapResponse
+              ? createMapResponse.substring(2)
+              : ''
+            : mapResponse || ''
       },
       read: {
-        type: responseTypeParts.length > 1 ? readResponseType || '' : responseType || '',
-        map: mapResponseParts.length > 1 ? readMapResponse || '' : mapResponse || ''
+        type:
+          responseTypeParts.length > 1
+            ? readResponseType
+              ? readResponseType.substring(2)
+              : ''
+            : responseType || '',
+        map:
+          mapResponseParts.length > 1
+            ? readMapResponse
+              ? readMapResponse.substring(2)
+              : ''
+            : mapResponse || ''
       },
       update: {
-        type: responseTypeParts.length > 1 ? updateResponseType || '' : responseType || '',
-        map: mapResponseParts.length > 1 ? updateMapResponse || '' : mapResponse || ''
+        type:
+          responseTypeParts.length > 1
+            ? updateResponseType
+              ? updateResponseType.substring(2)
+              : ''
+            : responseType || '',
+        map:
+          mapResponseParts.length > 1
+            ? updateMapResponse
+              ? updateMapResponse.substring(2)
+              : ''
+            : mapResponse || ''
       },
       delete: {
-        type: responseTypeParts.length > 1 ? deleteResponseType || '' : responseType || '',
-        map: mapResponseParts.length > 1 ? deleteMapResponse || '' : ''
+        type:
+          responseTypeParts.length > 1
+            ? deleteResponseType
+              ? deleteResponseType.substring(2)
+              : ''
+            : responseType || '',
+        map:
+          mapResponseParts.length > 1
+            ? deleteMapResponse
+              ? deleteMapResponse.substring(2)
+              : ''
+            : ''
       }
     },
     actionPrefix: actionsPrefix || entity,
