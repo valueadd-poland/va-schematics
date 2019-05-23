@@ -2,6 +2,7 @@ import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics'
 import { insertTypeImport } from '../../utils/import.utils';
 import { parseStateDir } from '../../utils/options-parsing.utils';
 import { formatFiles } from '../../utils/rules/format-files';
+import { parseType } from '../../utils/ts.utils';
 import { ActionSchema } from './action-schema.interface';
 import { addActionClassDeclaration } from './rules/add-action-class-declaration.rule';
 import { addActionClassToCollectiveType } from './rules/add-action-class-to-collective-type.rule';
@@ -23,7 +24,10 @@ export function action(options: ActionSchema): Rule {
     const rules: Rule[] = [];
 
     if (options.payload) {
-      insertTypeImport(host, stateDir.actions, options.payload);
+      const payloadTypes = parseType(options.payload);
+      payloadTypes.forEach(type => {
+        insertTypeImport(host, stateDir.actions, type);
+      });
     }
 
     rules.push(
