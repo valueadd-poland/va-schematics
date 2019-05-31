@@ -260,6 +260,7 @@ export function crudEffects(options: CrudOptions): Rule {
     insertTypeImport(host, stateDir.effectsSpec, `DataPersistence`);
     insertCustomImport(host, stateDir.effectsSpec, 'hot', 'jasmine-marbles');
     insertCustomImport(host, stateDir.effectsSpec, 'cold', 'jasmine-marbles');
+    insertCustomImport(host, stateDir.effectsSpec, 'getClassMethodsNames', '@valueadd/common');
 
     insert(host, stateDir.effects, createEffects(host, options));
     insert(host, stateDir.effectsSpec, createEffectsSpec(host, options));

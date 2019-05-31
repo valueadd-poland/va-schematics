@@ -195,6 +195,7 @@ export function crudFacadeSpec(options: CrudOptions): Rule {
 
     insertTypeImport(host, stateDir.facadeSpec, dataService.names.className);
     insertCustomImport(host, stateDir.facadeSpec, 'of', 'rxjs');
+    insertCustomImport(host, stateDir.facadeSpec, 'getClassMethodsNames', '@valueadd/common');
 
     return host;
   };

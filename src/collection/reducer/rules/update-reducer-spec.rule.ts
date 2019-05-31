@@ -3,6 +3,7 @@ import { InsertChange } from '@schematics/angular/utility/change';
 import * as ts from 'typescript';
 import { findNode, insert } from '../../../utils/ast.utils';
 import { ParsedReducerFile } from '../../../utils/file-parsing.utils';
+import { insertCustomImport } from '../../../utils/import.utils';
 import {
   parsePropsToUpdate,
   StateFilePaths,
@@ -77,6 +78,7 @@ export function updateReducerSpec(
     );
     const change = new InsertChange(stateDir.reducerSpec, describeBlock.getEnd() - 1, toAdd);
     insert(host, stateDir.reducerSpec, [change]);
+    insertCustomImport(host, stateDir.reducerSpec, 'statesEqual', '@valueadd/common');
 
     return host;
   };
