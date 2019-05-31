@@ -24,6 +24,11 @@
       "default": true,
       "description": "Create selectors for provided properties?",
       "x-prompt": "Would you like to add ngrx selectors?"
+    },
+    "actionPayload": {
+      "type": "boolean",
+      "default": true,
+      "description": "Does action "
     }
   }
 }

@@ -8,16 +8,22 @@ import { insertCustomImport, insertTypeImport } from '../../../utils/import.util
 import { names } from '../../../utils/name.utils';
 import { findByIdentifier, findClassBodyInFile } from '../../../utils/ts.utils';
 import { config } from '../../config';
+import { CrudOperation } from '../../data-service/data-service-schema';
 import { CrudOptions } from '../index';
 
-function getEffectSpecTemplate(options: CrudOptions, actionName: string): string {
+function getEffectSpecTemplate(
+  options: CrudOptions,
+  actionName: string,
+  actionPayload = true
+): string {
   const { actionsNamespace, dataService } = options;
   const actionNames = names(actionName);
+  const payload = actionPayload ? '{} as any' : '';
 
   return `\n\ndescribe('${actionNames.propertyName}$', () => {
     it('should be successful', () => {
       const payload = {} as any;
-      const action = new ${actionsNamespace}.${actionNames.className}({} as any);
+      const action = new ${actionsNamespace}.${actionNames.className}(${payload});
       const completion = new ${actionsNamespace}.${actionNames.className}Success(payload);
       
       actions = hot('-a', {a: action});
@@ -31,7 +37,7 @@ function getEffectSpecTemplate(options: CrudOptions, actionName: string): string
     
     it('should fail', () => {
       const payload = {} as any;
-      const action = new ${actionsNamespace}.${actionNames.className}({} as any);
+      const action = new ${actionsNamespace}.${actionNames.className}(${payload});
       const completion = new ${actionsNamespace}.${actionNames.className}Fail(payload);
 
       actions = hot('-a', { a: action });
@@ -45,9 +51,14 @@ function getEffectSpecTemplate(options: CrudOptions, actionName: string): string
   });`;
 }
 
-function getEffectFetchTemplate(options: CrudOptions, actionName: string): string {
+function getEffectFetchTemplate(
+  options: CrudOptions,
+  actionName: string,
+  actionPayload = true
+): string {
   const { actionsNamespace } = options;
   const actionNames = names(actionName);
+  const payload = actionPayload ? 'action.payload' : '';
 
   return `@Effect()
   ${actionNames.propertyName}$ = this.dp.fetch(${actionsNamespace}.${config.action.typesEnumName}.${
@@ -56,7 +67,7 @@ function getEffectFetchTemplate(options: CrudOptions, actionName: string): strin
     id: () => {},
     run: (action: ${actionsNamespace}.${actionNames.className}) => {
       return this.${options.dataService.names.propertyName}
-        .${actionNames.propertyName}(action.payload)
+        .${actionNames.propertyName}(${payload})
         .pipe(map(data => new ${actionsNamespace}.${actionNames.className}Success(data)));
     },
     onError: (action: ${actionsNamespace}.${actionNames.className}, error: HttpErrorResponse) => {
@@ -68,7 +79,8 @@ function getEffectFetchTemplate(options: CrudOptions, actionName: string): strin
 function getEffectUpdateTemplate(
   options: CrudOptions,
   actionName: string,
-  update: 'pessimistic' | 'optimistic'
+  update: 'pessimistic' | 'optimistic',
+  successPayload?: string
 ): string {
   const { actionsNamespace } = options;
   const actionNames = names(actionName);
@@ -80,7 +92,9 @@ function getEffectUpdateTemplate(
     run: (action: ${actionsNamespace}.${actionNames.className}) => {
       return this.${options.dataService.names.propertyName}
         .${actionNames.propertyName}(action.payload)
-        .pipe(map(data => new ${actionsNamespace}.${actionNames.className}Success(data)));
+        .pipe(map(data => new ${actionsNamespace}.${
+    actionNames.className
+  }Success(${successPayload || 'data'})));
     },
     onError: (action: ${actionsNamespace}.${actionNames.className}, error: HttpErrorResponse) => {
       return new ${actionsNamespace}.${actionNames.className}Fail(error);
@@ -89,7 +103,7 @@ function getEffectUpdateTemplate(
 }
 
 function createEffectsSpec(host: Tree, options: CrudOptions): Change[] {
-  const { isCollection, entity, toGenerate, stateDir, dataService, effects } = options;
+  const { entity, toGenerate, stateDir, dataService, effects } = options;
   const changes: Change[] = [];
 
   configureTestingModule(host, stateDir.effectsSpec, [
@@ -143,7 +157,15 @@ function createEffectsSpec(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         effectsFilePath,
         describeFnSecondArgument.getEnd() - 1,
-        getEffectSpecTemplate(options, `Get${entity.name}${isCollection ? 's' : ''}`)
+        getEffectSpecTemplate(options, `Get${entity.name}`)
+      )
+    );
+
+    changes.push(
+      new InsertChange(
+        effectsFilePath,
+        describeFnSecondArgument.getEnd() - 1,
+        getEffectSpecTemplate(options, `Get${entity.name}s`, false)
       )
     );
   }
@@ -183,7 +205,7 @@ function createEffectsSpec(host: Tree, options: CrudOptions): Change[] {
 
 function createEffects(host: Tree, options: CrudOptions): Change[] {
   const changes: Change[] = [];
-  const { toGenerate, isCollection, entity, stateDir } = options;
+  const { toGenerate, entity, stateDir } = options;
   const effectsFilePath = stateDir.effects;
   const classBody = findClassBodyInFile(host, effectsFilePath);
 
@@ -192,7 +214,15 @@ function createEffects(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         effectsFilePath,
         classBody.getStart(),
-        getEffectFetchTemplate(options, `Get${entity.name}${isCollection ? 's' : ''}`)
+        getEffectFetchTemplate(options, `Get${entity.name}`)
+      )
+    );
+
+    changes.push(
+      new InsertChange(
+        effectsFilePath,
+        classBody.getStart(),
+        getEffectFetchTemplate(options, `Get${entity.name}s`, false)
       )
     );
   }
@@ -222,7 +252,7 @@ function createEffects(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         effectsFilePath,
         classBody.getStart(),
-        getEffectUpdateTemplate(options, `Remove${entity.name}`, 'pessimistic')
+        getEffectUpdateTemplate(options, `Remove${entity.name}`, 'pessimistic', 'action.payload')
       )
     );
   }

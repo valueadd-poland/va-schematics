@@ -48,11 +48,11 @@ export function parseStateDir(path: string, host: Tree): StateFilePaths {
 export function parsePropsToUpdate(propsToUpdate: string): StateProperty[] {
   return propsToUpdate
     .split(',')
-    .map(prop => prop.split(':'))
+    .map(prop => prop.split(/(?<!\\):/g))
     .map(prop => {
       return {
         key: prop[0],
-        value: prop[1],
+        value: prop[1].replace('\\:', ':'),
         type: prop[2] || guessType(prop[1])
       };
     });

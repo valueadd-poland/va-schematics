@@ -7,28 +7,52 @@ import { getRequestPayloadClass } from '../../data-service/utils/request-payload
 import { CrudOptions } from '../index';
 
 function createActionRules(options: CrudOptions): Rule[] {
-  const { toGenerate, isCollection, entity, actionPrefix, statePath } = options;
+  const { toGenerate, entity, actionPrefix, statePath } = options;
   const rules: Rule[] = [];
 
   if (toGenerate.read) {
     rules.push(
       action({
-        payload: isCollection ? undefined : getRequestPayloadClass(`Get${entity.name}`),
-        name: `Get${entity.name}${isCollection ? 's' : ''}`,
+        payload: getRequestPayloadClass(`Get${entity.name}`),
+        name: `Get${entity.name}`,
         prefix: actionPrefix,
         stateDir: statePath,
         skipFormat: true
       }),
       action({
         payload: 'HttpErrorResponse',
-        name: `Get${entity.name}${isCollection ? 's' : ''}Fail`,
+        name: `Get${entity.name}Fail`,
         prefix: actionPrefix,
         stateDir: statePath,
         skipFormat: true
       }),
       action({
-        payload: `${entity.name}${isCollection ? '[]' : ''}`,
-        name: `Get${entity.name}${isCollection ? 's' : ''}Success`,
+        payload: `${entity.name}`,
+        name: `Get${entity.name}Success`,
+        prefix: actionPrefix,
+        stateDir: statePath,
+        skipFormat: true
+      })
+    );
+
+    rules.push(
+      action({
+        payload: '',
+        name: `Get${entity.name}s`,
+        prefix: actionPrefix,
+        stateDir: statePath,
+        skipFormat: true
+      }),
+      action({
+        payload: 'HttpErrorResponse',
+        name: `Get${entity.name}sFail`,
+        prefix: actionPrefix,
+        stateDir: statePath,
+        skipFormat: true
+      }),
+      action({
+        payload: `${entity.name}[]`,
+        name: `Get${entity.name}sSuccess`,
         prefix: actionPrefix,
         stateDir: statePath,
         skipFormat: true
@@ -105,6 +129,7 @@ function createActionRules(options: CrudOptions): Rule[] {
         skipFormat: true
       }),
       action({
+        payload: getRequestPayloadClass(`Remove${entity.name}`),
         name: `Remove${entity.name}Success`,
         prefix: actionPrefix,
         stateDir: statePath,

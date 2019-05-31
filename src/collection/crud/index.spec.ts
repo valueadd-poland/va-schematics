@@ -52,7 +52,6 @@ describe('crud', () => {
 
   it('works', async done => {
     const crudOpts: CrudSchema = {
-      isCollection: false,
       entity: 'TestModel',
       dataService: '/libs/data-access-test/src/lib/services/test-data.service.ts',
       actionsPrefix: 'Test',

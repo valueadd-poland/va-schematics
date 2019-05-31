@@ -5,7 +5,7 @@ import { dataServiceLocalStorageMethod } from '../../data-service/schematics/loc
 import { CrudOptions } from '../index';
 
 function createDataServiceMethodRules(options: CrudOptions): Rule[] {
-  const { toGenerate, response, dataService, isCollection, entity } = options;
+  const { toGenerate, response, dataService, entity } = options;
   const backend = options.dataService.backend;
   const rules: Rule[] = [];
 
@@ -17,7 +17,7 @@ function createDataServiceMethodRules(options: CrudOptions): Rule[] {
         ? DataServiceBackend.Http
         : DataServiceBackend.LocalStorage,
     entity: entity.name,
-    collection: isCollection,
+    collection: false,
     dataService: dataService.path
   };
 
@@ -32,6 +32,30 @@ function createDataServiceMethodRules(options: CrudOptions): Rule[] {
           })
         : dataServiceLocalStorageMethod({
             ...baseConfig,
+            operation: CrudOperation.Read
+          })
+    );
+
+    const collectionResponseType = response.read.type.split('>');
+    for (let i = collectionResponseType.length - 1; i >= 0; i--) {
+      if (collectionResponseType[i] !== '') {
+        collectionResponseType[i] += '[]';
+        break;
+      }
+    }
+
+    rules.push(
+      backend === DataServiceBackend.Http
+        ? dataServiceHttpMethod({
+            ...baseConfig,
+            collection: true,
+            operation: CrudOperation.Read,
+            httpResponse: collectionResponseType.join('>'),
+            responseMap: response.read.map
+          })
+        : dataServiceLocalStorageMethod({
+            ...baseConfig,
+            collection: true,
             operation: CrudOperation.Read
           })
     );
@@ -76,7 +100,8 @@ function createDataServiceMethodRules(options: CrudOptions): Rule[] {
             ...baseConfig,
             operation: CrudOperation.Delete,
             httpResponse: response.delete.type,
-            responseMap: response.delete.map
+            responseMap: response.delete.map,
+            methodReturnType: 'Observable<void>'
           })
         : dataServiceLocalStorageMethod({
             ...baseConfig,

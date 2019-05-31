@@ -4,4 +4,5 @@ export interface ReducerSchema {
   selectors: boolean;
   stateDir: string;
   skipFormat?: boolean;
+  actionPayload?: boolean;
 }

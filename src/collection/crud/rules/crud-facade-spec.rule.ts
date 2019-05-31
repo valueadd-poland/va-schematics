@@ -16,7 +16,8 @@ function getTestTemplate(
   options: CrudOptions,
   mapResponse: string,
   method: string,
-  props: FacadeProp[]
+  props: FacadeProp[],
+  methodPayload = true
 ): string {
   const { dataService } = options;
   let response = '{}';
@@ -37,7 +38,9 @@ function getTestTemplate(
   const initialProps = props.map(
     prop => `let ${prop.name} = await readFirst(facade.${prop.name}$);`
   );
-  const initialExpects = props.map(prop => `expect(${prop.name}).toBe(initialState.${prop.name});`);
+  const initialExpects = props.map(
+    prop => `expect(${prop.name}).toEqual(initialState.${prop.name});`
+  );
   const afterCallProps = props.map(prop => `${prop.name} = await readFirst(facade.${prop.name}$);`);
   const afterCallExpects = props.map(
     prop => `expect(${prop.name}).toEqual(${prop.expectedValue});`
@@ -52,7 +55,7 @@ function getTestTemplate(
 
         const response = ${response} as any;
         ${dataService.names.propertyName}.${method}.and.returnValue(of(response));
-        facade.${method}({} as any);
+        facade.${method}(${methodPayload ? '{} as any' : ''});
         
         ${afterCallProps.join('\n')}
         
@@ -67,11 +70,11 @@ function getTestTemplate(
 }
 
 function createCrudFacadeSpec(host: Tree, options: CrudOptions): Change[] {
-  const { stateDir, toGenerate, response, entity, isCollection } = options;
+  const { stateDir, toGenerate, response, entity } = options;
   const changes: Change[] = [];
   const sourceFile = readIntoSourceFile(host, stateDir.facadeSpec);
   const firstDescribeBlock = findDescribeBlockNode(sourceFile);
-  const getEntityName = toPropertyName(`${entity.name}${isCollection ? 's' : ''}`);
+  const getEntityName = toPropertyName(`${entity.name}`);
   const entityName = toPropertyName(entity.name);
 
   if (!firstDescribeBlock) {
@@ -91,7 +94,7 @@ function createCrudFacadeSpec(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         stateDir.facadeSpec,
         pos,
-        getTestTemplate(options, response.read.map, `get${entity.name}${isCollection ? 's' : ''}`, [
+        getTestTemplate(options, response.read.map, `get${entity.name}`, [
           {
             name: `${getEntityName}`,
             expectedValue: 'response'
@@ -105,6 +108,33 @@ function createCrudFacadeSpec(host: Tree, options: CrudOptions): Change[] {
             expectedValue: 'null'
           }
         ])
+      )
+    );
+
+    changes.push(
+      new InsertChange(
+        stateDir.facadeSpec,
+        pos,
+        getTestTemplate(
+          options,
+          response.read.map,
+          `get${entity.name}s`,
+          [
+            {
+              name: `${getEntityName}s`,
+              expectedValue: 'response'
+            },
+            {
+              name: `${getEntityName}sLoading`,
+              expectedValue: 'false'
+            },
+            {
+              name: `${getEntityName}sLoadError`,
+              expectedValue: 'null'
+            }
+          ],
+          false
+        )
       )
     );
   }

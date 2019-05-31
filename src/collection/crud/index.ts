@@ -46,7 +46,6 @@ export interface CrudOptions {
   facade: {
     queryName: string;
   };
-  isCollection: boolean;
   response: {
     create: {
       type: string;
@@ -83,7 +82,6 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
     actionsPrefix,
     dataService,
     entity,
-    isCollection,
     responseType,
     mapResponse,
     backend
@@ -221,7 +219,6 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
       path: entityPath[0],
       name: entity
     },
-    isCollection: !!isCollection,
     statePath: stateDir
   };
 }

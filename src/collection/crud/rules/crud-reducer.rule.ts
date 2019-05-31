@@ -6,18 +6,17 @@ import { reducer } from '../../reducer';
 import { CrudOptions } from '../index';
 
 function createReducer(options: CrudOptions): Rule[] {
-  const { toGenerate, isCollection, entity, statePath } = options;
-  const entityPropertyName = toPropertyName(entity.name) + (isCollection ? 's' : '');
-  const entityType = entity.name + (isCollection ? '[]' : ' | null');
-  const entityValue = isCollection ? '[]' : 'null';
+  const { toGenerate, entity, statePath } = options;
+  const entityPropertyName = toPropertyName(entity.name);
+  const entityType = entity.name;
   const rules: Rule[] = [];
 
   if (toGenerate.read) {
     rules.push(
       reducer({
-        actionName: `Get${entity.name}${isCollection ? 's' : ''}`,
+        actionName: `Get${entity.name}`,
         propsToUpdate:
-          `${entityPropertyName}:${entityValue}:${entityType},` +
+          `${entityPropertyName}:null:${entityType}|null,` +
           `${entityPropertyName}Loading:true,` +
           `${entityPropertyName}LoadError:null:HttpErrorResponse|null`,
         selectors: true,
@@ -25,9 +24,9 @@ function createReducer(options: CrudOptions): Rule[] {
         skipFormat: true
       }),
       reducer({
-        actionName: `Get${entity.name}${isCollection ? 's' : ''}Fail`,
+        actionName: `Get${entity.name}Fail`,
         propsToUpdate:
-          `${entityPropertyName}:${isCollection ? '[]' : 'null'}:${entityType},` +
+          `${entityPropertyName}:null:${entityType}|null,` +
           `${entityPropertyName}Loading:false,` +
           `${entityPropertyName}LoadError:action.payload:HttpErrorResponse|null`,
         selectors: false,
@@ -35,11 +34,44 @@ function createReducer(options: CrudOptions): Rule[] {
         skipFormat: true
       }),
       reducer({
-        actionName: `Get${entity.name}${isCollection ? 's' : ''}Success`,
+        actionName: `Get${entity.name}Success`,
         propsToUpdate:
-          `${entityPropertyName}:action.payload:${entityType},` +
+          `${entityPropertyName}:action.payload:${entityType}|null,` +
           `${entityPropertyName}Loading:false,` +
           `${entityPropertyName}LoadError:null:HttpErrorResponse|null`,
+        selectors: false,
+        stateDir: statePath,
+        skipFormat: true
+      })
+    );
+
+    rules.push(
+      reducer({
+        actionName: `Get${entity.name}s`,
+        propsToUpdate:
+          `${entityPropertyName}s:[]:${entityType}[],` +
+          `${entityPropertyName}sLoading:true,` +
+          `${entityPropertyName}sLoadError:null:HttpErrorResponse|null`,
+        selectors: true,
+        stateDir: statePath,
+        skipFormat: true
+      }),
+      reducer({
+        actionName: `Get${entity.name}sFail`,
+        propsToUpdate:
+          `${entityPropertyName}s:[]:${entityType}[],` +
+          `${entityPropertyName}sLoading:false,` +
+          `${entityPropertyName}sLoadError:action.payload:HttpErrorResponse|null`,
+        selectors: false,
+        stateDir: statePath,
+        skipFormat: true
+      }),
+      reducer({
+        actionName: `Get${entity.name}sSuccess`,
+        propsToUpdate:
+          `${entityPropertyName}s:action.payload:${entityType}[],` +
+          `${entityPropertyName}sLoading:false,` +
+          `${entityPropertyName}sLoadError:null:HttpErrorResponse|null`,
         selectors: false,
         stateDir: statePath,
         skipFormat: true
@@ -70,6 +102,7 @@ function createReducer(options: CrudOptions): Rule[] {
       reducer({
         actionName: `Create${entity.name}Success`,
         propsToUpdate:
+          `${entityPropertyName}s:state.${entityPropertyName}s.concat(action.payload):${entityType}[],` +
           `${entityPropertyName}Creating:false,` +
           `${entityPropertyName}CreateError:null:HttpErrorResponse|null`,
         selectors: false,
@@ -102,6 +135,7 @@ function createReducer(options: CrudOptions): Rule[] {
       reducer({
         actionName: `Update${entity.name}Success`,
         propsToUpdate:
+          `${entityPropertyName}s:state.${entityPropertyName}s.map(e => e.id === action.payload.id ? action.payload \\: e):${entityType}[],` +
           `${entityPropertyName}Updating:false,` +
           `${entityPropertyName}UpdateError:null:HttpErrorResponse|null`,
         selectors: false,
@@ -134,6 +168,7 @@ function createReducer(options: CrudOptions): Rule[] {
       reducer({
         actionName: `Remove${entity.name}Success`,
         propsToUpdate:
+          `${entityPropertyName}s:state.${entityPropertyName}s.filter(e => e.id !== action.payload.id):${entityType}[],` +
           `${entityPropertyName}Removing:false,` +
           `${entityPropertyName}RemoveError:null:HttpErrorResponse|null`,
         selectors: false,

@@ -5,9 +5,9 @@ export interface CrudSchema {
   backend?: DataServiceBackend;
   dataService: string;
   entity: string;
-  isCollection?: boolean;
   mapResponse?: string;
   operation: string;
   responseType?: string;
   stateDir: string;
+  collection?: boolean;
 }

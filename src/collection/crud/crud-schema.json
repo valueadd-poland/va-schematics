@@ -53,12 +53,6 @@
       "x-prompt": "What is the actions prefix (default is entity class name)?",
       "default": ""
     },
-    "isCollection": {
-      "type": "boolean",
-      "description": "Defines what to generate; collection of entities or single entity",
-      "x-prompt": "Is collection of entities?",
-      "default": true
-    },
     "responseType": {
       "type": "string",
       "description": "Response return type.",

@@ -26,13 +26,31 @@ function getMethodTemplate(
 }
 
 function createFacade(host: Tree, options: CrudOptions): Change[] {
-  const { toGenerate, isCollection, entity, stateDir, facade, actionsNamespace } = options;
-  const entityPropertyName = toPropertyName(entity.name) + (isCollection ? 's' : '');
+  const { toGenerate, entity, stateDir, facade, actionsNamespace } = options;
+  const entityPropertyName = toPropertyName(entity.name);
   const selectorChanges: Change[] = [];
   const methodsChanges: Change[] = [];
   const facadeClassBody = findClassBodyInFile(host, stateDir.facade);
 
   if (toGenerate.read) {
+    selectorChanges.push(
+      new InsertChange(
+        stateDir.facade,
+        facadeClassBody.getStart(),
+        getSelectorTemplate(`${entityPropertyName}s`, facade.queryName)
+      ),
+      new InsertChange(
+        stateDir.facade,
+        facadeClassBody.getStart(),
+        getSelectorTemplate(`${entityPropertyName}sLoading`, facade.queryName)
+      ),
+      new InsertChange(
+        stateDir.facade,
+        facadeClassBody.getStart(),
+        getSelectorTemplate(`${entityPropertyName}sLoadError`, facade.queryName)
+      )
+    );
+
     selectorChanges.push(
       new InsertChange(
         stateDir.facade,
@@ -57,9 +75,16 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
         facadeClassBody.getEnd(),
         getMethodTemplate(
           actionsNamespace,
-          `Get${entity.name}${isCollection ? 's' : ''}`,
-          isCollection ? '' : getRequestPayloadClass(`Get${entity.name}`)
+          `Get${entity.name}`,
+          getRequestPayloadClass(`Get${entity.name}`)
         )
+      )
+    );
+    methodsChanges.push(
+      new InsertChange(
+        stateDir.facade,
+        facadeClassBody.getEnd(),
+        getMethodTemplate(actionsNamespace, `Get${entity.name}s`)
       )
     );
   }
