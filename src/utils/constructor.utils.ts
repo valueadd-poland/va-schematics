@@ -134,5 +134,5 @@ export function createConstructorForInjection(
   const toAdd = `
   constructor(${ctorArgumentsToAdd}) {}
 `;
-  return new InsertChange(filePath, listNode.pos + 1, toAdd);
+  return new InsertChange(filePath, listNode.getStart(), toAdd);
 }

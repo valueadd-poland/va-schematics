@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "id": "SchematicsVaDataServiceHttpMethod",
+  "title": "Data service http method schematic.",
+  "type": "object",
+  "properties": {
+    "operation": {
+      "type": "string",
+      "description": "CRUD operation to create.",
+      "enum": ["create", "read", "update", "delete"],
+      "default": "create",
+      "x-prompt": {
+        "message": "Which operation would you like to create?",
+        "type": "list",
+        "items": [
+          {
+            "value": "create",
+            "label": "Create        [an entity will be added to the local storage collection]"
+          },
+          {
+            "value": "read",
+            "label": "Read          [an entity will be queried from the local storage collection]"
+          },
+          {
+            "value": "update",
+            "label": "Update        [an entity will be updated in the local storage collection]"
+          },
+          {
+            "value": "delete",
+            "label": "Delete        [an entity will be deleted from the local storage collection]"
+          }
+        ]
+      }
+    },
+    "entity": {
+      "type": "string",
+      "description": "The name of the entity",
+      "x-prompt": "What is the name of the entity?"
+    },
+    "collection": {
+      "type": "boolean",
+      "description": "Defines whether the method operates on the entity collection.",
+      "x-prompt": "Does the method operate on the entity collection?",
+      "default": false
+    },
+    "httpResponse": {
+      "type": "string",
+      "description": "Http response",
+      "x-prompt": "What type is http response?"
+    },
+    "responseMap": {
+      "type": "string",
+      "description": "map operator in pipe",
+      "x-prompt": "Map response?",
+      "default": ""
+    },
+    "methodName": {
+      "type": "string",
+      "description": "Override the default method name based on the type of operation."
+    },
+    "methodProperties": {
+      "type": "string",
+      "description": "Override the default method properties based on the type of operation."
+    },
+    "methodReturnType": {
+      "type": "string",
+      "description": "Override the default method return type based on the type of operation."
+    },
+    "skipTest": {
+      "type": "boolean",
+      "description": "Skip creating tests."
+    }
+  }
+}

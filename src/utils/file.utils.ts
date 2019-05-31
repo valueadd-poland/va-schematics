@@ -8,7 +8,7 @@ export function writeToFile(filePath: string, str: string): void {
 }
 
 /**
- * This method is specifically for updating a JSON file using the filesystem
+ * This httpMethod is specifically for updating a JSON file using the filesystem
  *
  * @remarks
  * If you are looking to update a JSON file in a tree, look for ./ast-utils#updateJsonInTree
@@ -53,7 +53,7 @@ export function serializeJson(json: any): string {
 }
 
 /**
- * This method is specifically for reading a JSON file from the filesystem
+ * This httpMethod is specifically for reading a JSON file from the filesystem
  *
  * @remarks
  * If you are looking to read a JSON file in a Tree, use ./ast-utils#readJsonInTree

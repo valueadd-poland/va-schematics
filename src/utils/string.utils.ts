@@ -21,7 +21,7 @@ const STRING_UNDERSCORE_REGEXP_2 = /-|\s+/g;
  *  decamelize('my favorite items'); // 'my favorite items'
  *  ```
  *
- *  @method decamelize
+ *  @httpMethod decamelize
  *  @param {String} str The string to decamelize.
  *  @return {String} the decamelized string.
  */
@@ -39,7 +39,7 @@ export function decamelize(str: string): string {
  * dasherize('my favorite items'); // 'my-favorite-items'
  * ```
  *
- * @method dasherize
+ * @httpMethod dasherize
  * @param {String} str The string to dasherize.
  * @return {String} the dasherized string.
  */
@@ -58,7 +58,7 @@ export function dasherize(str?: string): string {
  * camelize('My Favorite Items');  // 'myFavoriteItems'
  * ```
  *
- * @method camelize
+ * @httpMethod camelize
  * @param {String} str The string to camelize.
  * @return {String} the camelized string.
  */
@@ -80,7 +80,7 @@ export function camelize(str: string): string {
  * 'my favorite items'.classify();  // 'MyFavoriteItems'
  * ```
  *
- * @method classify
+ * @httpMethod classify
  * @param {String} str the string to classify
  * @return {String} the classified string
  */
@@ -102,7 +102,7 @@ export function classify(str: string): string {
  * 'my favorite items'.underscore();  // 'my_favorite_items'
  * ```
  *
- * @method underscore
+ * @httpMethod underscore
  * @param {String} str The string to underscore.
  * @return {String} the underscored string.
  */
@@ -123,7 +123,7 @@ export function underscore(str: string): string {
  * 'my favorite items'.capitalize() // 'My favorite items'
  * ```
  *
- * @method capitalize
+ * @httpMethod capitalize
  * @param {String} str The string to capitalize.
  * @return {String} The capitalized string.
  */

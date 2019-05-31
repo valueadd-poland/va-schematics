@@ -1,68 +1,87 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
-import { dataServiceMethod } from '../../data-service-method';
+import { CrudOperation, DataServiceBackend } from '../../data-service/data-service-schema';
+import { dataServiceHttpMethod } from '../../data-service/schematics/http-method/index';
+import { dataServiceLocalStorageMethod } from '../../data-service/schematics/local-storage-method/index';
 import { CrudOptions } from '../index';
 
 function createDataServiceMethodRules(options: CrudOptions): Rule[] {
-  const { toGenerate, isCollection, entity, dataService, response } = options;
+  const { toGenerate, response, dataService, isCollection, entity } = options;
+  const backend = options.dataService.backend;
   const rules: Rule[] = [];
+
+  const baseConfig = {
+    skipTest: false,
+    skipFormat: true,
+    methodBackend:
+      backend === DataServiceBackend.Http
+        ? DataServiceBackend.Http
+        : DataServiceBackend.LocalStorage,
+    entity: entity.name,
+    collection: isCollection,
+    dataService: dataService.path
+  };
 
   if (toGenerate.read) {
     rules.push(
-      dataServiceMethod({
-        httpMethod: 'GET',
-        properties: isCollection ? '' : 'id:string',
-        mapResponse: response.read.map,
-        name: `get${entity.name}${isCollection ? 's' : ''}`,
-        dataServiceFilePath: dataService.path,
-        returnType: entity.name,
-        responseType: response.read.type,
-        skipFormat: true
-      })
+      backend === DataServiceBackend.Http
+        ? dataServiceHttpMethod({
+            ...baseConfig,
+            operation: CrudOperation.Read,
+            httpResponse: response.read.type,
+            responseMap: response.read.map
+          })
+        : dataServiceLocalStorageMethod({
+            ...baseConfig,
+            operation: CrudOperation.Read
+          })
     );
   }
 
   if (toGenerate.create) {
     rules.push(
-      dataServiceMethod({
-        httpMethod: 'POST',
-        properties: `data:${entity.name}`,
-        mapResponse: response.create.map,
-        name: `create${entity.name}`,
-        dataServiceFilePath: dataService.path,
-        returnType: entity.name,
-        responseType: response.create.type,
-        skipFormat: true
-      })
+      backend === DataServiceBackend.Http
+        ? dataServiceHttpMethod({
+            ...baseConfig,
+            operation: CrudOperation.Create,
+            httpResponse: response.create.type,
+            responseMap: response.create.map
+          })
+        : dataServiceLocalStorageMethod({
+            ...baseConfig,
+            operation: CrudOperation.Create
+          })
     );
   }
 
   if (toGenerate.update) {
     rules.push(
-      dataServiceMethod({
-        httpMethod: 'PUT',
-        properties: `data:${entity.name}`,
-        mapResponse: response.update.map,
-        name: `update${entity.name}`,
-        dataServiceFilePath: dataService.path,
-        returnType: entity.name,
-        responseType: response.update.type,
-        skipFormat: true
-      })
+      backend === DataServiceBackend.Http
+        ? dataServiceHttpMethod({
+            ...baseConfig,
+            operation: CrudOperation.Update,
+            httpResponse: response.update.type,
+            responseMap: response.update.map
+          })
+        : dataServiceLocalStorageMethod({
+            ...baseConfig,
+            operation: CrudOperation.Update
+          })
     );
   }
 
   if (toGenerate.delete) {
     rules.push(
-      dataServiceMethod({
-        httpMethod: 'DELETE',
-        properties: `id:string`,
-        mapResponse: response.delete.map,
-        name: `remove${entity.name}`,
-        dataServiceFilePath: dataService.path,
-        returnType: entity.name,
-        responseType: response.delete.type,
-        skipFormat: true
-      })
+      backend === DataServiceBackend.Http
+        ? dataServiceHttpMethod({
+            ...baseConfig,
+            operation: CrudOperation.Delete,
+            httpResponse: response.delete.type,
+            responseMap: response.delete.map
+          })
+        : dataServiceLocalStorageMethod({
+            ...baseConfig,
+            operation: CrudOperation.Delete
+          })
     );
   }
 
@@ -72,6 +91,7 @@ function createDataServiceMethodRules(options: CrudOptions): Rule[] {
 export function crudDataServiceMethods(options: CrudOptions): Rule {
   return (host: Tree, context: SchematicContext) => {
     context.logger.info(`Generating crud methods in data service.`);
+
     return chain(createDataServiceMethodRules(options))(host, context);
   };
 }

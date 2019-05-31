@@ -42,3 +42,10 @@ export function parseReducerFile(sourceFile: ts.SourceFile): ParsedReducerFile {
     stateInterface: stateInterface as ts.InterfaceDeclaration
   };
 }
+
+export function getSpecPath(path: string): string {
+  const p = path.split('.ts');
+  p.pop();
+  p.push('.spec.ts');
+  return p.join('');
+}

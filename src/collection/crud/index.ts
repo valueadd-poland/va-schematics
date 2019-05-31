@@ -18,6 +18,7 @@ import {
   findNamespaceName,
   readIntoSourceFile
 } from '../../utils/ts.utils';
+import { DataServiceBackend } from '../data-service/data-service-schema';
 import { CrudSchema } from './crud-schema.interface';
 import { CrudOptions } from './index';
 import { crudActions } from './rules/crud-actions.rule';
@@ -33,6 +34,7 @@ export interface CrudOptions {
   dataService: {
     names: Names;
     path: string;
+    backend: DataServiceBackend;
   };
   effects: {
     name: string;
@@ -83,7 +85,8 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
     entity,
     isCollection,
     responseType,
-    mapResponse
+    mapResponse,
+    backend
   } = options;
 
   const parsedStateDir = parseStateDir(stateDir, host);
@@ -211,7 +214,8 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
     },
     dataService: {
       names: names(findClassNameInFile(host, dataServicePath)),
-      path: dataServicePath
+      path: dataServicePath,
+      backend: (backend as DataServiceBackend) || DataServiceBackend.Http
     },
     entity: {
       path: entityPath[0],

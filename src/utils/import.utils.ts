@@ -2,15 +2,13 @@ import { normalize } from '@angular-devkit/core';
 import { DirEntry, Tree } from '@angular-devkit/schematics';
 import { buildRelativePath } from '@schematics/angular/utility/find-module';
 import * as ts from 'typescript';
-import { findNode, getSourceNodes, insert, insertImport, isImported } from './ast.utils';
+import { findNode, findNodes, getSourceNodes, insert, insertImport, isImported } from './ast.utils';
 import { SchematicCache } from './schematic-cache.util';
 import { createFilesArrayFromDir, isBaseType, parseType, readIntoSourceFile } from './ts.utils';
 
 interface Declarations {
   [key: string]: string[];
 }
-
-let files: string[];
 
 function doesTextContainExport(text: string, name: string): boolean {
   return (
@@ -34,19 +32,22 @@ function doesTextContainExport(text: string, name: string): boolean {
 
 export function findDeclarationFileByName(host: Tree, name: string): string[] {
   const schematicCache = SchematicCache.getInstance();
-  const cache = schematicCache.read<Declarations>('declarationsPathsByDeclarationName');
+  const declarationPaths =
+    schematicCache.read<Declarations>('declarationsPathsByDeclarationName') || {};
+  let hostFiles = schematicCache.read<string[]>('hostFiles');
 
-  if (cache[name]) {
-    return cache[name];
+  if (declarationPaths[name]) {
+    return declarationPaths[name];
   }
 
-  if (!files) {
-    files = createFilesArrayFromDir(host.getDir('.')).filter(
+  if (!hostFiles) {
+    hostFiles = createFilesArrayFromDir(host.getDir('.')).filter(
       f => !f.endsWith('spec.ts') && f.endsWith('.ts') && !f.startsWith('/node_modules')
     );
+    schematicCache.save('hostFiles', hostFiles);
   }
 
-  const paths = files.filter(file => {
+  const paths = hostFiles.filter(file => {
     const buff = host.read(file);
     if (buff) {
       const content = buff.toString('utf8');
@@ -55,8 +56,8 @@ export function findDeclarationFileByName(host: Tree, name: string): string[] {
     return false;
   });
 
-  cache[name] = paths;
-  schematicCache.save('declarationsPathsByDeclarationName', cache);
+  declarationPaths[name] = paths;
+  schematicCache.save('declarationsPathsByDeclarationName', declarationPaths);
 
   return paths;
 }
@@ -148,12 +149,20 @@ export function insertCustomImport(
 export function insertTypeImport(host: Tree, filePath: string, type: string): void {
   const sourceFile = readIntoSourceFile(host, filePath);
   const types = parseType(type);
+  const importSpecifiers = findNodes<ts.ImportSpecifier>(
+    sourceFile,
+    ts.SyntaxKind.ImportSpecifier
+  ).map(is => is.name.getText());
 
   types.forEach(t => {
     if (isBaseType(t)) {
       return;
     }
     t = t.split('[')[0];
+
+    if (importSpecifiers.includes(t)) {
+      return;
+    }
 
     const typeFile = findDeclarationFileByName(host, t)[0];
     if (typeFile) {

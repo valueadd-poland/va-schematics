@@ -1,6 +1,5 @@
 import { Rule, SchematicContext, SchematicsException, Tree } from '@angular-devkit/schematics';
 import { Change, InsertChange } from '@schematics/angular/utility/change';
-
 import * as ts from 'typescript';
 import {
   addSymbolToObject,
@@ -10,11 +9,19 @@ import {
   getSourceNodes,
   insert,
   insertImport
-} from '../../../utils/ast.utils';
-import { insertCustomImport } from '../../../utils/import.utils';
-import { parsePropsToUpdate } from '../../../utils/options-parsing.utils';
-import { findDeclarationNodeByPartialName, readIntoSourceFile } from '../../../utils/ts.utils';
-import { DataServiceMethodSchema } from '../data-service-method-schema.interface';
+} from '../../../../../utils/ast.utils';
+import { getSpecPath } from '../../../../../utils/file-parsing.utils';
+import { insertCustomImport } from '../../../../../utils/import.utils';
+import { parsePropsToUpdate } from '../../../../../utils/options-parsing.utils';
+import {
+  findClassNameInFile,
+  findDeclarationNodeByPartialName,
+  readIntoSourceFile
+} from '../../../../../utils/ts.utils';
+import { CrudOperation } from '../../../data-service-schema';
+import { getServiceTestTemplate } from '../../../utils/template.utils';
+import { DataServiceHttpMethodSchema } from '../data-service-http-method-schema';
+import { Options } from '../index';
 
 function addVariableDeclarations(
   specPath: string,
@@ -109,7 +116,7 @@ function addTestBedConfiguration(
       new InsertChange(
         specPath,
         beforeEach.end + 2,
-        `\nafterEach(() => {\nhttpMock.verify();\n});\n`
+        `\nafterEach(() => {\nhttpMock.verify();\nlocalStorage.clear();\n});\n`
       )
     );
   }
@@ -121,14 +128,37 @@ function addTestBedConfiguration(
   ];
 }
 
-function getTestTemplate(options: DataServiceMethodSchema): string {
-  const { name, properties, mapResponse, httpMethod } = options;
+function getTestTemplate(options: DataServiceHttpMethodSchema): string {
+  const { methodName, methodProperties, responseMap, operation } = options;
   let response = '{}';
   let callProps = '';
+  let httpMethod = '';
 
-  if (mapResponse) {
+  switch (operation) {
+    case CrudOperation.Create: {
+      httpMethod = 'POST';
+      break;
+    }
+
+    case CrudOperation.Read: {
+      httpMethod = 'GET';
+      break;
+    }
+
+    case CrudOperation.Update: {
+      httpMethod = 'PUT';
+      break;
+    }
+
+    case CrudOperation.Delete: {
+      httpMethod = 'DELETE';
+      break;
+    }
+  }
+
+  if (responseMap) {
     response = '{';
-    const parts = mapResponse.split('.');
+    const parts = responseMap.split('.');
     parts.forEach(part => {
       response += `${part}: {`;
     });
@@ -138,23 +168,23 @@ function getTestTemplate(options: DataServiceMethodSchema): string {
     response += '}';
   }
 
-  if (properties) {
-    const props = parsePropsToUpdate(properties);
+  if (methodProperties) {
+    const props = parsePropsToUpdate(methodProperties);
     props.forEach((prop, index) => {
       callProps += '{} as any' + (index !== props.length - 1 ? ',' : '');
     });
   }
 
   return `
-  describe('#${name}', () => {
+  describe('#${methodName}', () => {
     it('should be successful', () => {
       const response = ${response} as any;
       
-      service.${name}(${callProps}).subscribe(res => {
-        expect(res).toBe(response${mapResponse ? '.' + mapResponse : ''});
+      service.${methodName}(${callProps}).subscribe(res => {
+        expect(res).toBe(response${responseMap ? '.' + responseMap : ''});
       });
 
-      const req = httpMock.expectOne(service.endpoints.${name});
+      const req = httpMock.expectOne(service.endpoints.${methodName});
       expect(req.request.method).toBe('${httpMethod}');
       req.flush(response);
     });
@@ -162,7 +192,7 @@ function getTestTemplate(options: DataServiceMethodSchema): string {
     it('should throw error', () => {
       const response = {};
 
-      service.${name}(${callProps}).subscribe(
+      service.${methodName}(${callProps}).subscribe(
         () => {
           fail('expecting error');
         },
@@ -171,7 +201,7 @@ function getTestTemplate(options: DataServiceMethodSchema): string {
         }
       );
 
-      const req = httpMock.expectOne(service.endpoints.${name});
+      const req = httpMock.expectOne(service.endpoints.${methodName});
       expect(req.request.method).toBe('${httpMethod}');
       req.flush(response, {
         status: 400,
@@ -185,20 +215,26 @@ function getTestTemplate(options: DataServiceMethodSchema): string {
 function addTest(
   specPath: string,
   describeBlock: ts.Block,
-  options: DataServiceMethodSchema
+  options: DataServiceHttpMethodSchema
 ): Change {
   return new InsertChange(specPath, describeBlock.end - 1, getTestTemplate(options));
 }
 
-export function addMethodSpec(options: DataServiceMethodSchema): Rule {
+export function httpMethodSpec(options: Options): Rule {
   return (host: Tree, context: SchematicContext) => {
-    const specPath = options.dataServiceFilePath.slice(0, -3) + '.spec.ts';
-
-    if (!host.get(specPath)) {
-      context.logger.info('There is no data service spec file. Skipping.');
+    if (options.skipTest) {
       return host;
     }
-    const dataServiceSourceFile = readIntoSourceFile(host, options.dataServiceFilePath);
+    context.logger.info(`Creating tests of the ${options.methodName} method.`);
+
+    const specPath = getSpecPath(options.dataService);
+
+    if (!host.exists(specPath)) {
+      const serviceName = findClassNameInFile(host, options.dataService);
+      host.create(specPath, getServiceTestTemplate(serviceName, options));
+    }
+
+    const dataServiceSourceFile = readIntoSourceFile(host, options.dataService);
     const sourceFile = readIntoSourceFile(host, specPath);
     const describeBlockNode = findDescribeBlockNode(sourceFile);
 
@@ -221,14 +257,14 @@ export function addMethodSpec(options: DataServiceMethodSchema): Rule {
 
     if (!dataServiceDeclaration) {
       throw new SchematicsException(
-        `can not find DataService declaration in ${options.dataServiceFilePath}`
+        `can not find DataService declaration in ${options.dataService}`
       );
     }
     const dataServiceDeclarationName = dataServiceDeclaration.name;
 
     if (!dataServiceDeclarationName) {
       throw new SchematicsException(
-        `can not find DataService declaration in ${options.dataServiceFilePath}`
+        `can not find DataService declaration in ${options.dataService}`
       );
     }
     const dataServiceName = dataServiceDeclarationName.getText();
@@ -250,7 +286,5 @@ export function addMethodSpec(options: DataServiceMethodSchema): Rule {
     ]);
 
     insertCustomImport(host, specPath, 'HttpClientTestingModule', '@angular/common/http/testing');
-
-    return host;
   };
 }

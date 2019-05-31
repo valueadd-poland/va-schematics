@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "id": "SchematicsVaDataService",
+  "title": "Data service schematics.",
+  "type": "object",
+  "properties": {
+    "dataService": {
+      "type": "string",
+      "description": "The path to the date service.",
+      "x-prompt": "What is the path to data service?"
+    },
+    "methodBackend": {
+      "type": "string",
+      "description": "Backend to use.",
+      "enum": ["none", "http", "localStorage"],
+      "default": "http",
+      "x-prompt": {
+        "message": "Which backend should be used when generating a function body?",
+        "type": "list",
+        "items": [
+          {
+            "value": "none",
+            "label": "None              [the function will be generated with an empty body]"
+          },
+          {
+            "value": "http",
+            "label": "Http              [an entity will be queried/saved with an angular's HttpClient]"
+          },
+          {
+            "value": "localStorage",
+            "label": "Local storage     [an entity will be queried/saved to a browser's local storage]"
+          }
+        ]
+      }
+    },
+    "skipFormat": {
+      "type": "boolean",
+      "description": "Defines whether file formatting should be skipped.",
+      "default": false
+    },
+    "skipTest": {
+      "type": "boolean",
+      "description": "Defines whether creating tests should be skipped.",
+      "default": false
+    },
+    "operation": {
+      "type": "string"
+    },
+    "entity": {
+      "type": "string"
+    },
+    "collection": {
+      "type": "boolean"
+    },
+    "methodName": {
+      "type": "string"
+    },
+    "methodProperties": {
+      "type": "string"
+    },
+    "methodReturnType": {
+      "type": "string"
+    },
+    "httpResponse": {
+      "type": "string"
+    },
+    "responseMap": {
+      "type": "string"
+    }
+  }
+}
