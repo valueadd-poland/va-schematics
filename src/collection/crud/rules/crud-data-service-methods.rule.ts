@@ -105,7 +105,8 @@ function createDataServiceMethodRules(options: CrudOptions): Rule[] {
           })
         : dataServiceLocalStorageMethod({
             ...baseConfig,
-            operation: CrudOperation.Delete
+            operation: CrudOperation.Delete,
+            methodReturnType: 'Observable<null>'
           })
     );
   }

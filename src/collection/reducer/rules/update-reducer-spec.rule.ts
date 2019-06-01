@@ -89,7 +89,7 @@ function createTestUpdateSuccess(
   let expects = stateProperties
     .map(
       stateProperty =>
-        `expect(result.${stateProperty.key}${
+        `expect((result as any).${stateProperty.key}${
           stateProperty.value.includes('payload') ? '[0].name' : ''
         }).toEqual(${stateProperty.value.includes('payload') ? "'test2'" : stateProperty.value});`
     )

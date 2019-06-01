@@ -25,6 +25,12 @@
       "description": "Create selectors for provided properties?",
       "x-prompt": "Would you like to add ngrx selectors?"
     },
+    "facade": {
+      "type": "boolean",
+      "default": false,
+      "description": "Create facade for generated selectors.",
+      "x-prompt": "Would you like to create facade for generated selectors?"
+    },
     "actionPayload": {
       "type": "boolean",
       "default": true,

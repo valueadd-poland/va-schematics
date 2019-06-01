@@ -5,4 +5,5 @@ export interface ReducerSchema {
   stateDir: string;
   skipFormat?: boolean;
   actionPayload?: boolean;
+  facade?: boolean;
 }

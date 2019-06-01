@@ -6,6 +6,7 @@ import { formatFiles } from '../../utils/rules/format-files';
 import { readIntoSourceFile } from '../../utils/ts.utils';
 import { ReducerSchema } from './reducer-schema.interface';
 import { insertNamespaceImport } from './rules/insert-namespace-import.rule';
+import { updateFacade } from './rules/update-facade.rule';
 import { updateReducerSpec } from './rules/update-reducer-spec.rule';
 import { updateReducer } from './rules/update-reducer.rule';
 import { updateSelectorsSpec } from './rules/update-selectors-spec.rule';
@@ -48,6 +49,7 @@ export function reducer(options: ReducerSchema): Rule {
             updateSelectorsSpec(selectorsSpecSourceFile, stateDir, options)
           ]
         : []),
+      ...(options.facade ? [updateFacade(options)] : []),
       formatFiles({ skipFormat: !!options.skipFormat })
     ];
 
