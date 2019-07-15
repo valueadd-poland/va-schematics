@@ -8,7 +8,6 @@ import { insertCustomImport, insertTypeImport } from '../../../utils/import.util
 import { names } from '../../../utils/name.utils';
 import { findByIdentifier, findClassBodyInFile } from '../../../utils/ts.utils';
 import { config } from '../../config';
-import { CrudOperation } from '../../data-service/data-service-schema';
 import { CrudOptions } from '../index';
 
 function getEffectSpecTemplate(
@@ -161,13 +160,15 @@ function createEffectsSpec(host: Tree, options: CrudOptions): Change[] {
       )
     );
 
-    changes.push(
-      new InsertChange(
-        effectsFilePath,
-        describeFnSecondArgument.getEnd() - 1,
-        getEffectSpecTemplate(options, `Get${entity.name}s`, false)
-      )
-    );
+    if (options.collection) {
+      changes.push(
+        new InsertChange(
+          effectsFilePath,
+          describeFnSecondArgument.getEnd() - 1,
+          getEffectSpecTemplate(options, `Get${entity.name}Collection`, false)
+        )
+      );
+    }
   }
 
   if (toGenerate.create) {
@@ -218,13 +219,15 @@ function createEffects(host: Tree, options: CrudOptions): Change[] {
       )
     );
 
-    changes.push(
-      new InsertChange(
-        effectsFilePath,
-        classBody.getStart(),
-        getEffectFetchTemplate(options, `Get${entity.name}s`, false)
-      )
-    );
+    if (options.collection) {
+      changes.push(
+        new InsertChange(
+          effectsFilePath,
+          classBody.getStart(),
+          getEffectFetchTemplate(options, `Get${entity.name}Collection`, false)
+        )
+      );
+    }
   }
 
   if (toGenerate.create) {

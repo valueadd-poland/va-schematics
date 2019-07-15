@@ -33,23 +33,25 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
   const facadeClassBody = findClassBodyInFile(host, stateDir.facade);
 
   if (toGenerate.read) {
-    selectorChanges.push(
-      new InsertChange(
-        stateDir.facade,
-        facadeClassBody.getStart(),
-        getSelectorTemplate(`${entityPropertyName}s`, facade.queryName)
-      ),
-      new InsertChange(
-        stateDir.facade,
-        facadeClassBody.getStart(),
-        getSelectorTemplate(`${entityPropertyName}sLoading`, facade.queryName)
-      ),
-      new InsertChange(
-        stateDir.facade,
-        facadeClassBody.getStart(),
-        getSelectorTemplate(`${entityPropertyName}sLoadError`, facade.queryName)
-      )
-    );
+    if (options.collection) {
+      selectorChanges.push(
+        new InsertChange(
+          stateDir.facade,
+          facadeClassBody.getStart(),
+          getSelectorTemplate(`${entityPropertyName}Collection`, facade.queryName)
+        ),
+        new InsertChange(
+          stateDir.facade,
+          facadeClassBody.getStart(),
+          getSelectorTemplate(`${entityPropertyName}CollectionLoading`, facade.queryName)
+        ),
+        new InsertChange(
+          stateDir.facade,
+          facadeClassBody.getStart(),
+          getSelectorTemplate(`${entityPropertyName}CollectionLoadError`, facade.queryName)
+        )
+      );
+    }
 
     selectorChanges.push(
       new InsertChange(
@@ -80,13 +82,16 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
         )
       )
     );
-    methodsChanges.push(
-      new InsertChange(
-        stateDir.facade,
-        facadeClassBody.getEnd(),
-        getMethodTemplate(actionsNamespace, `Get${entity.name}s`)
-      )
-    );
+
+    if (options.collection) {
+      methodsChanges.push(
+        new InsertChange(
+          stateDir.facade,
+          facadeClassBody.getEnd(),
+          getMethodTemplate(actionsNamespace, `Get${entity.name}Collection`)
+        )
+      );
+    }
   }
 
   if (toGenerate.create) {

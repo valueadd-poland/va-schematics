@@ -31,6 +31,7 @@ import { crudReducer } from './rules/crud-reducer.rule';
 export interface CrudOptions {
   actionPrefix: string;
   actionsNamespace: string;
+  collection: boolean;
   dataService: {
     names: Names;
     path: string;
@@ -75,6 +76,7 @@ export interface CrudOptions {
   };
 }
 
+// tslint:disable-next-line:cognitive-complexity
 export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
   const {
     stateDir,
@@ -137,6 +139,7 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
 
   return {
     actionsNamespace: findNamespaceName(host, parsedStateDir.actions),
+    collection: options.collection || false,
     effects: {
       name: findClassNameInFile(host, parsedStateDir.effects)
     },

@@ -111,32 +111,34 @@ function createCrudFacadeSpec(host: Tree, options: CrudOptions): Change[] {
       )
     );
 
-    changes.push(
-      new InsertChange(
-        stateDir.facadeSpec,
-        pos,
-        getTestTemplate(
-          options,
-          response.read.map,
-          `get${entity.name}s`,
-          [
-            {
-              name: `${getEntityName}s`,
-              expectedValue: 'response'
-            },
-            {
-              name: `${getEntityName}sLoading`,
-              expectedValue: 'false'
-            },
-            {
-              name: `${getEntityName}sLoadError`,
-              expectedValue: 'null'
-            }
-          ],
-          false
+    if (options.collection) {
+      changes.push(
+        new InsertChange(
+          stateDir.facadeSpec,
+          pos,
+          getTestTemplate(
+            options,
+            response.read.map,
+            `get${entity.name}Collection`,
+            [
+              {
+                name: `${getEntityName}Collection`,
+                expectedValue: 'response'
+              },
+              {
+                name: `${getEntityName}CollectionLoading`,
+                expectedValue: 'false'
+              },
+              {
+                name: `${getEntityName}CollectionLoadError`,
+                expectedValue: 'null'
+              }
+            ],
+            false
+          )
         )
-      )
-    );
+      );
+    }
   }
 
   if (toGenerate.create) {

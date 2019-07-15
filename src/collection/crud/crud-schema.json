@@ -63,6 +63,12 @@
       "type": "string",
       "description": "Add map operator to response pipe.",
       "x-prompt": "What is response object path to map?"
+    },
+    "collection": {
+      "type": "boolean",
+      "default": false,
+      "description": "Generate collection fetching in READ operation.",
+      "x-prompt": "Shall generate actions for fetching collection of entities?"
     }
   }
 }

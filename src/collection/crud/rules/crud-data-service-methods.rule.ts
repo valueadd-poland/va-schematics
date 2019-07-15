@@ -36,29 +36,31 @@ function createDataServiceMethodRules(options: CrudOptions): Rule[] {
           })
     );
 
-    const collectionResponseType = response.read.type.split('>');
-    for (let i = collectionResponseType.length - 1; i >= 0; i--) {
-      if (collectionResponseType[i] !== '') {
-        collectionResponseType[i] += '[]';
-        break;
+    if (options.collection) {
+      const collectionResponseType = response.read.type.split('>');
+      for (let i = collectionResponseType.length - 1; i >= 0; i--) {
+        if (collectionResponseType[i] !== '') {
+          collectionResponseType[i] += '[]';
+          break;
+        }
       }
-    }
 
-    rules.push(
-      backend === DataServiceBackend.Http
-        ? dataServiceHttpMethod({
-            ...baseConfig,
-            collection: true,
-            operation: CrudOperation.Read,
-            httpResponse: collectionResponseType.join('>'),
-            responseMap: response.read.map
-          })
-        : dataServiceLocalStorageMethod({
-            ...baseConfig,
-            collection: true,
-            operation: CrudOperation.Read
-          })
-    );
+      rules.push(
+        backend === DataServiceBackend.Http
+          ? dataServiceHttpMethod({
+              ...baseConfig,
+              collection: true,
+              operation: CrudOperation.Read,
+              httpResponse: collectionResponseType.join('>'),
+              responseMap: response.read.map
+            })
+          : dataServiceLocalStorageMethod({
+              ...baseConfig,
+              collection: true,
+              operation: CrudOperation.Read
+            })
+      );
+    }
   }
 
   if (toGenerate.create) {

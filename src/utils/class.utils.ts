@@ -56,7 +56,7 @@ export function getDefaultCrudMethodName(
     }
 
     case CrudOperation.Read: {
-      return collection ? `get${entity}s` : `get${entity}`;
+      return collection ? `get${entity}Collection` : `get${entity}`;
     }
 
     case CrudOperation.Update: {

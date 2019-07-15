@@ -45,38 +45,40 @@ function createReducer(options: CrudOptions): Rule[] {
       })
     );
 
-    rules.push(
-      reducer({
-        actionName: `Get${entity.name}s`,
-        propsToUpdate:
-          `${entityPropertyName}s:[]:${entityType}[],` +
-          `${entityPropertyName}sLoading:true,` +
-          `${entityPropertyName}sLoadError:null:HttpErrorResponse|null`,
-        selectors: true,
-        stateDir: statePath,
-        skipFormat: true
-      }),
-      reducer({
-        actionName: `Get${entity.name}sFail`,
-        propsToUpdate:
-          `${entityPropertyName}s:[]:${entityType}[],` +
-          `${entityPropertyName}sLoading:false,` +
-          `${entityPropertyName}sLoadError:action.payload:HttpErrorResponse|null`,
-        selectors: false,
-        stateDir: statePath,
-        skipFormat: true
-      }),
-      reducer({
-        actionName: `Get${entity.name}sSuccess`,
-        propsToUpdate:
-          `${entityPropertyName}s:action.payload:${entityType}[],` +
-          `${entityPropertyName}sLoading:false,` +
-          `${entityPropertyName}sLoadError:null:HttpErrorResponse|null`,
-        selectors: false,
-        stateDir: statePath,
-        skipFormat: true
-      })
-    );
+    if (options.collection) {
+      rules.push(
+        reducer({
+          actionName: `Get${entity.name}Collection`,
+          propsToUpdate:
+            `${entityPropertyName}Collection:[]:${entityType}[],` +
+            `${entityPropertyName}CollectionLoading:true,` +
+            `${entityPropertyName}CollectionLoadError:null:HttpErrorResponse|null`,
+          selectors: true,
+          stateDir: statePath,
+          skipFormat: true
+        }),
+        reducer({
+          actionName: `Get${entity.name}CollectionFail`,
+          propsToUpdate:
+            `${entityPropertyName}Collection:[]:${entityType}[],` +
+            `${entityPropertyName}CollectionLoading:false,` +
+            `${entityPropertyName}CollectionLoadError:action.payload:HttpErrorResponse|null`,
+          selectors: false,
+          stateDir: statePath,
+          skipFormat: true
+        }),
+        reducer({
+          actionName: `Get${entity.name}CollectionSuccess`,
+          propsToUpdate:
+            `${entityPropertyName}Collection:action.payload:${entityType}[],` +
+            `${entityPropertyName}CollectionLoading:false,` +
+            `${entityPropertyName}CollectionLoadError:null:HttpErrorResponse|null`,
+          selectors: false,
+          stateDir: statePath,
+          skipFormat: true
+        })
+      );
+    }
   }
 
   if (toGenerate.create) {
@@ -102,7 +104,9 @@ function createReducer(options: CrudOptions): Rule[] {
       reducer({
         actionName: `Create${entity.name}Success`,
         propsToUpdate:
-          `${entityPropertyName}s:state.${entityPropertyName}s.concat(action.payload):${entityType}[],` +
+          (options.collection
+            ? `${entityPropertyName}Collection:state.${entityPropertyName}Collection.concat(action.payload):${entityType}[],`
+            : '') +
           `${entityPropertyName}Creating:false,` +
           `${entityPropertyName}CreateError:null:HttpErrorResponse|null`,
         selectors: false,
@@ -135,7 +139,9 @@ function createReducer(options: CrudOptions): Rule[] {
       reducer({
         actionName: `Update${entity.name}Success`,
         propsToUpdate:
-          `${entityPropertyName}s:state.${entityPropertyName}s.map(e => e.id === action.payload.id ? action.payload \\: e):${entityType}[],` +
+          (options.collection
+            ? `${entityPropertyName}Collection:state.${entityPropertyName}Collection.map(e => e.id === action.payload.id ? action.payload \\: e):${entityType}[],`
+            : '') +
           `${entityPropertyName}Updating:false,` +
           `${entityPropertyName}UpdateError:null:HttpErrorResponse|null`,
         selectors: false,
@@ -168,7 +174,9 @@ function createReducer(options: CrudOptions): Rule[] {
       reducer({
         actionName: `Remove${entity.name}Success`,
         propsToUpdate:
-          `${entityPropertyName}s:state.${entityPropertyName}s.filter(e => e.id !== action.payload.id):${entityType}[],` +
+          (options.collection
+            ? `${entityPropertyName}Collection:state.${entityPropertyName}Collection.filter(e => e.id !== action.payload.id):${entityType}[],`
+            : '') +
           `${entityPropertyName}Removing:false,` +
           `${entityPropertyName}RemoveError:null:HttpErrorResponse|null`,
         selectors: false,
