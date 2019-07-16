@@ -95,7 +95,7 @@ function createTestUpdateSuccess(
     )
     .join('\n');
   expects += `\nexpect(statesEqual(result, state, [${statePropertiesStringList}])).toBeTruthy()`;
-  const prop = toPropertyName(actionName.slice(6, -7) + 's');
+  const prop = toPropertyName(actionName.slice(6, -7) + 'Collection');
   return `
     describe('${actionName}', () => {
       it('should set ${statePropertiesList} and do not modify other state properties', () => {
@@ -128,7 +128,7 @@ function createTestRemoveSuccess(
     )
     .join('\n');
   expects += `\nexpect(statesEqual(result, state, [${statePropertiesStringList}])).toBeTruthy()`;
-  const prop = toPropertyName(actionName.slice(6, -7) + 's');
+  const prop = toPropertyName(actionName.slice(6, -7) + 'Collection');
   return `
     describe('${actionName}', () => {
       it('should set ${statePropertiesList} and do not modify other state properties', () => {
