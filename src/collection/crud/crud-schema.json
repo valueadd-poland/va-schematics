@@ -31,9 +31,18 @@
       }
     },
     "operation": {
-      "type": "string",
-      "description": "Crud operation; available: create, read, update, delete",
-      "x-prompt": "What type of the operations should be added (c - create, r - read, u - update, d - delete)?"
+      "type": "array",
+      "description": "Specifies which operation to implement.",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      },
+      "x-prompt": {
+        "message": "Which operations would you like to implement?",
+        "type": "list",
+        "multiselect": true,
+        "items": ["Create", "Read", "ReadCollection", "Update", "Delete"]
+      }
     },
     "stateDir": {
       "type": "string",
@@ -63,12 +72,6 @@
       "type": "string",
       "description": "Add map operator to response pipe.",
       "x-prompt": "What is response object path to map?"
-    },
-    "collection": {
-      "type": "boolean",
-      "default": false,
-      "description": "Generate collection fetching in READ operation.",
-      "x-prompt": "Shall generate actions for fetching collection of entities?"
     }
   }
 }

@@ -159,16 +159,16 @@ function createEffectsSpec(host: Tree, options: CrudOptions): Change[] {
         getEffectSpecTemplate(options, `Get${entity.name}`)
       )
     );
+  }
 
-    if (options.collection) {
-      changes.push(
-        new InsertChange(
-          effectsFilePath,
-          describeFnSecondArgument.getEnd() - 1,
-          getEffectSpecTemplate(options, `Get${entity.name}Collection`, false)
-        )
-      );
-    }
+  if (toGenerate.readCollection) {
+    changes.push(
+      new InsertChange(
+        effectsFilePath,
+        describeFnSecondArgument.getEnd() - 1,
+        getEffectSpecTemplate(options, `Get${entity.name}Collection`, true)
+      )
+    );
   }
 
   if (toGenerate.create) {
@@ -218,16 +218,16 @@ function createEffects(host: Tree, options: CrudOptions): Change[] {
         getEffectFetchTemplate(options, `Get${entity.name}`)
       )
     );
+  }
 
-    if (options.collection) {
-      changes.push(
-        new InsertChange(
-          effectsFilePath,
-          classBody.getStart(),
-          getEffectFetchTemplate(options, `Get${entity.name}Collection`, false)
-        )
-      );
-    }
+  if (toGenerate.readCollection) {
+    changes.push(
+      new InsertChange(
+        effectsFilePath,
+        classBody.getStart(),
+        getEffectFetchTemplate(options, `Get${entity.name}Collection`)
+      )
+    );
   }
 
   if (toGenerate.create) {

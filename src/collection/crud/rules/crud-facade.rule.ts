@@ -33,26 +33,6 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
   const facadeClassBody = findClassBodyInFile(host, stateDir.facade);
 
   if (toGenerate.read) {
-    if (options.collection) {
-      selectorChanges.push(
-        new InsertChange(
-          stateDir.facade,
-          facadeClassBody.getStart(),
-          getSelectorTemplate(`${entityPropertyName}Collection`, facade.queryName)
-        ),
-        new InsertChange(
-          stateDir.facade,
-          facadeClassBody.getStart(),
-          getSelectorTemplate(`${entityPropertyName}CollectionLoading`, facade.queryName)
-        ),
-        new InsertChange(
-          stateDir.facade,
-          facadeClassBody.getStart(),
-          getSelectorTemplate(`${entityPropertyName}CollectionLoadError`, facade.queryName)
-        )
-      );
-    }
-
     selectorChanges.push(
       new InsertChange(
         stateDir.facade,
@@ -82,16 +62,38 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
         )
       )
     );
+  }
 
-    if (options.collection) {
-      methodsChanges.push(
-        new InsertChange(
-          stateDir.facade,
-          facadeClassBody.getEnd(),
-          getMethodTemplate(actionsNamespace, `Get${entity.name}Collection`)
+  if (toGenerate.readCollection) {
+    selectorChanges.push(
+      new InsertChange(
+        stateDir.facade,
+        facadeClassBody.getStart(),
+        getSelectorTemplate(`${entityPropertyName}Collection`, facade.queryName)
+      ),
+      new InsertChange(
+        stateDir.facade,
+        facadeClassBody.getStart(),
+        getSelectorTemplate(`${entityPropertyName}CollectionLoading`, facade.queryName)
+      ),
+      new InsertChange(
+        stateDir.facade,
+        facadeClassBody.getStart(),
+        getSelectorTemplate(`${entityPropertyName}CollectionLoadError`, facade.queryName)
+      )
+    );
+
+    methodsChanges.push(
+      new InsertChange(
+        stateDir.facade,
+        facadeClassBody.getEnd(),
+        getMethodTemplate(
+          actionsNamespace,
+          `Get${entity.name}Collection`,
+          getRequestPayloadClass(`Get${entity.name}Collection`)
         )
-      );
-    }
+      )
+    );
   }
 
   if (toGenerate.create) {
@@ -190,6 +192,10 @@ export function crudFacade(options: CrudOptions): Rule {
 
     if (options.toGenerate.read) {
       const type = getRequestPayloadClass(`Get${options.entity.name}`);
+      insertTypeImport(host, options.stateDir.facade, type);
+    }
+    if (options.toGenerate.readCollection) {
+      const type = getRequestPayloadClass(`Get${options.entity.name}Collection`);
       insertTypeImport(host, options.stateDir.facade, type);
     }
     if (options.toGenerate.create) {

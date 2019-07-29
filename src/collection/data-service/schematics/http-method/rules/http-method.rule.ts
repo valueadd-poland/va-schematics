@@ -1,9 +1,9 @@
 import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
-import { NoopChange } from '@schematics/angular/utility/change';
 import { insert, insertImport } from '../../../../../utils/ast.utils';
 import { insertMethod, insertPropertyToDictionaryField } from '../../../../../utils/class.utils';
 import { insertConstructorArguments } from '../../../../../utils/constructor.utils';
 import { insertTypeImport } from '../../../../../utils/import.utils';
+import { toFileName } from '../../../../../utils/name.utils';
 import { parseTypedProperties } from '../../../../../utils/options-parsing.utils';
 import { readIntoSourceFile } from '../../../../../utils/ts.utils';
 import { config } from '../../../../config';
@@ -21,7 +21,8 @@ function httpMethodBodyTemplate(options: Options): string {
   }`;
 
   switch (operation) {
-    case CrudOperation.Read: {
+    case CrudOperation.Read:
+    case CrudOperation.ReadCollection: {
       return `
           return this.http.get<${httpResponse}>(this.endpoints.${methodName})${pipe};
         `;
@@ -65,14 +66,12 @@ export function httpMethod(options: Options): Rule {
       insertImport(sourceFile, options.dataService, 'Observable', 'rxjs'),
       insertImport(sourceFile, options.dataService, 'HttpClient', '@angular/common/http'),
       insertImport(sourceFile, options.dataService, 'map', 'rxjs/operators'),
-      options.collection
-        ? new NoopChange()
-        : insertImport(
-            sourceFile,
-            options.dataService,
-            getRequestPayloadClass(options.methodName),
-            '../resources/request-payloads'
-          )
+      insertImport(
+        sourceFile,
+        options.dataService,
+        getRequestPayloadClass(options.methodName),
+        `../resources/request-payloads/${toFileName(options.methodName)}.request-payload`
+      )
     ]);
     insertTypeImport(host, options.dataService, options.entity);
     importMethodTypes(host, options, options.dataService);

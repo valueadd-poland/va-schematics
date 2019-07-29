@@ -56,7 +56,7 @@ describe('crud', () => {
       dataService: '/libs/data-access-test/src/lib/services/test-data.service.ts',
       actionsPrefix: 'Test',
       stateDir: '/libs/data-access-test/src/lib/+state',
-      operation: 'crud',
+      operation: ['Read', 'ReadCollection', 'Create', 'Update', 'Delete'],
       mapResponse: 'data',
       responseType: 'ApiResponse<TestModel>'
     };

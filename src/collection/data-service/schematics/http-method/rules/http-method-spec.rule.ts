@@ -140,7 +140,8 @@ function getTestTemplate(options: DataServiceHttpMethodSchema): string {
       break;
     }
 
-    case CrudOperation.Read: {
+    case CrudOperation.Read:
+    case CrudOperation.ReadCollection: {
       httpMethod = 'GET';
       break;
     }

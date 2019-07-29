@@ -20,7 +20,7 @@ export type Options = {
 
 function parseSchema(schema: DataServiceHttpMethodSchema): Options {
   const collection = schema.collection || false;
-  const methodName = getDefaultCrudMethodName(schema.operation, schema.entity, collection);
+  const methodName = getDefaultCrudMethodName(schema.operation, schema.entity);
   const methodProperties = getDefaultCrudMethodProperties(methodName, schema.operation, collection);
 
   return {
@@ -52,16 +52,14 @@ export function dataServiceHttpMethod(options: DataServiceHttpMethodSchema): Rul
 
     const rules: Rule[] = [httpMethod(parsedOptions), httpMethodSpec(parsedOptions)];
 
-    if (!parsedOptions.collection) {
-      rules.push(
-        createRequestPayload(
-          parsedOptions.operation,
-          parsedOptions.dataService,
-          parsedOptions.methodName,
-          parsedOptions.entity
-        )
-      );
-    }
+    rules.push(
+      createRequestPayload(
+        parsedOptions.operation,
+        parsedOptions.dataService,
+        parsedOptions.methodName,
+        parsedOptions.entity
+      )
+    );
 
     return chain([...rules, formatFiles({ skipFormat: parsedOptions.skipFormat })])(host, context);
   };

@@ -45,18 +45,18 @@ export function getDefaultCrudMethodReturnType(entity: string, collection: boole
   return collection ? `Observable<${entity}[]>` : `Observable<${entity}>`;
 }
 
-export function getDefaultCrudMethodName(
-  operation: CrudOperation,
-  entity: string,
-  collection: boolean
-): string {
+export function getDefaultCrudMethodName(operation: CrudOperation, entity: string): string {
   switch (operation) {
     case CrudOperation.Create: {
       return `create${entity}`;
     }
 
     case CrudOperation.Read: {
-      return collection ? `get${entity}Collection` : `get${entity}`;
+      return `get${entity}`;
+    }
+
+    case CrudOperation.ReadCollection: {
+      return `get${entity}Collection`;
     }
 
     case CrudOperation.Update: {

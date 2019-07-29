@@ -1,6 +1,7 @@
 export enum CrudOperation {
   Create = 'create',
   Read = 'read',
+  ReadCollection = 'readCollection',
   Update = 'update',
   Delete = 'delete'
 }

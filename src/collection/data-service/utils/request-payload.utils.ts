@@ -17,12 +17,3 @@ export function getRequestPayloadPath(dataService: string, requestPayload: strin
     `${dataServiceParts.join('/')}/resources/request-payloads/${requestPayloadFile}`
   );
 }
-
-export function getRequestPayloadsBarrelPath(dataService: string): string {
-  return normalize(
-    dataService
-      .split('/')
-      .slice(0, -2)
-      .join('/') + '/resources/request-payloads/index.ts'
-  );
-}

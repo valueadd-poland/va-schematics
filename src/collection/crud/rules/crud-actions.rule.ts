@@ -34,32 +34,32 @@ function createActionRules(options: CrudOptions): Rule[] {
         skipFormat: true
       })
     );
+  }
 
-    if (options.collection) {
-      rules.push(
-        action({
-          payload: '',
-          name: `Get${entity.name}Collection`,
-          prefix: actionPrefix,
-          stateDir: statePath,
-          skipFormat: true
-        }),
-        action({
-          payload: 'HttpErrorResponse',
-          name: `Get${entity.name}CollectionFail`,
-          prefix: actionPrefix,
-          stateDir: statePath,
-          skipFormat: true
-        }),
-        action({
-          payload: `${entity.name}[]`,
-          name: `Get${entity.name}CollectionSuccess`,
-          prefix: actionPrefix,
-          stateDir: statePath,
-          skipFormat: true
-        })
-      );
-    }
+  if (toGenerate.readCollection) {
+    rules.push(
+      action({
+        payload: getRequestPayloadClass(`Get${entity.name}Collection`),
+        name: `Get${entity.name}Collection`,
+        prefix: actionPrefix,
+        stateDir: statePath,
+        skipFormat: true
+      }),
+      action({
+        payload: 'HttpErrorResponse',
+        name: `Get${entity.name}CollectionFail`,
+        prefix: actionPrefix,
+        stateDir: statePath,
+        skipFormat: true
+      }),
+      action({
+        payload: `${entity.name}[]`,
+        name: `Get${entity.name}CollectionSuccess`,
+        prefix: actionPrefix,
+        stateDir: statePath,
+        skipFormat: true
+      })
+    );
   }
 
   if (toGenerate.create) {

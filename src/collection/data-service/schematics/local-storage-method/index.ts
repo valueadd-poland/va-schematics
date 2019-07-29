@@ -35,9 +35,15 @@ function localStorageMethodBodyTemplate(options: Options): string {
   switch (operation) {
     case CrudOperation.Read: {
       return `
-          return LocalStorageClient.${
-            collection ? 'getAll' : 'get'
-          }(this.collections.${entityPropertyName}${
+          return LocalStorageClient.get(this.collections.${entityPropertyName}${
+        methodProperties.length ? ', ' + methodProperties[0].name + mapProperty : ''
+      });
+        `;
+    }
+
+    case CrudOperation.ReadCollection: {
+      return `
+          return LocalStorageClient.getAll(this.collections.${entityPropertyName}${
         methodProperties.length ? ', ' + methodProperties[0].name + mapProperty : ''
       });
         `;
@@ -65,7 +71,7 @@ function localStorageMethodBodyTemplate(options: Options): string {
 
 function parseSchema(schema: DataServiceLocalStorageMethodSchema): Options {
   const collection = schema.collection || false;
-  const methodName = getDefaultCrudMethodName(schema.operation, schema.entity, collection);
+  const methodName = getDefaultCrudMethodName(schema.operation, schema.entity);
   const methodProperties = getDefaultCrudMethodProperties(methodName, schema.operation, collection);
 
   return {

@@ -31,7 +31,6 @@ import { crudReducer } from './rules/crud-reducer.rule';
 export interface CrudOptions {
   actionPrefix: string;
   actionsNamespace: string;
-  collection: boolean;
   dataService: {
     names: Names;
     path: string;
@@ -71,6 +70,7 @@ export interface CrudOptions {
   toGenerate: {
     create: boolean;
     read: boolean;
+    readCollection: boolean;
     update: boolean;
     delete: boolean;
   };
@@ -139,7 +139,6 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
 
   return {
     actionsNamespace: findNamespaceName(host, parsedStateDir.actions),
-    collection: options.collection || false,
     effects: {
       name: findClassNameInFile(host, parsedStateDir.effects)
     },
@@ -208,10 +207,11 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
     stateDir: parsedStateDir,
     statePartialName: partialStateName,
     toGenerate: {
-      create: operation.includes('c'),
-      read: operation.includes('r'),
-      update: operation.includes('u'),
-      delete: operation.includes('d')
+      create: operation.includes('Create'),
+      read: operation.includes('Read'),
+      readCollection: operation.includes('ReadCollection'),
+      update: operation.includes('Update'),
+      delete: operation.includes('Delete')
     },
     dataService: {
       names: names(findClassNameInFile(host, dataServicePath)),
