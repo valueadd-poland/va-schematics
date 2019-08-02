@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { NxModule, DataPersistence } from '@nrwl/nx';
+import { NxModule, DataPersistence } from '@nrwl/angular';
 import { cold, hot } from 'jasmine-marbles';
 import { <%= className %>Effects } from './<%= fileName %>.effects';
 

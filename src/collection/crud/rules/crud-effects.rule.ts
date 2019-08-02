@@ -60,9 +60,7 @@ function getEffectFetchTemplate(
   const payload = actionPayload ? 'action.payload' : '';
 
   return `@Effect()
-  ${actionNames.propertyName}$ = this.dp.fetch(${actionsNamespace}.${config.action.typesEnumName}.${
-    actionNames.className
-  }, {
+  ${actionNames.propertyName}$ = this.dp.fetch(${actionsNamespace}.${config.action.typesEnumName}.${actionNames.className}, {
     id: () => {},
     run: (action: ${actionsNamespace}.${actionNames.className}) => {
       return this.${options.dataService.names.propertyName}

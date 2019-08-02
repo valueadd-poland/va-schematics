@@ -22,7 +22,7 @@ import { getRequestPayloadClass } from '../../utils/request-payload.utils';
 import { DataServiceLocalStorageMethodSchema } from './data-service-local-storage-method-schema';
 
 export type Options = {
-  [P in keyof DataServiceLocalStorageMethodSchema]-?: DataServiceLocalStorageMethodSchema[P]
+  [P in keyof DataServiceLocalStorageMethodSchema]-?: DataServiceLocalStorageMethodSchema[P];
 } & {
   mapProperty: string;
 };

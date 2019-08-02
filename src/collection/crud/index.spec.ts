@@ -1,4 +1,4 @@
-import { VirtualTree } from '@angular-devkit/schematics';
+import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import { Schema as ClassSchema } from '@schematics/angular/class/schema';
 import { Schema as ServiceSchema } from '@schematics/angular/service/schema';
@@ -34,7 +34,7 @@ describe('crud', () => {
 
   beforeEach(async done => {
     runner = new SchematicTestRunner('schematics', collectionPath);
-    appTree = new UnitTestTree(new VirtualTree());
+    appTree = new UnitTestTree(Tree.empty());
     appTree = createEmptyWorkspace(appTree);
     appTree = createApp(appTree, 'myapp');
     appTree = createLib(appTree, 'data-access-test');

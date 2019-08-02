@@ -1,4 +1,4 @@
-import { Tree, VirtualTree } from '@angular-devkit/schematics';
+import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import { Schema as ClassSchema } from '@schematics/angular/class/schema';
 import { Schema as ServiceSchema } from '@schematics/angular/service/schema';
@@ -322,7 +322,7 @@ export async function createTestAppWithStore(): Promise<UnitTestTree> {
   };
 
   return new Promise<UnitTestTree>(async resolve => {
-    appTree = new UnitTestTree(new VirtualTree());
+    appTree = new UnitTestTree(Tree.empty());
     appTree = createEmptyWorkspace(appTree);
     appTree = createApp(appTree, 'testapp');
     appTree = createLib(appTree, 'testlib');

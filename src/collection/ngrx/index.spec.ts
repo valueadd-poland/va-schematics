@@ -1,4 +1,4 @@
-import { VirtualTree } from '@angular-devkit/schematics';
+import { Tree } from '@angular-devkit/schematics';
 import { UnitTestTree } from '@angular-devkit/schematics/testing';
 import { getFileContent } from '@schematics/angular/utility/test';
 import { createApp, createEmptyWorkspace, runSchematic } from '../../utils/testing.utils';
@@ -8,7 +8,7 @@ describe('ngrx', () => {
   let appTree: UnitTestTree;
 
   beforeEach(() => {
-    appTree = new UnitTestTree(new VirtualTree());
+    appTree = new UnitTestTree(Tree.empty());
     appTree = createEmptyWorkspace(appTree);
     appTree = createApp(appTree, 'myapp');
   });

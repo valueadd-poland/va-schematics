@@ -19,9 +19,7 @@ export function addActionClassToCollectiveType(
     );
     if (!typeDeclaration) {
       throw new Error(
-        `${config.action.collectiveTypeName} type declaration does not exist in '${
-          stateDir.actions
-        }'.`
+        `${config.action.collectiveTypeName} type declaration does not exist in '${stateDir.actions}'.`
       );
     }
 
