@@ -13,7 +13,7 @@ import { httpMethodSpec } from './rules/http-method-spec.rule';
 import { httpMethod } from './rules/http-method.rule';
 
 export type Options = {
-  [P in keyof DataServiceHttpMethodSchema]-?: DataServiceHttpMethodSchema[P]
+  [P in keyof DataServiceHttpMethodSchema]-?: DataServiceHttpMethodSchema[P];
 } & {
   methodPropertyMapping: string;
 };

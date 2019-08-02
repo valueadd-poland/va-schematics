@@ -1,4 +1,4 @@
-import { VirtualTree } from '@angular-devkit/schematics';
+import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { getSpecPath } from '../../../../utils/file-parsing.utils';
@@ -30,7 +30,7 @@ describe('data-service-empty-method', () => {
   beforeEach(() => {
     SchematicCache.getInstance().clearAll();
     runner = new SchematicTestRunner('va-schematics', collectionPath);
-    appTree = new UnitTestTree(new VirtualTree());
+    appTree = new UnitTestTree(Tree.empty());
     appTree = createEmptyWorkspace(appTree);
     appTree = createLib(appTree, libName);
     appTree = createServiceInLib(appTree, 'test-data', libName);

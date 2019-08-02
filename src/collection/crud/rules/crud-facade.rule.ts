@@ -9,9 +9,7 @@ import { CrudOptions } from '../index';
 
 function getSelectorTemplate(statePropertyName: string, queryName: string): string {
   const statePropertyNames = names(statePropertyName);
-  return `\n${statePropertyNames.propertyName}$ = this.store.pipe(select(${queryName}.get${
-    statePropertyNames.className
-  }));`;
+  return `\n${statePropertyNames.propertyName}$ = this.store.pipe(select(${queryName}.get${statePropertyNames.className}));`;
 }
 
 function getMethodTemplate(

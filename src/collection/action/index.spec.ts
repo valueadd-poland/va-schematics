@@ -1,4 +1,4 @@
-import { VirtualTree } from '@angular-devkit/schematics';
+import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import { Schema as ClassSchema } from '@schematics/angular/class/schema';
 import * as path from 'path';
@@ -26,7 +26,7 @@ describe('action', () => {
   let appTree: UnitTestTree;
 
   beforeEach(async done => {
-    appTree = new UnitTestTree(new VirtualTree());
+    appTree = new UnitTestTree(Tree.empty());
     appTree = createEmptyWorkspace(appTree);
     appTree = createApp(appTree, 'testapp');
     appTree = createLib(appTree, 'testlib');
