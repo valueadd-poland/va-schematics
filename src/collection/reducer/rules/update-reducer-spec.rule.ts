@@ -220,7 +220,7 @@ export function updateReducerSpec(
 
     const change = new InsertChange(stateDir.reducerSpec, describeBlock.getEnd() - 1, toAdd);
     insert(host, stateDir.reducerSpec, [change]);
-    insertCustomImport(host, stateDir.reducerSpec, 'statesEqual', '@valueadd/common');
+    insertCustomImport(host, stateDir.reducerSpec, 'statesEqual', '@valueadd/testing');
 
     return host;
   };
