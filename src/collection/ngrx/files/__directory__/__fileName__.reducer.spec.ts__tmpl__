@@ -9,7 +9,7 @@ describe('<%= className %> Reducer', () => {
     });
 
     describe('unknown action', () => {
-        it('should return the initial state', () => {
+        test('returns the initial state', () => {
             const action = {} as any;
             const result = <%= propertyName %>Reducer(state, action);
 

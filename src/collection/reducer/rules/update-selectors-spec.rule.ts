@@ -15,7 +15,7 @@ function generateSelectorSpecTemplate(
   featureKey: string,
   queryName: string
 ): string {
-  return `\nit('get${classify(prop.key)}() should return ${prop.key} value', () => {
+  return `\ntest('get${classify(prop.key)}() returns ${prop.key} value', () => {
       const result = ${queryName}.get${classify(prop.key)}(storeState);
 
       expect(result).toBe(storeState[${featureKey}].${prop.key});

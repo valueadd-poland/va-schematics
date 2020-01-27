@@ -58,7 +58,7 @@ describe('data-service-http-method', () => {
       expect(content).toContain(`import { HttpClient } from '@angular/common/http';`);
       expect(content).toContain(`import { map } from 'rxjs/operators';`);
       expect(content).toContain(
-        `import { CreateExampleModelRequestPayload } from '../resources/request-payloads';`
+        `import { CreateExampleModelRequestPayload } from '../resources/request-payloads/create-example-model.request-payload';`
       );
       expect(content).toContain(`import { ExampleModel, ApiResponse } from '../resources/models';`);
       expect(content).toContain(`readonly endpoints = {`);
@@ -102,7 +102,9 @@ describe('data-service-http-method', () => {
       const content = appTree.readContent(dataServiceSpecPath);
 
       expect(content).toContain(`describe('#createExampleModel', () => {`);
-      expect(content).toContain(`it('should be successful', () => {`);
+      expect(content).toContain(
+        `test('returns an observable of response data on success', () => {`
+      );
       expect(content).toContain(`const response = {data: {}} as any;`);
       expect(content).toContain(`service.createExampleModel({} as any).subscribe(res => {`);
       expect(content).toContain(`expect(res).toBe(response.data);`);
@@ -111,7 +113,7 @@ describe('data-service-http-method', () => {
       );
       expect(content).toContain(`expect(req.request.method).toBe('POST');`);
       expect(content).toContain(`req.flush(response);`);
-      expect(content).toContain(`it('should throw error', () => {`);
+      expect(content).toContain(`test('throws an error including response data on fail', () => {`);
       expect(content).toContain(`const response = {};`);
       expect(content).toContain(`service.createExampleModel({} as any).subscribe(`);
       expect(content).toContain(`() => {`);

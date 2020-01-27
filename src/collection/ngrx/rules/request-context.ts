@@ -16,7 +16,7 @@ export interface RequestContext {
 export function buildNameToNgrxFile(context: RequestContext, suffice: string): string {
   return path.join(
     context.moduleDir,
-    context.options!.directory || '',
+    context.options.directory || '',
     `${stringUtils.dasherize(context.featureName)}.${suffice}`
   );
 }

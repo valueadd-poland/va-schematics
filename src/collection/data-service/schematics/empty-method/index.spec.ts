@@ -90,12 +90,12 @@ describe('data-service-empty-method', () => {
       expect(content).toContain(`import { TestDataService } from './test-data.service';`);
       expect(content).toContain(`describe('TestDataService', () => {`);
       expect(content).toContain(`beforeEach(() => TestBed.configureTestingModule({}));`);
-      expect(content).toContain(`it('should be created', () => {`);
+      expect(content).toContain(`test('is created', () => {`);
       expect(content).toContain(`const service: TestDataService = TestBed.get(TestDataService);`);
       expect(content).toContain(`expect(service).toBeTruthy();`);
 
       expect(content).toContain(`describe('#emptyExampleMethod', () => {`);
-      expect(content).toContain(`it('should work', () => {`);
+      expect(content).toContain(`test('works', () => {`);
       expect(content).toContain(`expect(true).toBeTruthy();`);
 
       done();
