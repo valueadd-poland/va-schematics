@@ -24,7 +24,7 @@ export function addExportsToBarrel(options: NgrxSchema): Rule {
       const buffer = host.read(indexFilePath);
       if (!!buffer) {
         // AST to 'index.ts' barrel for the public API
-        const indexSource = buffer!.toString('utf-8');
+        const indexSource = buffer.toString('utf-8');
         const indexSourceFile = ts.createSourceFile(
           indexFilePath,
           indexSource,

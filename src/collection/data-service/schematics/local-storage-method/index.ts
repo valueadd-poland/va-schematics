@@ -28,7 +28,7 @@ export type Options = {
 };
 
 function localStorageMethodBodyTemplate(options: Options): string {
-  const { mapProperty, operation, collection, entity } = options;
+  const { mapProperty, operation, entity } = options;
   const entityPropertyName = toPropertyName(entity);
   const methodProperties = parseTypedProperties(options.methodProperties || '');
 

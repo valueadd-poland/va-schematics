@@ -34,7 +34,7 @@ function createTest(
 
   return `
     describe('${actionName}', () => {
-      it('should set ${statePropertiesList} and do not modify other state properties', () => {
+      test('sets ${statePropertiesList} and does not modify other state properties', () => {
          ${hasPayload ? 'const payload = {} as any;' : ''}
          const action = new ${actionsNamespace}.${actionName}(${hasPayload ? 'payload' : ''});
          const result = ${parsedReducerFile.reducerFunction.name!.getText()}(state, action);
@@ -66,7 +66,7 @@ function createTestCreateSuccess(
 
   return `
     describe('${actionName}', () => {
-      it('should set ${statePropertiesList} and do not modify other state properties', () => {
+      test('sets ${statePropertiesList} and does not modify other state properties', () => {
          ${hasPayload ? 'const payload = {} as any;' : ''}
          const action = new ${actionsNamespace}.${actionName}(${hasPayload ? 'payload' : ''});
          const result = ${parsedReducerFile.reducerFunction.name!.getText()}(state, action);
@@ -98,7 +98,7 @@ function createTestUpdateSuccess(
   const prop = toPropertyName(actionName.slice(6, -7) + 'Collection');
   return `
     describe('${actionName}', () => {
-      it('should set ${statePropertiesList} and do not modify other state properties', () => {
+      test('sets ${statePropertiesList} and does not modify other state properties', () => {
          state = { ...initialState, ${prop}: [{ id: '1', name: 'test' } as any] };
          ${hasPayload ? "const payload = {id: '1', name: 'test2'} as any;" : ''}
          const action = new ${actionsNamespace}.${actionName}(${hasPayload ? 'payload' : ''});
@@ -131,7 +131,7 @@ function createTestRemoveSuccess(
   const prop = toPropertyName(actionName.slice(6, -7) + 'Collection');
   return `
     describe('${actionName}', () => {
-      it('should set ${statePropertiesList} and do not modify other state properties', () => {
+      test('sets ${statePropertiesList} and does not modify other state properties', () => {
          state = { ...initialState, ${prop}: [{ id: '1', name: 'test' } as any] };
          ${hasPayload ? "const payload = {id: '1', name: 'test2'} as any;" : ''}
          const action = new ${actionsNamespace}.${actionName}(${hasPayload ? 'payload' : ''});

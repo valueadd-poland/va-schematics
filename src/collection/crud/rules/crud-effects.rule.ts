@@ -20,21 +20,23 @@ function getEffectSpecTemplate(
   const payload = actionPayload ? '{} as any' : '';
 
   return `\n\ndescribe('${actionNames.propertyName}$', () => {
-    it('should be successful', () => {
+    test('returns ${actionNames.className}Success action on success', () => {
       const payload = {} as any;
       const action = new ${actionsNamespace}.${actionNames.className}(${payload});
       const completion = new ${actionsNamespace}.${actionNames.className}Success(payload);
-
+      
       actions = hot('-a', {a: action});
       const response = cold('--b|', {b: payload});
       const expected = cold('---c', {c: completion});
-      ${dataService.names.propertyName}.${actionNames.propertyName}.and.returnValue(response);
-
+      ${dataService.names.propertyName}.${actionNames.propertyName}.mockReturnValue(response);
+      
+      expect(effects.${actionNames.propertyName}$).toSatisfyOnFlush(() => {
+        expect(${dataService.names.propertyName}.${actionNames.propertyName}).toHaveBeenCalled();
+      });
       expect(effects.${actionNames.propertyName}$).toBeObservable(expected);
-      expect(${dataService.names.propertyName}.${actionNames.propertyName}).toHaveBeenCalled();
     });
-
-    it('should fail', () => {
+    
+    test('returns ${actionNames.className}Fail action on fail', () => {
       const payload = {} as any;
       const action = new ${actionsNamespace}.${actionNames.className}(${payload});
       const completion = new ${actionsNamespace}.${actionNames.className}Fail(payload);
@@ -42,10 +44,12 @@ function getEffectSpecTemplate(
       actions = hot('-a', { a: action });
       const response = cold('-#', {}, payload);
       const expected = cold('--c', { c: completion });
-      ${dataService.names.propertyName}.${actionNames.propertyName}.and.returnValue(response);
+      ${dataService.names.propertyName}.${actionNames.propertyName}.mockReturnValue(response);
 
+      expect(effects.${actionNames.propertyName}$).toSatisfyOnFlush(() => {
+        expect(${dataService.names.propertyName}.${actionNames.propertyName}).toHaveBeenCalled();
+      });
       expect(effects.${actionNames.propertyName}$).toBeObservable(expected);
-      expect(${dataService.names.propertyName}.${actionNames.propertyName}).toHaveBeenCalled();
     });
   });`;
 }
@@ -123,16 +127,13 @@ function createEffectsSpec(host: Tree, options: CrudOptions): Change[] {
     },
     {
       name: dataService.names.propertyName,
-      type: `jasmine.SpyObj<${dataService.names.className}>`,
+      type: `jest.Mocked<${dataService.names.className}>`,
       config: {
         assign: dataService.names.className,
         metadataField: 'providers',
         value: `{
           provide: ${dataService.names.className},
-          useValue: jasmine.createSpyObj(
-            '${dataService.names.propertyName}',
-            getClassMethodsNames(${dataService.names.className})
-          )
+          useValue: createSpyObj(${dataService.names.className})
         }`
       }
     }
@@ -289,9 +290,9 @@ export function crudEffects(options: CrudOptions): Rule {
     insertTypeImport(host, stateDir.effectsSpec, actionsNamespace);
     insertTypeImport(host, stateDir.effectsSpec, dataService.names.className);
     insertTypeImport(host, stateDir.effectsSpec, `DataPersistence`);
-    insertCustomImport(host, stateDir.effectsSpec, 'hot', 'jasmine-marbles');
-    insertCustomImport(host, stateDir.effectsSpec, 'cold', 'jasmine-marbles');
-    insertCustomImport(host, stateDir.effectsSpec, 'getClassMethodsNames', '@valueadd/testing');
+    insertCustomImport(host, stateDir.effectsSpec, 'hot', 'jest-marbles');
+    insertCustomImport(host, stateDir.effectsSpec, 'cold', 'jest-marbles');
+    insertCustomImport(host, stateDir.effectsSpec, 'createSpyObj', 'jest-createspyobj');
 
     insert(host, stateDir.effects, createEffects(host, options));
     insert(host, stateDir.effectsSpec, createEffectsSpec(host, options));

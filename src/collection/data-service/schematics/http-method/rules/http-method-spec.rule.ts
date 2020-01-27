@@ -178,7 +178,7 @@ function getTestTemplate(options: DataServiceHttpMethodSchema): string {
 
   return `
   describe('#${methodName}', () => {
-    it('should be successful', () => {
+    test('returns an observable of response data on success', () => {
       const response = ${response} as any;
       
       service.${methodName}(${callProps}).subscribe(res => {
@@ -190,7 +190,7 @@ function getTestTemplate(options: DataServiceHttpMethodSchema): string {
       req.flush(response);
     });
 
-    it('should throw error', () => {
+    test('throws an error including response data on fail', () => {
       const response = {};
 
       service.${methodName}(${callProps}).subscribe(

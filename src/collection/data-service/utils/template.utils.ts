@@ -11,7 +11,7 @@ import { ${serviceName} } from '${servicePath}';
 describe('${serviceName}', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
-  it('should be created', () => {
+  test('is created', () => {
     const service: ${serviceName} = TestBed.get(${serviceName});
     expect(service).toBeTruthy();
   });

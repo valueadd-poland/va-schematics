@@ -10,7 +10,7 @@ import { DataServiceEmptyMethodSchema } from '../data-service-empty-method-schem
 function getMethodTestTemplate(options: DataServiceEmptyMethodSchema): string {
   return `
   describe('#${options.methodName}', () => {
-    it('should work', () => {
+    test('works', () => {
       expect(true).toBeTruthy();
     });
   });
