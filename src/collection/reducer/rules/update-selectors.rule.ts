@@ -71,11 +71,7 @@ export function updateSelectors(
   return (host: Tree) => {
     const stateProperties = parsePropsToUpdate(options.propsToUpdate);
 
-    const changes = createSelector(
-      selectorsSourceFile,
-      stateDir.selectors,
-      stateProperties
-    );
+    const changes = createSelector(selectorsSourceFile, stateDir.selectors, stateProperties);
 
     insert(host, stateDir.selectors, changes);
 

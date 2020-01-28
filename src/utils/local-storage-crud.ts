@@ -29,7 +29,10 @@ export class LocalStorageCrud {
 
   remove(collection: string, id: string): Observable<void> {
     const entities = this.getCollection(collection);
-    this.setCollection(collection, entities.filter(entity => entity.id !== id));
+    this.setCollection(
+      collection,
+      entities.filter(entity => entity.id !== id)
+    );
 
     return of();
   }
