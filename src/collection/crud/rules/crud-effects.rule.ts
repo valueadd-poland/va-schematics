@@ -24,16 +24,16 @@ function getEffectSpecTemplate(
       const payload = {} as any;
       const action = new ${actionsNamespace}.${actionNames.className}(${payload});
       const completion = new ${actionsNamespace}.${actionNames.className}Success(payload);
-      
+
       actions = hot('-a', {a: action});
       const response = cold('--b|', {b: payload});
       const expected = cold('---c', {c: completion});
       ${dataService.names.propertyName}.${actionNames.propertyName}.and.returnValue(response);
-      
+
       expect(effects.${actionNames.propertyName}$).toBeObservable(expected);
       expect(${dataService.names.propertyName}.${actionNames.propertyName}).toHaveBeenCalled();
     });
-    
+
     it('should fail', () => {
       const payload = {} as any;
       const action = new ${actionsNamespace}.${actionNames.className}(${payload});
@@ -60,7 +60,9 @@ function getEffectFetchTemplate(
   const payload = actionPayload ? 'action.payload' : '';
 
   return `@Effect()
-  ${actionNames.propertyName}$ = this.dp.fetch(${actionsNamespace}.${config.action.typesEnumName}.${actionNames.className}, {
+  ${actionNames.propertyName}$ = this.dp.fetch(${actionsNamespace}.${config.action.typesEnumName}.${
+    actionNames.className
+  }, {
     id: () => {},
     run: (action: ${actionsNamespace}.${actionNames.className}) => {
       return this.${options.dataService.names.propertyName}
