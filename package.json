@@ -1,5 +1,5 @@
 {
-  "name": "va-schematics",
+  "name": "@valueadd/schematics",
   "version": "0.0.0",
   "description": "ValueAdd schematics",
   "scripts": {
