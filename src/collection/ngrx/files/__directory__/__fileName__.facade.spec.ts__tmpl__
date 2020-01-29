@@ -1,45 +1,42 @@
 import { NgModule } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { readFirst } from '@nrwl/angular/testing';
-import { EffectsModule } from '@ngrx/effects';
-import { StoreModule } from '@ngrx/store';
+import { provideMockActions } from '@ngrx/effects/testing';
+import { Store } from '@ngrx/store';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { NxModule } from '@nrwl/angular';
-import { <%= className %>Effects } from './<%= fileName %>.effects';
+import { Observable } from 'rxjs';
 import { <%= className %>Facade } from './<%= fileName %>.facade';
-import {
-  <%= className %>State,
-  initialState,
-  <%= propertyName %>Reducer
-} from './<%= fileName %>.reducer';
 
 describe('<%= className %>Facade', () => {
+  let actions: Observable<any>;
   let facade: <%= className %>Facade;
+  let store: jest.Mocked<MockStore<{}>>;
 
   describe('used in NgModule', () => {
 
     beforeEach(() => {
       @NgModule({
-        imports: [
-          StoreModule.forFeature('<%= propertyName %>', <%= propertyName %>Reducer, { initialState }),
-          EffectsModule.forFeature([<%= className %>Effects])
-        ],
-        providers: [<%= className %>Facade]
+        imports: [],
+        providers: [
+          <%= className %>Facade,
+          provideMockStore(),
+          provideMockActions(() => actions)
+        ]
       })
       class CustomFeatureModule {}
 
       @NgModule({
         imports: [
           NxModule.forRoot(),
-          StoreModule.forRoot({}),
-          EffectsModule.forRoot([]),
           CustomFeatureModule,
         ]
       })
       class RootModule {}
-      TestBed.configureTestingModule({ imports: [RootModule] });
 
+      TestBed.configureTestingModule({ imports: [RootModule] });
       facade = TestBed.get(<%= className %>Facade);
+      store = TestBed.get(Store);
+      jest.spyOn(store, 'dispatch');
     });
   });
-
 });
