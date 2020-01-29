@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://patryk.zielinski93.github.com/valueadd-poland/va-schematics/compare/v1.0.0...v2.0.0) (2020-01-29)
+
+
+### Features
+
+* **project:** use Jest in generated tests ([a5ec783](https://patryk.zielinski93.github.com/valueadd-poland/va-schematics/commit/a5ec783e5818493d4bd9015f4736bf183801c78e))
+
 ## 1.0.0 (2020-01-28)
 
 
