@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.1](https://patryk.zielinski93.github.com/valueadd-poland/va-schematics/compare/v2.0.0...v2.0.1) (2020-03-27)
+
+
+### Bug Fixes
+
+* **deps:** typescript dependency ([083ca73](https://patryk.zielinski93.github.com/valueadd-poland/va-schematics/commit/083ca7310e8ddd6885b46a351adc248b00782f84))
+
 ## [2.0.0](https://patryk.zielinski93.github.com/valueadd-poland/va-schematics/compare/v1.0.0...v2.0.0) (2020-01-29)
 
 
