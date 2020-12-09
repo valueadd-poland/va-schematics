@@ -10,6 +10,7 @@ export interface VariableDeclaration {
     metadataField: 'providers' | 'declarations' | 'imports' | 'schemas' | 'aotSummaries';
     value: string;
     assign?: string;
+    assignWithTypeCast?: boolean;
   };
   name: string;
   type: string;
@@ -82,14 +83,16 @@ export function configureTestingModule(
       if (
         assign &&
         !binaryExpressions.find(n =>
-          formatToCompare(n.getText()).includes(`TestBed.get(${assign})`)
+          formatToCompare(n.getText()).includes(`TestBed.inject(${assign})`)
         )
       ) {
         propertyAssigmentChanges.push(
           new InsertChange(
             filePath,
             beforeEachFnArgument.getEnd() - 1,
-            `${variable.name} = TestBed.get(${variable.config.assign});`
+            `${variable.name} = TestBed.inject(${variable.config.assign})${
+              variable.config.assignWithTypeCast ? ' as ' + variable.type : ''
+            };`
           )
         );
       }

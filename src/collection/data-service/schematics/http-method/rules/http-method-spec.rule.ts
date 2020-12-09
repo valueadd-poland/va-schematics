@@ -87,15 +87,19 @@ function addTestBedConfiguration(
   const beforeEachText = beforeEach.getText();
   const beforeFn = moduleDef.parent.parent as ts.ArrowFunction;
 
-  if (!beforeEachText.includes(`TestBed.get(${dataServiceName})`)) {
+  if (!beforeEachText.includes(`TestBed.inject(${dataServiceName})`)) {
     changes.push(
-      new InsertChange(specPath, beforeFn.end, `\n\nservice = TestBed.get(${dataServiceName});`)
+      new InsertChange(specPath, beforeFn.end, `\n\nservice = TestBed.inject(${dataServiceName});`)
     );
   }
 
-  if (!beforeEachText.includes(`TestBed.get(HttpTestingController)`)) {
+  if (!beforeEachText.includes(`TestBed.inject(HttpTestingController)`)) {
     changes.push(
-      new InsertChange(specPath, beforeFn.end, `\nhttpMock = TestBed.get(HttpTestingController);`)
+      new InsertChange(
+        specPath,
+        beforeFn.end,
+        `\nhttpMock = TestBed.inject(HttpTestingController);`
+      )
     );
   }
 
@@ -180,7 +184,7 @@ function getTestTemplate(options: DataServiceHttpMethodSchema): string {
   describe('#${methodName}', () => {
     test('returns an observable of response data on success', () => {
       const response = ${response} as any;
-      
+
       service.${methodName}(${callProps}).subscribe(res => {
         expect(res).toBe(response${responseMap ? '.' + responseMap : ''});
       });

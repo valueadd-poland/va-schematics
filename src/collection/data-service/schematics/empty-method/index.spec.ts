@@ -91,7 +91,9 @@ describe('data-service-empty-method', () => {
       expect(content).toContain(`describe('TestDataService', () => {`);
       expect(content).toContain(`beforeEach(() => TestBed.configureTestingModule({}));`);
       expect(content).toContain(`test('is created', () => {`);
-      expect(content).toContain(`const service: TestDataService = TestBed.get(TestDataService);`);
+      expect(content).toContain(
+        `const service: TestDataService = TestBed.inject(TestDataService);`
+      );
       expect(content).toContain(`expect(service).toBeTruthy();`);
 
       expect(content).toContain(`describe('#emptyExampleMethod', () => {`);
