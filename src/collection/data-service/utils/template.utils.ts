@@ -12,7 +12,7 @@ describe('${serviceName}', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   test('is created', () => {
-    const service: ${serviceName} = TestBed.get(${serviceName});
+    const service: ${serviceName} = TestBed.inject(${serviceName});
     expect(service).toBeTruthy();
   });
 });

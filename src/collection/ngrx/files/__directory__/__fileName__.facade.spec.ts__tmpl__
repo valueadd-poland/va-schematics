@@ -10,7 +10,7 @@ import { <%= className %>Facade } from './<%= fileName %>.facade';
 describe('<%= className %>Facade', () => {
   let actions: Observable<any>;
   let facade: <%= className %>Facade;
-  let store: jest.Mocked<MockStore<{}>>;
+  let store: MockStore;
 
   describe('used in NgModule', () => {
 
@@ -34,8 +34,8 @@ describe('<%= className %>Facade', () => {
       class RootModule {}
 
       TestBed.configureTestingModule({ imports: [RootModule] });
-      facade = TestBed.get(<%= className %>Facade);
-      store = TestBed.get(Store);
+      facade = TestBed.inject(<%= className %>Facade);
+      store = TestBed.inject(MockStore);
       jest.spyOn(store, 'dispatch');
     });
   });

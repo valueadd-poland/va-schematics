@@ -24,18 +24,18 @@ function getEffectSpecTemplate(
       const payload = {} as any;
       const action = new ${actionsNamespace}.${actionNames.className}(${payload});
       const completion = new ${actionsNamespace}.${actionNames.className}Success(payload);
-      
+
       actions = hot('-a', {a: action});
       const response = cold('--b|', {b: payload});
       const expected = cold('---c', {c: completion});
       ${dataService.names.propertyName}.${actionNames.propertyName}.mockReturnValue(response);
-      
+
       expect(effects.${actionNames.propertyName}$).toSatisfyOnFlush(() => {
         expect(${dataService.names.propertyName}.${actionNames.propertyName}).toHaveBeenCalled();
       });
       expect(effects.${actionNames.propertyName}$).toBeObservable(expected);
     });
-    
+
     test('returns ${actionNames.className}Fail action on fail', () => {
       const payload = {} as any;
       const action = new ${actionsNamespace}.${actionNames.className}(${payload});
@@ -130,6 +130,7 @@ function createEffectsSpec(host: Tree, options: CrudOptions): Change[] {
       type: `jest.Mocked<${dataService.names.className}>`,
       config: {
         assign: dataService.names.className,
+        assignWithTypeCast: true,
         metadataField: 'providers',
         value: `{
           provide: ${dataService.names.className},
