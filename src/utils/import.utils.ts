@@ -41,9 +41,13 @@ export function findDeclarationFileByName(host: Tree, name: string): string[] {
   }
 
   if (!hostFiles) {
-    hostFiles = createFilesArrayFromDir(host.getDir('.')).filter(
-      f => !f.endsWith('spec.ts') && f.endsWith('.ts') && !f.startsWith('/node_modules')
-    );
+    hostFiles = createFilesArrayFromDir(
+      host.getDir('.'),
+      dirEntry =>
+        !dirEntry.path.startsWith('/node_modules') &&
+        !dirEntry.path.startsWith('/.') &&
+        !dirEntry.path.startsWith('/dist')
+    ).filter(f => !f.endsWith('spec.ts') && f.endsWith('.ts'));
     schematicCache.save('hostFiles', hostFiles);
   }
 

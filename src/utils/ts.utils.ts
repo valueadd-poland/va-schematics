@@ -25,14 +25,24 @@ export function showTree(node: ts.Node, indent: string = '    '): void {
   }
 }
 
-export function createFilesArrayFromDir(dir: DirEntry): string[] {
-  const dirFiles = dir.subfiles.map(subFile => normalize(`${dir.path}/${subFile}`));
+export function createFilesArrayFromDir(
+  dir: DirEntry,
+  dirFilterFn: (d: DirEntry) => boolean = () => true
+): string[] {
+  let files: string[] = [];
+  const directoriesToScan = [dir];
 
-  dir.subdirs.forEach(subDir => {
-    dirFiles.push(...createFilesArrayFromDir(dir.dir(subDir)));
-  });
+  while (directoriesToScan.length) {
+    const currentDir = directoriesToScan.shift() as DirEntry;
+    files = files.concat(
+      currentDir.subfiles.map(subFile => normalize(`${currentDir.path}/${subFile}`))
+    );
+    directoriesToScan.push(
+      ...currentDir.subdirs.map(subdir => currentDir.dir(subdir)).filter(dirFilterFn)
+    );
+  }
 
-  return dirFiles;
+  return files;
 }
 
 export function findDeclarationNodeByName<T extends ts.Node>(
