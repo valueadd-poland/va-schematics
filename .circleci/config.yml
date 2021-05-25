@@ -1,5 +1,5 @@
-var_1: &default_docker_image circleci/node:10.12
-var_2: &browsers_docker_image circleci/node:10.12-browsers
+var_1: &default_docker_image circleci/node:14.16.1
+var_2: &browsers_docker_image circleci/node:14.16.1-browsers
 var_3: &cache_key va-schematics-{{ checksum "package-lock.json" }}
 
 # Settings common to each job
@@ -67,7 +67,7 @@ jobs:
     <<: *defaults
     steps:
       - attach_workspace: *attach_options
-      - run: './node_modules/.bin/prettier src/**/*.{json,ts,html} --list-different'
+      - run: './node_modules/.bin/prettier src/**/*.{json,ts} --list-different'
       - run: npm run lint
 
   test:

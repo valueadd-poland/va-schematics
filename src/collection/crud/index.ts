@@ -20,7 +20,6 @@ import {
 } from '../../utils/ts.utils';
 import { DataServiceBackend } from '../data-service/data-service-schema';
 import { CrudSchema } from './crud-schema.interface';
-import { CrudOptions } from './index';
 import { crudActions } from './rules/crud-actions.rule';
 import { crudDataServiceMethods } from './rules/crud-data-service-methods.rule';
 import { crudEffects } from './rules/crud-effects.rule';

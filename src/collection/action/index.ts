@@ -7,6 +7,7 @@ import { ActionSchema } from './action-schema.interface';
 import { addActionClassDeclaration } from './rules/add-action-class-declaration.rule';
 import { addActionClassToCollectiveType } from './rules/add-action-class-to-collective-type.rule';
 import { addActionType } from './rules/add-action-type.rule';
+import { addActionCreator } from './rules/creators/add-action-creator.rule';
 
 // You don't have to export the function as default. You can also have more than one rule factory
 // per file.
@@ -30,14 +31,15 @@ export function action(options: ActionSchema): Rule {
       });
     }
 
-    rules.push(
-      ...[
-        addActionType(options, stateDir),
-        addActionClassDeclaration(options, stateDir),
-        addActionClassToCollectiveType(options, stateDir),
-        formatFiles({ skipFormat: !!options.skipFormat })
-      ]
-    );
+    const actionRules: Rule[] = options.creators
+      ? [addActionCreator(options, stateDir)]
+      : [
+          addActionType(options, stateDir),
+          addActionClassDeclaration(options, stateDir),
+          addActionClassToCollectiveType(options, stateDir)
+        ];
+
+    rules.push(...[...actionRules, formatFiles({ skipFormat: !!options.skipFormat })]);
 
     return chain(rules)(host, context);
   };

@@ -67,6 +67,26 @@ export function findDeclarationNodeByName<T extends ts.Node>(
   return null;
 }
 
+export function findDeclarationNodeBySyntaxKind<T extends ts.Node>(
+  node: ts.Node,
+  syntaxKind: ts.SyntaxKind
+): T | null {
+  if ((node as any).kind === syntaxKind) {
+    return node as T;
+  }
+
+  const children = node.getChildren();
+  for (let i = 0; i < children.length; i++) {
+    const foundNode = findDeclarationNodeBySyntaxKind(children[i], syntaxKind);
+
+    if (foundNode) {
+      return foundNode as T;
+    }
+  }
+
+  return null;
+}
+
 export function findDeclarationNodeByPartialName<T extends ts.Node>(
   node: ts.Node,
   name: string

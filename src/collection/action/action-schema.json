@@ -24,6 +24,13 @@
       "type": "string",
       "description": "Action's enum type prefix ('[__PREFIX__] Get Test').",
       "x-prompt": "What is the action's prefix?"
+    },
+    "creators": {
+      "type": "boolean",
+      "default": true,
+      "description": "Specifies whether to use creator functions for handling actions and reducers.",
+      "aliases": ["c"],
+      "x-prompt": "Do you want to use the create function?"
     }
   }
 }

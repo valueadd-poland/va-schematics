@@ -2,6 +2,7 @@ import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import { Schema as ClassSchema } from '@schematics/angular/class/schema';
 import * as path from 'path';
+import { classify } from '../../utils/string.utils';
 import { createApp, createEmptyWorkspace, createLib } from '../../utils/testing.utils';
 import { NgrxSchema } from '../ngrx/ngrx-schema.interface';
 import { ActionSchema } from './action-schema.interface';
@@ -40,7 +41,61 @@ describe('action', () => {
     done();
   });
 
-  it('create two actions', async done => {
+  it('create actions with old syntax', async done => {
+    const stateDirPath = '/libs/testlib/src/lib/+state';
+    const getTestsOpts: ActionSchema = {
+      name: 'GetTests',
+      stateDir: stateDirPath,
+      prefix: 'Test',
+      creators: false
+    };
+    const getTestOpts: ActionSchema = {
+      name: 'GetTest',
+      stateDir: stateDirPath,
+      prefix: 'Test',
+      payload: 'string',
+      creators: false
+    };
+    const updateTestOpts: ActionSchema = {
+      name: 'UpdateTest',
+      stateDir: stateDirPath,
+      prefix: 'Test',
+      payload: 'TestModel',
+      creators: false
+    };
+    const removeTestOpts: ActionSchema = {
+      name: 'RemoveTest',
+      stateDir: stateDirPath,
+      prefix: 'Test',
+      payload: 'TestModel',
+      creators: false
+    };
+
+    await runner.runSchematicAsync('action', getTestsOpts, appTree).toPromise();
+    await runner.runSchematicAsync('action', getTestOpts, appTree).toPromise();
+    await runner.runSchematicAsync('action', updateTestOpts, appTree).toPromise();
+    await runner.runSchematicAsync('action', removeTestOpts, appTree).toPromise();
+    const content = appTree.readContent('/libs/testlib/src/lib/+state/test.actions.ts');
+
+    expect(content).toContain(`GetTests = '[Test] Get Tests'`);
+    expect(content).toContain(`export class GetTests implements Action`);
+    expect(content).toContain(`readonly type = Types.GetTests;`);
+
+    expect(content).toContain(`import { TestModel } from '../resources/models/test-model'`);
+    expect(content).toContain(`UpdateTest = '[Test] Update Test'`);
+    expect(content).toContain(`export class UpdateTest implements Action`);
+    expect(content).toContain(`readonly type = Types.UpdateTest;`);
+    expect(content).toContain(`constructor(public payload: TestModel) {}`);
+
+    expect(content).toContain(
+      `export type CollectiveType = GetTests | GetTest | UpdateTest | RemoveTest`
+    );
+
+    // @console.log(appTree.readContent('/libs/testlib/src/lib/+state/test.actions.ts'));
+    done();
+  });
+
+  it('create actions with action creator', async done => {
     const stateDirPath = '/libs/testlib/src/lib/+state';
     const getTestsOpts: ActionSchema = {
       name: 'GetTests',
@@ -72,21 +127,49 @@ describe('action', () => {
     await runner.runSchematicAsync('action', removeTestOpts, appTree).toPromise();
     const content = appTree.readContent('/libs/testlib/src/lib/+state/test.actions.ts');
 
-    expect(content).toContain(`GetTests = '[Test] Get Tests'`);
-    expect(content).toContain(`export class GetTests implements Action`);
-    expect(content).toContain(`readonly type = Types.GetTests;`);
-
-    expect(content).toContain(`import { TestModel } from '../resources/models/test-model'`);
-    expect(content).toContain(`UpdateTest = '[Test] Update Test'`);
-    expect(content).toContain(`export class UpdateTest implements Action`);
-    expect(content).toContain(`readonly type = Types.UpdateTest;`);
-    expect(content).toContain(`constructor(public payload: TestModel) {}`);
-
-    expect(content).toContain(
-      `export type CollectiveType = GetTests | GetTest | UpdateTest | RemoveTest`
+    expect(content).toMatch(
+      new RegExp(
+        `export const ${getTestOpts.prefix.toLocaleLowerCase()}${classify(
+          getTestOpts.name
+        )} = createAction`
+      )
+    );
+    expect(content).toMatch(
+      new RegExp(
+        `'\\[${classify(getTestOpts.name)}] ${classify(getTestOpts.prefix)} ${classify(
+          getTestOpts.name
+        )}'`
+      )
+    );
+    expect(content).toMatch(
+      new RegExp(
+        `export const ${updateTestOpts.prefix.toLocaleLowerCase()}${classify(
+          updateTestOpts.name
+        )} = createAction`
+      )
+    );
+    expect(content).toMatch(
+      new RegExp(
+        `'\\[${classify(updateTestOpts.name)}] ${classify(updateTestOpts.prefix)} ${classify(
+          updateTestOpts.name
+        )}'`
+      )
+    );
+    expect(content).toMatch(
+      new RegExp(
+        `export const ${removeTestOpts.prefix.toLocaleLowerCase()}${classify(
+          removeTestOpts.name
+        )} = createAction`
+      )
+    );
+    expect(content).toMatch(
+      new RegExp(
+        `'\\[${classify(removeTestOpts.name)}] ${classify(removeTestOpts.prefix)} ${classify(
+          removeTestOpts.name
+        )}'`
+      )
     );
 
-    // @console.log(appTree.readContent('/libs/testlib/src/lib/+state/test.actions.ts'));
     done();
   });
 });
