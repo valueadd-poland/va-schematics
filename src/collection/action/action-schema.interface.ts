@@ -10,4 +10,9 @@ export interface ActionSchema {
   prefix: string;
   skipFormat?: boolean;
   stateDir: string;
+  /**
+   * Specifies whether to use creator functions for
+   * handling actions and reducers.
+   */
+  creators?: boolean;
 }

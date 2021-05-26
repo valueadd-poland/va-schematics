@@ -18,10 +18,7 @@ export function parseReducerFile(sourceFile: ts.SourceFile): ParsedReducerFile {
   const reducerFunction = nodes
     .filter(node => node.kind === ts.SyntaxKind.FunctionDeclaration)
     .filter(node =>
-      ((node as ts.FunctionDeclaration) as any).name
-        .getText()
-        .toLowerCase()
-        .includes('reducer')
+      (node as ts.FunctionDeclaration as any).name.getText().toLowerCase().includes('reducer')
     )[0];
   const stateInterface = nodes
     .filter(node => node.kind === ts.SyntaxKind.InterfaceDeclaration)

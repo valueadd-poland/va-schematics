@@ -218,9 +218,7 @@ export function insertAfterLastOccurrence(
   // sort() has a side effect, so make a copy so that we won't overwrite the parent's object.
   let lastItem = [...nodes].sort(nodesByPosition).pop();
   if (lastItem && syntaxKind) {
-    lastItem = findNodes(lastItem, syntaxKind)
-      .sort(nodesByPosition)
-      .pop();
+    lastItem = findNodes(lastItem, syntaxKind).sort(nodesByPosition).pop();
   }
   if (!lastItem && fallbackPos === undefined) {
     throw new Error(`tried to insert ${toInsert} as first occurence with no fallback position`);
@@ -388,7 +386,9 @@ export function _addSymbolToNgModuleMetadata(
     return [];
   }
   // Get all the children property assignment of object literals.
-  const matchingProperties: ts.ObjectLiteralElement[] = (node as ts.ObjectLiteralExpression).properties
+  const matchingProperties: ts.ObjectLiteralElement[] = (
+    node as ts.ObjectLiteralExpression
+  ).properties
     .filter(prop => prop.kind === ts.SyntaxKind.PropertyAssignment)
     // Filter out every fields that's not "metadataField". Also handles string literals
     // (but not expressions).
@@ -446,7 +446,7 @@ export function _addSymbolToNgModuleMetadata(
   }
 
   if (Array.isArray(node)) {
-    const nodeArray = (node as {}) as ts.Node[];
+    const nodeArray = node as {} as ts.Node[];
     const symbolsArray = nodeArray.map(n => n.getText());
     if (symbolsArray.includes(expression)) {
       return [];
@@ -676,7 +676,9 @@ export function addSymbolToObject(
     return [];
   }
   // Get all the children property assignment of object literals.
-  const matchingProperties: ts.ObjectLiteralElement[] = (node as ts.ObjectLiteralExpression).properties
+  const matchingProperties: ts.ObjectLiteralElement[] = (
+    node as ts.ObjectLiteralExpression
+  ).properties
     .filter(prop => prop.kind === ts.SyntaxKind.PropertyAssignment)
     // Filter out every fields that's not "metadataField". Also handles string literals
     // (but not expressions).
@@ -734,7 +736,7 @@ export function addSymbolToObject(
   }
 
   if (Array.isArray(node)) {
-    const nodeArray = (node as {}) as ts.Node[];
+    const nodeArray = node as {} as ts.Node[];
     const symbolsArray = nodeArray.map(n => formatToCompare(n.getText()));
     if (symbolsArray.includes(formatToCompare(expression))) {
       return [];
