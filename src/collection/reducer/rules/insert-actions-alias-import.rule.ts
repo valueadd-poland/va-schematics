@@ -4,18 +4,18 @@ import * as ts from 'typescript';
 import { insert, insertImport, isImported } from '../../../utils/ast.utils';
 import { StateFilePaths } from '../../../utils/options-parsing.utils';
 
-export function insertNamespaceImport(
+export function insertActionsAliasImport(
   reducerSourceFile: ts.SourceFile,
   stateDir: StateFilePaths,
-  actionsNamespace: string,
+  actionsImportAlias: string,
   isDefault = false
 ): Rule {
   return (host: Tree) => {
     const path = buildRelativePath(stateDir.reducer, stateDir.actions).slice(0, -3);
 
-    if (!isImported(reducerSourceFile, actionsNamespace, path)) {
+    if (!isImported(reducerSourceFile, actionsImportAlias, path)) {
       insert(host, stateDir.reducer, [
-        insertImport(reducerSourceFile, stateDir.reducer, actionsNamespace, path, isDefault)
+        insertImport(reducerSourceFile, stateDir.reducer, actionsImportAlias, path, isDefault)
       ]);
     }
 
