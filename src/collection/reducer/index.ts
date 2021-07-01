@@ -1,6 +1,6 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { parseReducerFile } from '../../utils/file-parsing.utils';
-import { findActionsNamespace } from '../../utils/naming.utils';
+import { createActionAliasName, createActionImportAlias } from '../../utils/naming.utils';
 import { parseStateDir } from '../../utils/options-parsing.utils';
 import { formatFiles } from '../../utils/rules/format-files';
 import { readIntoSourceFile } from '../../utils/ts.utils';
@@ -25,8 +25,7 @@ export function reducer(options: ReducerSchema): Rule {
     }
 
     const stateDir = parseStateDir(options.stateDir, host);
-    const actionsSourceFile = readIntoSourceFile(host, stateDir.actions);
-    const actionsNamespace = findActionsNamespace(actionsSourceFile);
+    const actionsNamespace = createActionAliasName(stateDir.actions);
     const reducerSourceFile = readIntoSourceFile(host, stateDir.reducer);
     const reducerSpecSourceFile = readIntoSourceFile(host, stateDir.reducerSpec);
     const selectorsSourceFile = readIntoSourceFile(host, stateDir.selectors);
@@ -34,7 +33,12 @@ export function reducer(options: ReducerSchema): Rule {
     const parsedReducerFile = parseReducerFile(reducerSourceFile);
 
     const rules: Rule[] = [
-      insertNamespaceImport(reducerSourceFile, stateDir, actionsNamespace),
+      insertNamespaceImport(
+        reducerSourceFile,
+        stateDir,
+        createActionImportAlias(stateDir.actions),
+        true
+      ),
       updateReducer(reducerSourceFile, parsedReducerFile, actionsNamespace, stateDir, options),
       updateReducerSpec(
         reducerSpecSourceFile,

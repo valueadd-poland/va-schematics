@@ -3,17 +3,14 @@ import { Change, InsertChange } from '@schematics/angular/utility/change';
 import * as ts from 'typescript';
 import { getSourceNodes, insert } from '../../../utils/ast.utils';
 import { names, toPropertyName } from '../../../utils/name.utils';
+import { createActionAliasName } from '../../../utils/naming.utils';
 import {
   parsePropsToUpdate,
   parseStateDir,
   StateProperty
 } from '../../../utils/options-parsing.utils';
 import { classify } from '../../../utils/string.utils';
-import {
-  findClassBodyInFile,
-  findNamespaceName,
-  readIntoSourceFile
-} from '../../../utils/ts.utils';
+import { findClassBodyInFile, readIntoSourceFile } from '../../../utils/ts.utils';
 import { ReducerSchema } from '../reducer-schema.interface';
 
 function getSelectorTemplate(prop: StateProperty, queryName: string): string {
@@ -36,7 +33,7 @@ function getMethodTemplate(
 export function updateFacade(options: ReducerSchema): Rule {
   return (host: Tree, context: SchematicContext) => {
     const stateDir = parseStateDir(options.stateDir, host);
-    const namespace = findNamespaceName(host, stateDir.actions);
+    const namespace = createActionAliasName(stateDir.actions);
     const stateProperties = parsePropsToUpdate(options.propsToUpdate);
     const facadeClass = findClassBodyInFile(host, stateDir.facade);
     const queryDeclarations = getSourceNodes(readIntoSourceFile(host, stateDir.selectors))

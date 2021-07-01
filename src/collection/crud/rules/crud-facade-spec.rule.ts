@@ -2,7 +2,7 @@ import { Rule, SchematicContext, SchematicsException, Tree } from '@angular-devk
 import { Change, InsertChange } from '@schematics/angular/utility/change';
 import { findDescribeBlockNode, insert } from '../../../utils/ast.utils';
 import { insertTypeImport } from '../../../utils/import.utils';
-import { names, toPropertyName } from '../../../utils/name.utils';
+import { names } from '../../../utils/name.utils';
 import { readIntoSourceFile } from '../../../utils/ts.utils';
 import { CrudOptions } from '../index';
 
@@ -12,16 +12,16 @@ function getMethodTestTemplate(
   method: string,
   methodPayload = true
 ): string {
-  const { actionsNamespace } = options;
+  const { actionsAliasName } = options;
   const actionNames = names(actionName);
 
   return `\n\ndescribe('#${method}', () => {
-    test('should dispatch ${actionsNamespace}.${actionNames.className} action', () => {
+    test('should dispatch ${actionsAliasName}.${actionNames.className} action', () => {
       ${methodPayload ? 'const payload = {} as any;' : ''}
-      const action = new ${actionsNamespace}.${actionNames.className}(${
+      const action = new ${actionsAliasName}.${actionNames.className}(${
     methodPayload ? 'payload' : ''
   });
-      
+
       facade.${method}(${methodPayload ? 'payload' : ''});
       expect(store.dispatch).toHaveBeenCalledWith(action);
     });
@@ -101,11 +101,11 @@ function createCrudFacadeSpec(host: Tree, options: CrudOptions): Change[] {
 
 export function crudFacadeSpec(options: CrudOptions): Rule {
   return (host: Tree, context: SchematicContext) => {
-    const { actionsNamespace, stateDir } = options;
+    const { actionsAliasName, stateDir } = options;
 
     insert(host, stateDir.facadeSpec, createCrudFacadeSpec(host, options));
 
-    insertTypeImport(host, stateDir.facadeSpec, actionsNamespace);
+    insertTypeImport(host, stateDir.facadeSpec, actionsAliasName);
 
     return host;
   };

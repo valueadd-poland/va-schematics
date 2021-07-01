@@ -10,12 +10,12 @@ import * as ts from 'typescript';
 import { findNode, findNodes } from '../../utils/ast.utils';
 import { findDeclarationFileByName } from '../../utils/import.utils';
 import { Names, names } from '../../utils/name.utils';
+import { createActionAliasName } from '../../utils/naming.utils';
 import { parseStateDir, StateFilePaths } from '../../utils/options-parsing.utils';
 import { formatFiles } from '../../utils/rules/format-files';
 import {
   findClassNameInFile,
   findDeclarationNodeByPartialName,
-  findNamespaceName,
   readIntoSourceFile
 } from '../../utils/ts.utils';
 import { DataServiceBackend } from '../data-service/data-service-schema';
@@ -29,7 +29,7 @@ import { crudReducer } from './rules/crud-reducer.rule';
 
 export interface CrudOptions {
   actionPrefix: string;
-  actionsNamespace: string;
+  actionsAliasName: string;
   dataService: {
     names: Names;
     path: string;
@@ -137,7 +137,7 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
   const deleteResponseType = responseTypeParts.find(rtp => rtp.startsWith('d:'));
 
   return {
-    actionsNamespace: findNamespaceName(host, parsedStateDir.actions),
+    actionsAliasName: createActionAliasName(parsedStateDir.actions),
     effects: {
       name: findClassNameInFile(host, parsedStateDir.effects)
     },

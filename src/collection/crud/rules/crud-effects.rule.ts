@@ -15,15 +15,15 @@ function getEffectSpecTemplate(
   actionName: string,
   actionPayload = true
 ): string {
-  const { actionsNamespace, dataService } = options;
+  const { actionsAliasName, dataService } = options;
   const actionNames = names(actionName);
   const payload = actionPayload ? '{} as any' : '';
 
   return `\n\ndescribe('${actionNames.propertyName}$', () => {
     test('returns ${actionNames.className}Success action on success', () => {
       const payload = {} as any;
-      const action = new ${actionsNamespace}.${actionNames.className}(${payload});
-      const completion = new ${actionsNamespace}.${actionNames.className}Success(payload);
+      const action = new ${actionsAliasName}.${actionNames.className}(${payload});
+      const completion = new ${actionsAliasName}.${actionNames.className}Success(payload);
 
       actions = hot('-a', {a: action});
       const response = cold('--b|', {b: payload});
@@ -38,8 +38,8 @@ function getEffectSpecTemplate(
 
     test('returns ${actionNames.className}Fail action on fail', () => {
       const payload = {} as any;
-      const action = new ${actionsNamespace}.${actionNames.className}(${payload});
-      const completion = new ${actionsNamespace}.${actionNames.className}Fail(payload);
+      const action = new ${actionsAliasName}.${actionNames.className}(${payload});
+      const completion = new ${actionsAliasName}.${actionNames.className}Fail(payload);
 
       actions = hot('-a', { a: action });
       const response = cold('-#', {}, payload);
@@ -59,20 +59,20 @@ function getEffectFetchTemplate(
   actionName: string,
   actionPayload = true
 ): string {
-  const { actionsNamespace } = options;
+  const { actionsAliasName } = options;
   const actionNames = names(actionName);
   const payload = actionPayload ? 'action.payload' : '';
 
   return `@Effect()
-  ${actionNames.propertyName}$ = this.dp.fetch(${actionsNamespace}.${config.action.typesEnumName}.${actionNames.className}, {
+  ${actionNames.propertyName}$ = this.dp.fetch(${actionsAliasName}.${config.action.typesEnumName}.${actionNames.className}, {
     id: () => {},
-    run: (action: ${actionsNamespace}.${actionNames.className}) => {
+    run: (action: ${actionsAliasName}.${actionNames.className}) => {
       return this.${options.dataService.names.propertyName}
         .${actionNames.propertyName}(${payload})
-        .pipe(map(data => new ${actionsNamespace}.${actionNames.className}Success(data)));
+        .pipe(map(data => new ${actionsAliasName}.${actionNames.className}Success(data)));
     },
-    onError: (action: ${actionsNamespace}.${actionNames.className}, error: HttpErrorResponse) => {
-      return new ${actionsNamespace}.${actionNames.className}Fail(error);
+    onError: (action: ${actionsAliasName}.${actionNames.className}, error: HttpErrorResponse) => {
+      return new ${actionsAliasName}.${actionNames.className}Fail(error);
     }
   });\n\n`;
 }
@@ -83,22 +83,22 @@ function getEffectUpdateTemplate(
   update: 'pessimistic' | 'optimistic',
   successPayload?: string
 ): string {
-  const { actionsNamespace } = options;
+  const { actionsAliasName } = options;
   const actionNames = names(actionName);
 
   return `@Effect()
-  ${actionNames.propertyName}$ = this.dp.${update}Update(${actionsNamespace}.${
+  ${actionNames.propertyName}$ = this.dp.${update}Update(${actionsAliasName}.${
     config.action.typesEnumName
   }.${actionNames.className}, {
-    run: (action: ${actionsNamespace}.${actionNames.className}) => {
+    run: (action: ${actionsAliasName}.${actionNames.className}) => {
       return this.${options.dataService.names.propertyName}
         .${actionNames.propertyName}(action.payload)
-        .pipe(map(data => new ${actionsNamespace}.${
-    actionNames.className
-  }Success(${successPayload || 'data'})));
+        .pipe(map(data => new ${actionsAliasName}.${actionNames.className}Success(${
+    successPayload || 'data'
+  })));
     },
-    onError: (action: ${actionsNamespace}.${actionNames.className}, error: HttpErrorResponse) => {
-      return new ${actionsNamespace}.${actionNames.className}Fail(error);
+    onError: (action: ${actionsAliasName}.${actionNames.className}, error: HttpErrorResponse) => {
+      return new ${actionsAliasName}.${actionNames.className}Fail(error);
     }
   });\n\n`;
 }
@@ -267,7 +267,7 @@ export function crudEffects(options: CrudOptions): Rule {
   return (host: Tree, context: SchematicContext) => {
     context.logger.info(`Generating effects.`);
 
-    const { actionsNamespace, dataService, stateDir, statePartialName } = options;
+    const { actionsAliasName, dataService, stateDir, statePartialName } = options;
 
     insertConstructorArguments(host, options.stateDir.effects, [
       {
@@ -288,7 +288,7 @@ export function crudEffects(options: CrudOptions): Rule {
     insertCustomImport(host, stateDir.effects, 'HttpErrorResponse', '@angular/common/http');
     insertCustomImport(host, stateDir.effects, 'map', 'rxjs/operators');
 
-    insertTypeImport(host, stateDir.effectsSpec, actionsNamespace);
+    insertTypeImport(host, stateDir.effectsSpec, actionsAliasName);
     insertTypeImport(host, stateDir.effectsSpec, dataService.names.className);
     insertTypeImport(host, stateDir.effectsSpec, `DataPersistence`);
     insertCustomImport(host, stateDir.effectsSpec, 'hot', 'jest-marbles');
