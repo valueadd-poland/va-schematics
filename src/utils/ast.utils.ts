@@ -170,7 +170,10 @@ export function findNode<T extends ts.Node = ts.Node>(
   kind: ts.SyntaxKind,
   text?: string
 ): T | null {
-  if (node.kind === kind && (text ? node.getText() === text : true)) {
+  if (
+    node.kind === kind &&
+    (text ? node.getText() === text || node.getFullText().includes(text) : true)
+  ) {
     return node as T;
   }
 

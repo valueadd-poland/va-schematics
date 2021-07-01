@@ -54,38 +54,92 @@ describe('reducer', () => {
 
   let appTree: UnitTestTree;
 
-  beforeEach(async done => {
-    appTree = new UnitTestTree(Tree.empty());
-    appTree = createEmptyWorkspace(appTree);
-    appTree = createApp(appTree, 'testapp');
-    appTree = createLib(appTree, 'testlib');
-    appTree = await runner
-      .runExternalSchematicAsync('va-schematics', 'ngrx', ngrxOpts, appTree)
-      .toPromise();
-    appTree = await runner
-      .runExternalSchematicAsync('@schematics/angular', 'class', classOpts, appTree)
-      .toPromise();
-    appTree = await runner.runSchematicAsync('action', getTestsOpts, appTree).toPromise();
-    appTree = await runner.runSchematicAsync('action', getTestOpts, appTree).toPromise();
-    appTree = await runner.runSchematicAsync('action', updateTestOpts, appTree).toPromise();
-    appTree = await runner.runSchematicAsync('action', removeTestOpts, appTree).toPromise();
+  describe('old syntax', () => {
+    beforeEach(async done => {
+      appTree = new UnitTestTree(Tree.empty());
+      appTree = createEmptyWorkspace(appTree);
+      appTree = createApp(appTree, 'testapp');
+      appTree = createLib(appTree, 'testlib');
+      appTree = await runner
+        .runExternalSchematicAsync('va-schematics', 'ngrx', ngrxOpts, appTree)
+        .toPromise();
+      appTree = await runner
+        .runExternalSchematicAsync('@schematics/angular', 'class', classOpts, appTree)
+        .toPromise();
+      appTree = await runner.runSchematicAsync('action', getTestsOpts, appTree).toPromise();
+      appTree = await runner.runSchematicAsync('action', getTestOpts, appTree).toPromise();
+      appTree = await runner.runSchematicAsync('action', updateTestOpts, appTree).toPromise();
+      appTree = await runner.runSchematicAsync('action', removeTestOpts, appTree).toPromise();
 
-    done();
+      done();
+    });
+
+    it('create reducer and selectors', async done => {
+      const reducerOpts: ReducerSchema = {
+        propsToUpdate:
+          'loadingTest:false,test:action.payload:Test,loadingTestApiError:null:ApiError|null',
+        actionName: 'GetTest',
+        stateDir: stateDirPath,
+        selectors: true,
+        creators: false
+      };
+      appTree = await runner.runSchematicAsync('reducer', reducerOpts, appTree).toPromise();
+
+      /*@const content = appTree.readContent('/libs/testlib/src/lib/+state/test.reducer.ts');
+      const content2 = appTree.readContent('/libs/testlib/src/lib/+state/test.selectors.spec.ts');
+      console.log(content2);*/
+      done();
+    });
   });
 
-  it('create reducer and selectors', async done => {
-    const reducerOpts: ReducerSchema = {
-      propsToUpdate:
-        'loadingTest:false,test:action.payload:Test,loadingTestApiError:null:ApiError|null',
-      actionName: 'GetTest',
-      stateDir: stateDirPath,
-      selectors: true
-    };
-    appTree = await runner.runSchematicAsync('reducer', reducerOpts, appTree).toPromise();
+  describe('creators syntax', () => {
+    beforeEach(async done => {
+      appTree = new UnitTestTree(Tree.empty());
+      appTree = createEmptyWorkspace(appTree);
+      appTree = createApp(appTree, 'testapp');
+      appTree = createLib(appTree, 'testlib');
+      appTree = await runner
+        .runExternalSchematicAsync(
+          'va-schematics',
+          'ngrx',
+          { ...ngrxOpts, creators: true },
+          appTree
+        )
+        .toPromise();
+      appTree = await runner
+        .runExternalSchematicAsync('@schematics/angular', 'class', classOpts, appTree)
+        .toPromise();
+      appTree = await runner
+        .runSchematicAsync('action', { ...getTestsOpts, creators: true }, appTree)
+        .toPromise();
+      appTree = await runner
+        .runSchematicAsync('action', { ...getTestOpts, creators: true }, appTree)
+        .toPromise();
+      appTree = await runner
+        .runSchematicAsync('action', { ...updateTestOpts, creators: true }, appTree)
+        .toPromise();
+      appTree = await runner
+        .runSchematicAsync('action', { ...removeTestOpts, creators: true }, appTree)
+        .toPromise();
 
-    /*@const content = appTree.readContent('/libs/testlib/src/lib/+state/test.reducer.ts');
-    const content2 = appTree.readContent('/libs/testlib/src/lib/+state/test.selectors.spec.ts');
-    console.log(content2);*/
-    done();
+      done();
+    });
+
+    it('create reducer and selectors with creator function', async done => {
+      const reducerCreatorOpts: ReducerSchema = {
+        propsToUpdate:
+          'loadingTest:false,test:action.payload:Test,loadingTestApiError:null:ApiError|null',
+        actionName: 'GetTest',
+        stateDir: stateDirPath,
+        selectors: true,
+        creators: true
+      };
+      appTree = await runner.runSchematicAsync('reducer', reducerCreatorOpts, appTree).toPromise();
+
+      /*@const content = appTree.readContent('/libs/testlib/src/lib/+state/test.reducer.ts');
+      const content2 = appTree.readContent('/libs/testlib/src/lib/+state/test.selectors.spec.ts');
+      console.log(content2);*/
+      done();
+    });
   });
 });

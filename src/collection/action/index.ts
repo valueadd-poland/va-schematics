@@ -4,10 +4,9 @@ import { parseStateDir } from '../../utils/options-parsing.utils';
 import { formatFiles } from '../../utils/rules/format-files';
 import { parseType } from '../../utils/ts.utils';
 import { ActionSchema } from './action-schema.interface';
-import { addActionClassDeclaration } from './rules/add-action-class-declaration.rule';
 import { addActionClassToCollectiveType } from './rules/add-action-class-to-collective-type.rule';
+import { addActionDeclaration } from './rules/add-action-declaration.rule';
 import { addActionType } from './rules/add-action-type.rule';
-import { addActionCreator } from './rules/creators/add-action-creator.rule';
 
 // You don't have to export the function as default. You can also have more than one rule factory
 // per file.
@@ -31,15 +30,14 @@ export function action(options: ActionSchema): Rule {
       });
     }
 
-    const actionRules: Rule[] = options.creators
-      ? [addActionCreator(options, stateDir)]
-      : [
-          addActionType(options, stateDir),
-          addActionClassDeclaration(options, stateDir),
-          addActionClassToCollectiveType(options, stateDir)
-        ];
-
-    rules.push(...[...actionRules, formatFiles({ skipFormat: !!options.skipFormat })]);
+    rules.push(
+      ...[
+        addActionType(options, stateDir),
+        addActionDeclaration(options, stateDir),
+        ...(options.creators ? [] : [addActionClassToCollectiveType(options, stateDir)]),
+        formatFiles({ skipFormat: !!options.skipFormat })
+      ]
+    );
 
     return chain(rules)(host, context);
   };

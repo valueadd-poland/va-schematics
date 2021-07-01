@@ -2,13 +2,18 @@ import { Rule, Tree } from '@angular-devkit/schematics';
 import { InsertChange } from '@schematics/angular/utility/change';
 import * as ts from 'typescript';
 import { findNode, insert } from '../../../utils/ast.utils';
-import { ParsedReducerFile } from '../../../utils/file-parsing.utils';
+import {
+  CommonReducerProperties,
+  ParsedReducerWithCreator,
+  ParsedReducerWithSwitch
+} from '../../../utils/file-parsing.utils';
 import { insertTypeImport } from '../../../utils/import.utils';
 import {
   parsePropsToUpdate,
   StateFilePaths,
   StateProperty
 } from '../../../utils/options-parsing.utils';
+import { camelize } from '../../../utils/string.utils';
 import { parseInterfaceMembers, parseType } from '../../../utils/ts.utils';
 import { config } from '../../config';
 import { ReducerSchema } from '../reducer-schema.interface';
@@ -48,7 +53,7 @@ function createImportsForTypes(
 
 function createStateProperties(
   filePath: string,
-  reducerFile: ParsedReducerFile,
+  reducerFile: CommonReducerProperties,
   interfaceProps: Array<[ts.Identifier, ts.Node]>,
   stateProperties: StateProperty[]
 ): InsertChange[] {
@@ -116,9 +121,32 @@ function createCaseStatement(
   );
 }
 
+function createOnStatement(
+  reducerCreatorStatement: ts.CallExpression,
+  path: string,
+  actionsNamespace: string,
+  actionName: string,
+  stateProperties: StateProperty[]
+): InsertChange {
+  let props = '';
+
+  stateProperties.forEach(prop => {
+    props += `${prop.key}: ${prop.value},`;
+  });
+
+  return new InsertChange(
+    path,
+    reducerCreatorStatement.end - 1,
+    `,\non(${actionsNamespace}.${camelize(actionName)}, (state, action) => ({\n` +
+      `...state,\n` +
+      `${props}\n` +
+      `}))\n`
+  );
+}
+
 export function updateReducer(
   reducerSourceFile: ts.SourceFile,
-  parsedReducerFile: ParsedReducerFile,
+  parsedReducerFile: ParsedReducerWithCreator | ParsedReducerWithSwitch,
   actionsNamespace: string,
   stateDir: StateFilePaths,
   options: ReducerSchema
@@ -135,13 +163,25 @@ export function updateReducer(
         currentInterfaceProperties,
         statePropertiesToUpdate
       ),
-      createCaseStatement(
-        parsedReducerFile.reducerSwitchStatement,
-        stateDir.reducer,
-        actionsNamespace,
-        options.actionName,
-        statePropertiesToUpdate
-      )
+      ...(options.creators
+        ? [
+            createOnStatement(
+              (parsedReducerFile as ParsedReducerWithCreator).reducerCreatorStatement,
+              stateDir.reducer,
+              actionsNamespace,
+              options.actionName,
+              statePropertiesToUpdate
+            )
+          ]
+        : [
+            createCaseStatement(
+              (parsedReducerFile as ParsedReducerWithSwitch).reducerSwitchStatement,
+              stateDir.reducer,
+              actionsNamespace,
+              options.actionName,
+              statePropertiesToUpdate
+            )
+          ])
     ];
     insert(host, stateDir.reducer, changes);
 

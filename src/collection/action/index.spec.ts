@@ -2,7 +2,8 @@ import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import { Schema as ClassSchema } from '@schematics/angular/class/schema';
 import * as path from 'path';
-import { classify } from '../../utils/string.utils';
+import { splitPascalCase } from '../../utils/name.utils';
+import { camelize, classify } from '../../utils/string.utils';
 import { createApp, createEmptyWorkspace, createLib } from '../../utils/testing.utils';
 import { NgrxSchema } from '../ngrx/ngrx-schema.interface';
 import { ActionSchema } from './action-schema.interface';
@@ -128,46 +129,29 @@ describe('action', () => {
     const content = appTree.readContent('/libs/testlib/src/lib/+state/test.actions.ts');
 
     expect(content).toMatch(
-      new RegExp(
-        `export const ${getTestOpts.prefix.toLocaleLowerCase()}${classify(
-          getTestOpts.name
-        )} = createAction`
-      )
+      new RegExp(`export const ${camelize(getTestOpts.name)} = createAction`)
+    );
+    expect(content).toContain(
+      `${classify(getTestOpts.name)} = '[${classify(getTestOpts.prefix)}] ${splitPascalCase(
+        getTestOpts.name
+      )}'`
+    );
+
+    expect(content).toMatch(
+      new RegExp(`export const ${camelize(updateTestOpts.name)} = createAction`)
+    );
+    expect(content).toContain(
+      `${classify(updateTestOpts.name)} = '[${classify(updateTestOpts.prefix)}] ${splitPascalCase(
+        updateTestOpts.name
+      )}'`
     );
     expect(content).toMatch(
-      new RegExp(
-        `'\\[${classify(getTestOpts.name)}] ${classify(getTestOpts.prefix)} ${classify(
-          getTestOpts.name
-        )}'`
-      )
+      new RegExp(`export const ${camelize(removeTestOpts.name)} = createAction`)
     );
-    expect(content).toMatch(
-      new RegExp(
-        `export const ${updateTestOpts.prefix.toLocaleLowerCase()}${classify(
-          updateTestOpts.name
-        )} = createAction`
-      )
-    );
-    expect(content).toMatch(
-      new RegExp(
-        `'\\[${classify(updateTestOpts.name)}] ${classify(updateTestOpts.prefix)} ${classify(
-          updateTestOpts.name
-        )}'`
-      )
-    );
-    expect(content).toMatch(
-      new RegExp(
-        `export const ${removeTestOpts.prefix.toLocaleLowerCase()}${classify(
-          removeTestOpts.name
-        )} = createAction`
-      )
-    );
-    expect(content).toMatch(
-      new RegExp(
-        `'\\[${classify(removeTestOpts.name)}] ${classify(removeTestOpts.prefix)} ${classify(
-          removeTestOpts.name
-        )}'`
-      )
+    expect(content).toContain(
+      `${classify(removeTestOpts.name)} = '[${classify(removeTestOpts.prefix)}] ${splitPascalCase(
+        removeTestOpts.name
+      )}'`
     );
 
     done();
