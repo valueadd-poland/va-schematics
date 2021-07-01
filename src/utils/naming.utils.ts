@@ -1,5 +1,6 @@
 import * as ts from 'typescript';
 import { getSourceNodes } from './ast.utils';
+import { capitalize } from './string.utils';
 
 export function findActionsNamespace(actionsSourceFile: ts.SourceFile): string {
   const nodes = getSourceNodes(actionsSourceFile);
@@ -13,4 +14,23 @@ export function findActionsNamespace(actionsSourceFile: ts.SourceFile): string {
   }
 
   return actionsNamespace;
+}
+
+export function createActionImportAlias(actionPath: string): string {
+  // hardcoded prefix of actions import e.g import * as fromAuthActions
+  const importPrefix = '* as ';
+
+  return importPrefix + createActionAliasName(actionPath);
+}
+
+export function createActionAliasName(actionPath: string): string {
+  const aliasNamePrefix = 'from';
+  // extract file name rom the path e.g  /libs/test/lib/+state/auth.actions.ts into auth.actions.ts
+  const actionFileName = actionPath.replace(/^.*[\\\/]/, '');
+  // remove extension from the file name and transform it into array e.g from auth.actions.ts into [auth, actions]
+  const actionFileNameChunksArray = actionFileName.split('.').slice(0, -1);
+  // capitalize name chunks and join them with prefix to create action file name alias eg. fromAuthActions
+  return (
+    aliasNamePrefix + actionFileNameChunksArray.map(nameChunk => capitalize(nameChunk)).join('')
+  );
 }

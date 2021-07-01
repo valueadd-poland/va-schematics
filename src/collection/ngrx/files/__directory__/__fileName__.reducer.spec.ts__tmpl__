@@ -1,4 +1,4 @@
-import { from<%= className %>Actions } from './<%= fileName %>.actions';
+import * as from<%= className %>Actions from './<%= fileName %>.actions';
 import { <%= className %>State, initialState, <%= propertyName %>Reducer } from './<%= fileName %>.reducer';
 
 describe('<%= className %> Reducer', () => {
