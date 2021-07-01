@@ -5,7 +5,7 @@ import { parseStateDir } from '../../utils/options-parsing.utils';
 import { formatFiles } from '../../utils/rules/format-files';
 import { readIntoSourceFile } from '../../utils/ts.utils';
 import { ReducerSchema } from './reducer-schema.interface';
-import { insertNamespaceImport } from './rules/insert-namespace-import.rule';
+import { insertActionsAliasImport } from './rules/insert-actions-alias-import.rule';
 import { updateFacade } from './rules/update-facade.rule';
 import { updateReducerSpec } from './rules/update-reducer-spec.rule';
 import { updateReducer } from './rules/update-reducer.rule';
@@ -33,7 +33,7 @@ export function reducer(options: ReducerSchema): Rule {
     const parsedReducerFile = parseReducerFile(reducerSourceFile);
 
     const rules: Rule[] = [
-      insertNamespaceImport(
+      insertActionsAliasImport(
         reducerSourceFile,
         stateDir,
         createActionImportAlias(stateDir.actions),
