@@ -2,7 +2,10 @@ import { Rule, Tree } from '@angular-devkit/schematics';
 import { InsertChange } from '@schematics/angular/utility/change';
 import * as ts from 'typescript';
 import { findNode, findNodes, insert } from '../../../utils/ast.utils';
-import { ParsedReducerFile } from '../../../utils/file-parsing.utils';
+import {
+  ParsedReducerWithCreator,
+  ParsedReducerWithSwitch
+} from '../../../utils/file-parsing.utils';
 import { insertCustomImport } from '../../../utils/import.utils';
 import { toPropertyName } from '../../../utils/name.utils';
 import {
@@ -10,15 +13,17 @@ import {
   StateFilePaths,
   StateProperty
 } from '../../../utils/options-parsing.utils';
+import { camelize } from '../../../utils/string.utils';
 import { readIntoSourceFile } from '../../../utils/ts.utils';
 import { ReducerSchema } from '../reducer-schema.interface';
 
 function createTest(
   actionName: string,
   actionsNamespace: string,
-  parsedReducerFile: ParsedReducerFile,
+  parsedReducerFile: ParsedReducerWithSwitch | ParsedReducerWithCreator,
   stateProperties: StateProperty[],
-  hasPayload: boolean
+  hasPayload: boolean,
+  creators: boolean
 ): string {
   const statePropertiesList = stateProperties.map(stateProperty => stateProperty.key).join(', ');
   const statePropertiesStringList = stateProperties.map(stateProperty => `'${stateProperty.key}'`);
@@ -31,14 +36,16 @@ function createTest(
     )
     .join('\n');
   expects += `\nexpect(statesEqual(result, state, [${statePropertiesStringList}])).toBeTruthy()`;
+  const action = createAction(actionsNamespace, actionName, hasPayload, creators);
+  const reducer = createReducer(creators, parsedReducerFile);
 
   return `
     describe('${actionName}', () => {
       test('sets ${statePropertiesList} and does not modify other state properties', () => {
          ${hasPayload ? 'const payload = {} as any;' : ''}
-         const action = new ${actionsNamespace}.${actionName}(${hasPayload ? 'payload' : ''});
-         const result = ${parsedReducerFile.reducerFunction.name!.getText()}(state, action);
-         
+         const action = ${action}
+         const result = ${reducer};
+
          ${expects}
       });
     });
@@ -48,9 +55,10 @@ function createTest(
 function createTestCreateSuccess(
   actionName: string,
   actionsNamespace: string,
-  parsedReducerFile: ParsedReducerFile,
+  parsedReducerFile: ParsedReducerWithSwitch | ParsedReducerWithCreator,
   stateProperties: StateProperty[],
-  hasPayload: boolean
+  hasPayload: boolean,
+  creators: boolean
 ): string {
   const statePropertiesList = stateProperties.map(stateProperty => stateProperty.key).join(', ');
   const statePropertiesStringList = stateProperties.map(stateProperty => `'${stateProperty.key}'`);
@@ -63,14 +71,15 @@ function createTestCreateSuccess(
     )
     .join('\n');
   expects += `\nexpect(statesEqual(result, state, [${statePropertiesStringList}])).toBeTruthy()`;
-
+  const action = createAction(actionsNamespace, actionName, hasPayload, creators);
+  const reducer = createReducer(creators, parsedReducerFile);
   return `
     describe('${actionName}', () => {
       test('sets ${statePropertiesList} and does not modify other state properties', () => {
          ${hasPayload ? 'const payload = {} as any;' : ''}
-         const action = new ${actionsNamespace}.${actionName}(${hasPayload ? 'payload' : ''});
-         const result = ${parsedReducerFile.reducerFunction.name!.getText()}(state, action);
-         
+         const action = ${action}
+         const result = ${reducer};
+
          ${expects}
       });
     });
@@ -80,9 +89,10 @@ function createTestCreateSuccess(
 function createTestUpdateSuccess(
   actionName: string,
   actionsNamespace: string,
-  parsedReducerFile: ParsedReducerFile,
+  parsedReducerFile: ParsedReducerWithSwitch | ParsedReducerWithCreator,
   stateProperties: StateProperty[],
-  hasPayload: boolean
+  hasPayload: boolean,
+  creators: boolean
 ): string {
   const statePropertiesList = stateProperties.map(stateProperty => stateProperty.key).join(', ');
   const statePropertiesStringList = stateProperties.map(stateProperty => `'${stateProperty.key}'`);
@@ -94,6 +104,8 @@ function createTestUpdateSuccess(
         }).toEqual(${stateProperty.value.includes('payload') ? "'test2'" : stateProperty.value});`
     )
     .join('\n');
+  const action = createAction(actionsNamespace, actionName, hasPayload, creators);
+  const reducer = createReducer(creators, parsedReducerFile);
   expects += `\nexpect(statesEqual(result, state, [${statePropertiesStringList}])).toBeTruthy()`;
   const prop = toPropertyName(actionName.slice(6, -7) + 'Collection');
   return `
@@ -101,9 +113,9 @@ function createTestUpdateSuccess(
       test('sets ${statePropertiesList} and does not modify other state properties', () => {
          state = { ...initialState, ${prop}: [{ id: '1', name: 'test' } as any] };
          ${hasPayload ? "const payload = {id: '1', name: 'test2'} as any;" : ''}
-         const action = new ${actionsNamespace}.${actionName}(${hasPayload ? 'payload' : ''});
-         const result = ${parsedReducerFile.reducerFunction.name!.getText()}(state, action);
-         
+         const action = ${action}
+         const result = ${reducer};
+
          ${expects}
       });
     });
@@ -113,9 +125,10 @@ function createTestUpdateSuccess(
 function createTestRemoveSuccess(
   actionName: string,
   actionsNamespace: string,
-  parsedReducerFile: ParsedReducerFile,
+  parsedReducerFile: ParsedReducerWithSwitch | ParsedReducerWithCreator,
   stateProperties: StateProperty[],
-  hasPayload: boolean
+  hasPayload: boolean,
+  creators: boolean
 ): string {
   const statePropertiesList = stateProperties.map(stateProperty => stateProperty.key).join(', ');
   const statePropertiesStringList = stateProperties.map(stateProperty => `'${stateProperty.key}'`);
@@ -128,15 +141,17 @@ function createTestRemoveSuccess(
     )
     .join('\n');
   expects += `\nexpect(statesEqual(result, state, [${statePropertiesStringList}])).toBeTruthy()`;
+  const action = createAction(actionsNamespace, actionName, hasPayload, creators);
+  const reducer = createReducer(creators, parsedReducerFile);
   const prop = toPropertyName(actionName.slice(6, -7) + 'Collection');
   return `
     describe('${actionName}', () => {
       test('sets ${statePropertiesList} and does not modify other state properties', () => {
          state = { ...initialState, ${prop}: [{ id: '1', name: 'test' } as any] };
          ${hasPayload ? "const payload = {id: '1', name: 'test2'} as any;" : ''}
-         const action = new ${actionsNamespace}.${actionName}(${hasPayload ? 'payload' : ''});
-         const result = ${parsedReducerFile.reducerFunction.name!.getText()}(state, action);
-         
+         const action = ${action}
+         const result = ${reducer};
+
          ${expects}
       });
     });
@@ -145,12 +160,13 @@ function createTestRemoveSuccess(
 
 export function updateReducerSpec(
   reducerSpecSourceFile: ts.SourceFile,
-  parsedReducerFile: ParsedReducerFile,
+  parsedReducerFile: ParsedReducerWithSwitch | ParsedReducerWithCreator,
   actionsNamespace: string,
   stateDir: StateFilePaths,
   options: ReducerSchema
 ): Rule {
   return (host: Tree) => {
+    const creators = options.creators as boolean;
     const stateProperties = parsePropsToUpdate(options.propsToUpdate);
 
     const describeIdentifierNode = findNode(
@@ -169,18 +185,7 @@ export function updateReducerSpec(
       throw new Error(`describe function's block not found in ${stateDir.reducerSpec}.`);
     }
 
-    let hasAction = false;
-    const actions = findNodes<ts.ClassDeclaration>(
-      readIntoSourceFile(host, stateDir.actions),
-      ts.SyntaxKind.ClassDeclaration
-    );
-    const action = actions.find(cd => !!cd.name && cd.name.getText() === options.actionName);
-    if (action) {
-      const constructor = findNode<ts.ConstructorDeclaration>(action, ts.SyntaxKind.Constructor);
-      if (constructor) {
-        hasAction = !!constructor.parameters.length;
-      }
-    }
+    const hasPayload = getHasPayload(creators, host, stateDir, options);
 
     let toAdd: string;
 
@@ -190,7 +195,8 @@ export function updateReducerSpec(
         actionsNamespace,
         parsedReducerFile,
         stateProperties,
-        hasAction
+        hasPayload,
+        creators
       );
     } else if (options.actionName.includes('Update') && options.actionName.includes('Success')) {
       toAdd = createTestUpdateSuccess(
@@ -198,7 +204,8 @@ export function updateReducerSpec(
         actionsNamespace,
         parsedReducerFile,
         stateProperties,
-        hasAction
+        hasPayload,
+        creators
       );
     } else if (options.actionName.includes('Remove') && options.actionName.includes('Success')) {
       toAdd = createTestRemoveSuccess(
@@ -206,7 +213,8 @@ export function updateReducerSpec(
         actionsNamespace,
         parsedReducerFile,
         stateProperties,
-        hasAction
+        hasPayload,
+        creators
       );
     } else {
       toAdd = createTest(
@@ -214,7 +222,8 @@ export function updateReducerSpec(
         actionsNamespace,
         parsedReducerFile,
         stateProperties,
-        hasAction
+        hasPayload,
+        creators
       );
     }
 
@@ -224,4 +233,67 @@ export function updateReducerSpec(
 
     return host;
   };
+}
+
+function createAction(
+  actionsNamespace: string,
+  actionName: string,
+  hasPayload: boolean,
+  creators: boolean
+): string {
+  return creators
+    ? `${actionsNamespace}.${camelize(actionName)}(${hasPayload ? '{payload}' : ''});`
+    : `new ${actionsNamespace}.${actionName}(${hasPayload ? 'payload' : ''});`;
+}
+
+function createReducer(
+  creators: boolean,
+  parsedReducerFile: ParsedReducerWithSwitch | ParsedReducerWithCreator
+): string {
+  return creators
+    ? `${
+        (parsedReducerFile as ParsedReducerWithCreator as any).reducerDeclaration.name.escapedText
+      }(state, action);`
+    : `${(
+        parsedReducerFile as ParsedReducerWithSwitch
+      ).reducerFunction.name!.getText()}(state, action);`;
+}
+
+function getActions(
+  creators: boolean,
+  host: Tree,
+  actionsDir: string
+): ts.VariableDeclaration[] | ts.ClassDeclaration[] {
+  return creators
+    ? findNodes<ts.VariableDeclaration>(
+        readIntoSourceFile(host, actionsDir),
+        ts.SyntaxKind.VariableDeclaration
+      )
+    : findNodes<ts.ClassDeclaration>(
+        readIntoSourceFile(host, actionsDir),
+        ts.SyntaxKind.ClassDeclaration
+      );
+}
+
+function getHasPayload(
+  creators: boolean,
+  host: Tree,
+  stateDir: StateFilePaths,
+  options: ReducerSchema
+): boolean {
+  const actions = getActions(creators, host, stateDir.actions);
+  const action = (actions as any[]).find(cd => {
+    return !!cd.name && cd.name.getText() === options.actionName;
+  });
+  if (action) {
+    if (creators) {
+      const props = findNode<ts.CallExpression>(action, ts.SyntaxKind.CallExpression, 'props');
+      return !!props;
+    } else {
+      const constructor = findNode<ts.ConstructorDeclaration>(action, ts.SyntaxKind.Constructor);
+      return !!constructor && !!constructor.parameters.length;
+    }
+  }
+
+  return false;
 }
