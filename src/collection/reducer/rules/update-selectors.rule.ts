@@ -68,6 +68,10 @@ export function updateSelectors(
   stateDir: StateFilePaths,
   options: ReducerSchema
 ): Rule {
+  if (!selectorsSourceFile && options.selectors) {
+    throw new Error('You try to update selectors that do not exist.');
+  }
+
   return (host: Tree) => {
     const stateProperties = parsePropsToUpdate(options.propsToUpdate);
 
