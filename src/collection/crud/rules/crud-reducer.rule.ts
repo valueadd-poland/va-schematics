@@ -10,6 +10,19 @@ function createReducer(options: CrudOptions): Rule[] {
   const entityPropertyName = toPropertyName(entity.name);
   const entityType = entity.name;
   const rules: Rule[] = [];
+  const initialActionOptions = {
+    selectors: true,
+    stateDir: statePath,
+    skipFormat: true,
+    creators: options.creators
+  };
+
+  const statusActionOptions = {
+    selectors: false,
+    stateDir: statePath,
+    skipFormat: true,
+    creators: options.creators
+  };
 
   if (toGenerate.read) {
     rules.push(
@@ -19,9 +32,7 @@ function createReducer(options: CrudOptions): Rule[] {
           `${entityPropertyName}:null:${entityType}|null,` +
           `${entityPropertyName}Loading:true,` +
           `${entityPropertyName}LoadError:null:HttpErrorResponse|null`,
-        selectors: true,
-        stateDir: statePath,
-        skipFormat: true
+        ...initialActionOptions
       }),
       reducer({
         actionName: `Get${entity.name}Fail`,
@@ -29,9 +40,7 @@ function createReducer(options: CrudOptions): Rule[] {
           `${entityPropertyName}:null:${entityType}|null,` +
           `${entityPropertyName}Loading:false,` +
           `${entityPropertyName}LoadError:action.payload:HttpErrorResponse|null`,
-        selectors: false,
-        stateDir: statePath,
-        skipFormat: true
+        ...statusActionOptions
       }),
       reducer({
         actionName: `Get${entity.name}Success`,
@@ -39,9 +48,7 @@ function createReducer(options: CrudOptions): Rule[] {
           `${entityPropertyName}:action.payload:${entityType}|null,` +
           `${entityPropertyName}Loading:false,` +
           `${entityPropertyName}LoadError:null:HttpErrorResponse|null`,
-        selectors: false,
-        stateDir: statePath,
-        skipFormat: true
+        ...statusActionOptions
       })
     );
   }
@@ -54,9 +61,7 @@ function createReducer(options: CrudOptions): Rule[] {
           `${entityPropertyName}Collection:[]:${entityType}[],` +
           `${entityPropertyName}CollectionLoading:true,` +
           `${entityPropertyName}CollectionLoadError:null:HttpErrorResponse|null`,
-        selectors: true,
-        stateDir: statePath,
-        skipFormat: true
+        ...initialActionOptions
       }),
       reducer({
         actionName: `Get${entity.name}CollectionFail`,
@@ -64,9 +69,7 @@ function createReducer(options: CrudOptions): Rule[] {
           `${entityPropertyName}Collection:[]:${entityType}[],` +
           `${entityPropertyName}CollectionLoading:false,` +
           `${entityPropertyName}CollectionLoadError:action.payload:HttpErrorResponse|null`,
-        selectors: false,
-        stateDir: statePath,
-        skipFormat: true
+        ...statusActionOptions
       }),
       reducer({
         actionName: `Get${entity.name}CollectionSuccess`,
@@ -74,9 +77,7 @@ function createReducer(options: CrudOptions): Rule[] {
           `${entityPropertyName}Collection:action.payload:${entityType}[],` +
           `${entityPropertyName}CollectionLoading:false,` +
           `${entityPropertyName}CollectionLoadError:null:HttpErrorResponse|null`,
-        selectors: false,
-        stateDir: statePath,
-        skipFormat: true
+        ...statusActionOptions
       })
     );
   }
@@ -88,18 +89,14 @@ function createReducer(options: CrudOptions): Rule[] {
         propsToUpdate:
           `${entityPropertyName}Creating:true,` +
           `${entityPropertyName}CreateError:null:HttpErrorResponse|null`,
-        selectors: true,
-        stateDir: statePath,
-        skipFormat: true
+        ...initialActionOptions
       }),
       reducer({
         actionName: `Create${entity.name}Fail`,
         propsToUpdate:
           `${entityPropertyName}Creating:false,` +
           `${entityPropertyName}CreateError:action.payload:HttpErrorResponse|null`,
-        selectors: false,
-        stateDir: statePath,
-        skipFormat: true
+        ...statusActionOptions
       }),
       reducer({
         actionName: `Create${entity.name}Success`,
@@ -109,9 +106,7 @@ function createReducer(options: CrudOptions): Rule[] {
             : '') +
           `${entityPropertyName}Creating:false,` +
           `${entityPropertyName}CreateError:null:HttpErrorResponse|null`,
-        selectors: false,
-        stateDir: statePath,
-        skipFormat: true
+        ...statusActionOptions
       })
     );
   }
@@ -123,18 +118,14 @@ function createReducer(options: CrudOptions): Rule[] {
         propsToUpdate:
           `${entityPropertyName}Updating:true,` +
           `${entityPropertyName}UpdateError:null:HttpErrorResponse|null`,
-        selectors: true,
-        stateDir: statePath,
-        skipFormat: true
+        ...initialActionOptions
       }),
       reducer({
         actionName: `Update${entity.name}Fail`,
         propsToUpdate:
           `${entityPropertyName}Updating:false,` +
           `${entityPropertyName}UpdateError:action.payload:HttpErrorResponse|null`,
-        selectors: false,
-        stateDir: statePath,
-        skipFormat: true
+        ...statusActionOptions
       }),
       reducer({
         actionName: `Update${entity.name}Success`,
@@ -144,9 +135,7 @@ function createReducer(options: CrudOptions): Rule[] {
             : '') +
           `${entityPropertyName}Updating:false,` +
           `${entityPropertyName}UpdateError:null:HttpErrorResponse|null`,
-        selectors: false,
-        stateDir: statePath,
-        skipFormat: true
+        ...statusActionOptions
       })
     );
   }
@@ -158,18 +147,14 @@ function createReducer(options: CrudOptions): Rule[] {
         propsToUpdate:
           `${entityPropertyName}Removing:true,` +
           `${entityPropertyName}RemoveError:null:HttpErrorResponse|null`,
-        selectors: true,
-        stateDir: statePath,
-        skipFormat: true
+        ...initialActionOptions
       }),
       reducer({
         actionName: `Remove${entity.name}Fail`,
         propsToUpdate:
           `${entityPropertyName}Removing:false,` +
           `${entityPropertyName}RemoveError:action.payload:HttpErrorResponse|null`,
-        selectors: false,
-        stateDir: statePath,
-        skipFormat: true
+        ...statusActionOptions
       }),
       reducer({
         actionName: `Remove${entity.name}Success`,
@@ -179,9 +164,7 @@ function createReducer(options: CrudOptions): Rule[] {
             : '') +
           `${entityPropertyName}Removing:false,` +
           `${entityPropertyName}RemoveError:null:HttpErrorResponse|null`,
-        selectors: false,
-        stateDir: statePath,
-        skipFormat: true
+        ...statusActionOptions
       })
     );
   }

@@ -5,6 +5,7 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { NxModule } from '@nrwl/angular';
 import { cold, hot } from 'jest-marbles';
 import { <%= className %>Effects } from './<%= fileName %>.effects';
+import * as from<%= className %>Actions from './<%= fileName %>.actions';
 
 describe('<%= className %>Effects', () => {
   let actions: Observable<any>;

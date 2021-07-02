@@ -283,7 +283,7 @@ function getHasPayload(
 ): boolean {
   const actions = getActions(creators, host, stateDir.actions);
   const action = (actions as any[]).find(cd => {
-    return !!cd.name && cd.name.getText() === options.actionName;
+    return !!cd.name && cd.name.getText().toLowerCase() === options.actionName.toLocaleLowerCase();
   });
   if (action) {
     if (creators) {

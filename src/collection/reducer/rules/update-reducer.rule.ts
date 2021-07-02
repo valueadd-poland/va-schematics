@@ -124,9 +124,10 @@ function createCaseStatement(
 function createOnStatement(
   reducerCreatorStatement: ts.CallExpression,
   path: string,
-  actionsNamespace: string,
+  actionsAliasName: string,
   actionName: string,
-  stateProperties: StateProperty[]
+  stateProperties: StateProperty[],
+  stateInterfaceName: string
 ): InsertChange {
   let props = '';
 
@@ -137,7 +138,9 @@ function createOnStatement(
   return new InsertChange(
     path,
     reducerCreatorStatement.end - 1,
-    `,\non(${actionsNamespace}.${camelize(actionName)}, (state, action) => ({\n` +
+    `,\non(${actionsAliasName}.${camelize(
+      actionName
+    )}, (state, action): ${stateInterfaceName} => ({\n` +
       `...state,\n` +
       `${props}\n` +
       `}))\n`
@@ -170,7 +173,8 @@ export function updateReducer(
               stateDir.reducer,
               actionsNamespace,
               options.actionName,
-              statePropertiesToUpdate
+              statePropertiesToUpdate,
+              parsedReducerFile.stateInterface.name.escapedText as string
             )
           ]
         : [

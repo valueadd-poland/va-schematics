@@ -27,6 +27,14 @@ import { crudFacadeSpec } from './rules/crud-facade-spec.rule';
 import { crudFacade } from './rules/crud-facade.rule';
 import { crudReducer } from './rules/crud-reducer.rule';
 
+export interface CrudGenerate {
+  create: boolean;
+  read: boolean;
+  readCollection: boolean;
+  update: boolean;
+  delete: boolean;
+}
+
 export interface CrudOptions {
   actionPrefix: string;
   actionsAliasName: string;
@@ -66,13 +74,8 @@ export interface CrudOptions {
   stateDir: StateFilePaths;
   statePartialName: string;
   statePath: string;
-  toGenerate: {
-    create: boolean;
-    read: boolean;
-    readCollection: boolean;
-    update: boolean;
-    delete: boolean;
-  };
+  toGenerate: CrudGenerate;
+  creators: boolean;
 }
 
 // tslint:disable-next-line:cognitive-complexity
@@ -221,7 +224,8 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
       path: entityPath[0],
       name: entity
     },
-    statePath: stateDir
+    statePath: stateDir,
+    creators: options.creators || false
   };
 }
 

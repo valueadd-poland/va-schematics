@@ -59,7 +59,8 @@ describe('crud', () => {
       stateDir: '/libs/data-access-test/src/lib/+state',
       operation: ['Read', 'ReadCollection', 'Create', 'Update', 'Delete'],
       mapResponse: 'data',
-      responseType: 'ApiResponse<TestModel>'
+      responseType: 'ApiResponse<TestModel>',
+      creators: false
     };
 
     appTree = await runner.runSchematicAsync('crud', crudOpts, appTree).toPromise();

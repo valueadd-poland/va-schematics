@@ -6,6 +6,7 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { NxModule } from '@nrwl/angular';
 import { Observable } from 'rxjs';
 import { <%= className %>Facade } from './<%= fileName %>.facade';
+import * as from<%= className %>Actions from './<%= fileName %>.actions';
 
 describe('<%= className %>Facade', () => {
   let actions: Observable<any>;

@@ -72,6 +72,13 @@
       "type": "string",
       "description": "Add map operator to response pipe.",
       "x-prompt": "What is response object path to map?"
+    },
+    "creators": {
+      "type": "boolean",
+      "default": true,
+      "description": "Specifies whether to use creators NgRx syntax",
+      "aliases": ["c"],
+      "x-prompt": "Do you want to use the creators NgRx syntax?"
     }
   }
 }

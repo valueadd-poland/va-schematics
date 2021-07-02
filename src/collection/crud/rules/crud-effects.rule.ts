@@ -6,9 +6,10 @@ import { configureTestingModule } from '../../../utils/configure-testing-module.
 import { insertConstructorArguments } from '../../../utils/constructor.utils';
 import { insertCustomImport, insertTypeImport } from '../../../utils/import.utils';
 import { names } from '../../../utils/name.utils';
+import { camelize } from '../../../utils/string.utils';
 import { findByIdentifier, findClassBodyInFile } from '../../../utils/ts.utils';
 import { config } from '../../config';
-import { CrudOptions } from '../index';
+import { CrudGenerate, CrudOptions } from '../index';
 
 function getEffectSpecTemplate(
   options: CrudOptions,
@@ -54,6 +55,50 @@ function getEffectSpecTemplate(
   });`;
 }
 
+function getEffectCreatorsSpecTemplate(
+  options: CrudOptions,
+  actionName: string,
+  actionPayload = true
+): string {
+  const { actionsAliasName, dataService } = options;
+  const actionNames = names(actionName);
+  const payload = actionPayload ? '{} as any' : '';
+
+  return `\n\ndescribe('${actionNames.propertyName}$', () => {
+    test('returns ${actionNames.className}Success action on success', () => {
+      const payload = {} as any;
+      const action = ${actionsAliasName}.${camelize(actionNames.className)}(${payload});
+      const completion = ${actionsAliasName}.${camelize(actionNames.className)}Success(payload);
+
+      actions = hot('-a', {a: action});
+      const response = cold('--b|', {b: payload});
+      const expected = cold('---c', {c: completion});
+      ${dataService.names.propertyName}.${actionNames.propertyName}.mockReturnValue(response);
+
+      expect(effects.${actionNames.propertyName}$).toSatisfyOnFlush(() => {
+        expect(${dataService.names.propertyName}.${actionNames.propertyName}).toHaveBeenCalled();
+      });
+      expect(effects.${actionNames.propertyName}$).toBeObservable(expected);
+    });
+
+    test('returns ${actionNames.className}Fail action on fail', () => {
+      const payload = {} as any;
+      const action = ${actionsAliasName}.${camelize(actionNames.className)}(${payload});
+      const completion = ${actionsAliasName}.${camelize(actionNames.className)}Fail(payload);
+
+      actions = hot('-a', { a: action });
+      const response = cold('-#', {}, payload);
+      const expected = cold('--c', { c: completion });
+      ${dataService.names.propertyName}.${actionNames.propertyName}.mockReturnValue(response);
+
+      expect(effects.${actionNames.propertyName}$).toSatisfyOnFlush(() => {
+        expect(${dataService.names.propertyName}.${actionNames.propertyName}).toHaveBeenCalled();
+      });
+      expect(effects.${actionNames.propertyName}$).toBeObservable(expected);
+    });
+  });`;
+}
+
 function getEffectFetchTemplate(
   options: CrudOptions,
   actionName: string,
@@ -75,6 +120,29 @@ function getEffectFetchTemplate(
       return new ${actionsAliasName}.${actionNames.className}Fail(error);
     }
   });\n\n`;
+}
+
+function getEffectCreatorFetchTemplate(options: CrudOptions, actionName: string): string {
+  const { actionsAliasName } = options;
+  const actionNames = names(actionName);
+
+  return `${actionNames.propertyName}$ = createEffect(() => this.actions$.pipe(
+  ofType(${actionsAliasName}.${camelize(actionNames.className)}),
+  fetch({
+    id: () => {},
+    run: ({payload}) => {
+      return this.${options.dataService.names.propertyName}
+        .${actionNames.propertyName}(payload)
+        .pipe(map(data => ${actionsAliasName}.${camelize(
+    actionNames.className
+  )}Success({payload: data})));
+    },
+    onError: (action, error: HttpErrorResponse) => {
+      return ${actionsAliasName}.${camelize(actionNames.className)}Fail({payload: error});
+    }
+  })
+  )
+  );\n\n`;
 }
 
 function getEffectUpdateTemplate(
@@ -101,6 +169,33 @@ function getEffectUpdateTemplate(
       return new ${actionsAliasName}.${actionNames.className}Fail(error);
     }
   });\n\n`;
+}
+
+function getEffectCreatorUpdateTemplate(
+  options: CrudOptions,
+  actionName: string,
+  update: 'pessimistic' | 'optimistic',
+  successPayload?: string
+): string {
+  const { actionsAliasName } = options;
+  const actionNames = names(actionName);
+
+  return `${actionNames.propertyName}$ = createEffect(() => this.actions$.pipe(
+  ofType(${actionsAliasName}.${camelize(actionNames.className)}),
+  ${update}Update({
+    run: ({payload}) => {
+      return this.${options.dataService.names.propertyName}
+        .${actionNames.propertyName}(payload)
+        .pipe(map(data => ${actionsAliasName}.${camelize(actionNames.className)}Success(${
+    successPayload || '{payload: data}'
+  })));
+    },
+    onError: (action, error: HttpErrorResponse) => {
+      return ${actionsAliasName}.${camelize(actionNames.className)}Fail({payload: error});
+    }
+  })
+  )
+  );\n\n`;
 }
 
 function createEffectsSpec(host: Tree, options: CrudOptions): Change[] {
@@ -156,7 +251,9 @@ function createEffectsSpec(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         effectsFilePath,
         describeFnSecondArgument.getEnd() - 1,
-        getEffectSpecTemplate(options, `Get${entity.name}`)
+        options.creators
+          ? getEffectCreatorsSpecTemplate(options, `Get${entity.name}`)
+          : getEffectSpecTemplate(options, `Get${entity.name}`)
       )
     );
   }
@@ -166,7 +263,9 @@ function createEffectsSpec(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         effectsFilePath,
         describeFnSecondArgument.getEnd() - 1,
-        getEffectSpecTemplate(options, `Get${entity.name}Collection`, true)
+        options.creators
+          ? getEffectCreatorsSpecTemplate(options, `Get${entity.name}Collection`, true)
+          : getEffectSpecTemplate(options, `Get${entity.name}Collection`, true)
       )
     );
   }
@@ -176,7 +275,9 @@ function createEffectsSpec(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         effectsFilePath,
         describeFnSecondArgument.getEnd() - 1,
-        getEffectSpecTemplate(options, `Create${entity.name}`)
+        options.creators
+          ? getEffectCreatorsSpecTemplate(options, `Create${entity.name}`)
+          : getEffectSpecTemplate(options, `Create${entity.name}`)
       )
     );
   }
@@ -186,7 +287,9 @@ function createEffectsSpec(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         effectsFilePath,
         describeFnSecondArgument.getEnd() - 1,
-        getEffectSpecTemplate(options, `Update${entity.name}`)
+        options.creators
+          ? getEffectCreatorsSpecTemplate(options, `Update${entity.name}`)
+          : getEffectSpecTemplate(options, `Update${entity.name}`)
       )
     );
   }
@@ -196,7 +299,9 @@ function createEffectsSpec(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         effectsFilePath,
         describeFnSecondArgument.getEnd() - 1,
-        getEffectSpecTemplate(options, `Remove${entity.name}`)
+        options.creators
+          ? getEffectCreatorsSpecTemplate(options, `Remove${entity.name}`)
+          : getEffectSpecTemplate(options, `Remove${entity.name}`)
       )
     );
   }
@@ -215,7 +320,9 @@ function createEffects(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         effectsFilePath,
         classBody.getStart(),
-        getEffectFetchTemplate(options, `Get${entity.name}`)
+        options.creators
+          ? getEffectCreatorFetchTemplate(options, `Get${entity.name}`)
+          : getEffectFetchTemplate(options, `Get${entity.name}`)
       )
     );
   }
@@ -225,7 +332,9 @@ function createEffects(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         effectsFilePath,
         classBody.getStart(),
-        getEffectFetchTemplate(options, `Get${entity.name}Collection`)
+        options.creators
+          ? getEffectCreatorFetchTemplate(options, `Get${entity.name}Collection`)
+          : getEffectFetchTemplate(options, `Get${entity.name}Collection`)
       )
     );
   }
@@ -235,7 +344,9 @@ function createEffects(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         effectsFilePath,
         classBody.getStart(),
-        getEffectUpdateTemplate(options, `Create${entity.name}`, 'pessimistic')
+        options.creators
+          ? getEffectCreatorUpdateTemplate(options, `Create${entity.name}`, 'pessimistic')
+          : getEffectUpdateTemplate(options, `Create${entity.name}`, 'pessimistic')
       )
     );
   }
@@ -245,7 +356,9 @@ function createEffects(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         effectsFilePath,
         classBody.getStart(),
-        getEffectUpdateTemplate(options, `Update${entity.name}`, 'pessimistic')
+        options.creators
+          ? getEffectCreatorUpdateTemplate(options, `Update${entity.name}`, 'pessimistic')
+          : getEffectUpdateTemplate(options, `Update${entity.name}`, 'pessimistic')
       )
     );
   }
@@ -255,7 +368,19 @@ function createEffects(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         effectsFilePath,
         classBody.getStart(),
-        getEffectUpdateTemplate(options, `Remove${entity.name}`, 'pessimistic', 'action.payload')
+        options.creators
+          ? getEffectCreatorUpdateTemplate(
+              options,
+              `Remove${entity.name}`,
+              'pessimistic',
+              '{payload}'
+            )
+          : getEffectUpdateTemplate(
+              options,
+              `Remove${entity.name}`,
+              'pessimistic',
+              'action.payload'
+            )
       )
     );
   }
@@ -274,23 +399,32 @@ export function crudEffects(options: CrudOptions): Rule {
         accessModifier: 'private',
         name: dataService.names.propertyName,
         type: dataService.names.className
-      },
-      {
-        accessModifier: 'private',
-        name: 'dp',
-        type: `DataPersistence<${options.statePartialName}>`
       }
     ]);
 
+    if (!options.creators) {
+      insertConstructorArguments(host, options.stateDir.effects, [
+        {
+          accessModifier: 'private',
+          name: 'dp',
+          type: `DataPersistence<${options.statePartialName}>`
+        }
+      ]);
+    }
+
     insertTypeImport(host, stateDir.effects, dataService.names.className);
-    insertTypeImport(host, stateDir.effects, `DataPersistence`);
+    options.creators
+      ? insertEffectCreatorPersistenceFunctions(host, stateDir.effects, options.toGenerate)
+      : insertTypeImport(host, stateDir.effects, `DataPersistence`);
     insertTypeImport(host, stateDir.effects, statePartialName);
     insertCustomImport(host, stateDir.effects, 'HttpErrorResponse', '@angular/common/http');
     insertCustomImport(host, stateDir.effects, 'map', 'rxjs/operators');
 
     insertTypeImport(host, stateDir.effectsSpec, actionsAliasName);
     insertTypeImport(host, stateDir.effectsSpec, dataService.names.className);
-    insertTypeImport(host, stateDir.effectsSpec, `DataPersistence`);
+    options.creators
+      ? insertEffectCreatorPersistenceFunctions(host, stateDir.effectsSpec, options.toGenerate)
+      : insertTypeImport(host, stateDir.effectsSpec, `DataPersistence`);
     insertCustomImport(host, stateDir.effectsSpec, 'hot', 'jest-marbles');
     insertCustomImport(host, stateDir.effectsSpec, 'cold', 'jest-marbles');
     insertCustomImport(host, stateDir.effectsSpec, 'createSpyObj', 'jest-createspyobj');
@@ -301,3 +435,16 @@ export function crudEffects(options: CrudOptions): Rule {
     return host;
   };
 }
+
+const insertEffectCreatorPersistenceFunctions = (
+  host: Tree,
+  directory: string,
+  toGenerate: CrudGenerate
+): void => {
+  if (toGenerate.read || toGenerate.readCollection) {
+    insertCustomImport(host, directory, 'fetch', '@nrwl/angular');
+  }
+  if (toGenerate.create || toGenerate.delete || toGenerate.update) {
+    insertCustomImport(host, directory, 'pessimisticUpdate', '@nrwl/angular');
+  }
+};
