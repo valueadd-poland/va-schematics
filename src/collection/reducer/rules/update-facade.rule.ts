@@ -1,4 +1,4 @@
-import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
+import { Rule, Tree } from '@angular-devkit/schematics';
 import { Change, InsertChange } from '@schematics/angular/utility/change';
 import * as ts from 'typescript';
 import { getSourceNodes, insert } from '../../../utils/ast.utils';
@@ -6,7 +6,7 @@ import { names, toPropertyName } from '../../../utils/name.utils';
 import { createActionAliasName } from '../../../utils/naming.utils';
 import {
   parsePropsToUpdate,
-  parseStateDir,
+  StateFilePaths,
   StateProperty
 } from '../../../utils/options-parsing.utils';
 import { classify } from '../../../utils/string.utils';
@@ -30,9 +30,16 @@ function getMethodTemplate(
   }`;
 }
 
-export function updateFacade(options: ReducerSchema): Rule {
-  return (host: Tree, context: SchematicContext) => {
-    const stateDir = parseStateDir(options.stateDir, host);
+export function updateFacade(
+  facadeSourceFile: ts.SourceFile,
+  stateDir: StateFilePaths,
+  options: ReducerSchema
+): Rule {
+  if (!facadeSourceFile && options.facade) {
+    throw new Error('You try to update a facade that does not exist.');
+  }
+
+  return (host: Tree) => {
     const namespace = createActionAliasName(stateDir.actions);
     const stateProperties = parsePropsToUpdate(options.propsToUpdate);
     const facadeClass = findClassBodyInFile(host, stateDir.facade);

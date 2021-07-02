@@ -1,5 +1,5 @@
 import * as from<%= className %>Actions from './<%= fileName %>.actions';
-import { <%= className %>State, initialState, reducer } from './<%= fileName %>.reducer';
+import { <%= className %>State, initialState, <%= propertyName %>Reducer } from './<%= fileName %>.reducer';
 
 describe('<%= className %> Reducer', () => {
     let state: <%= className %>State;
@@ -11,7 +11,7 @@ describe('<%= className %> Reducer', () => {
     describe('unknown action', () => {
         test('returns the initial state', () => {
             const action = {} as any;
-            const result = reducer(state, action);
+            const result = <%= propertyName %>Reducer(state, action);
 
             expect(result).toBe(state);
         });

@@ -19,7 +19,8 @@ describe('ngrx', () => {
       {
         name: 'state',
         module: 'apps/myapp/src/app/app.module.ts',
-        onlyEmptyRoot: true
+        onlyEmptyRoot: true,
+        creators: false
       } as NgrxSchema,
       appTree
     );

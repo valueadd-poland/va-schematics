@@ -59,6 +59,10 @@ export function updateSelectorsSpec(
   options: ReducerSchema
 ): Rule {
   return (host: Tree) => {
+    if (!selectorsSpecSourceFile && options.selectors) {
+      throw new Error('You try to update selectors specs that do not exist.');
+    }
+
     const stateProperties = parsePropsToUpdate(options.propsToUpdate);
 
     const changes = createSelectorSpec(

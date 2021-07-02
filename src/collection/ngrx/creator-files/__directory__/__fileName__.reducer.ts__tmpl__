@@ -1,5 +1,5 @@
 import * as from<%= className %>Actions from './<%= fileName %>.actions';
-import { createReducer, ActionReducer } from '@ngrx/store';
+import { on, createReducer, ActionReducer } from '@ngrx/store';
 
 export const <%= className.toUpperCase() %>_FEATURE_KEY = '<%= propertyName %>';
 
@@ -12,11 +12,4 @@ export interface <%= className %>PartialState {
 
 export const initialState: <%= className %>State = {};
 
-const <%= propertyName %>Reducer = createReducer(initialState);
-
-export function reducer(
-    state: <%= className %>State = initialState,
-    action: from<%= className %>Actions.CollectiveType
-): ActionReducer<<%= className %>State, from<%= className %>Actions.CollectiveType> {
-    return <%= propertyName %>Reducer(state, action);
-}
+export const <%= propertyName %>Reducer = createReducer(initialState);

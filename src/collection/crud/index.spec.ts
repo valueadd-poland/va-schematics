@@ -13,7 +13,8 @@ const collectionPath = path.join(__dirname, '../../collection.json');
 const ngrxOpts: NgrxSchema = {
   name: 'test',
   module: '/libs/data-access-test/src/lib/data-access-test.module.ts',
-  facade: true
+  facade: true,
+  creators: false
 };
 
 const classOpts: ClassSchema = {

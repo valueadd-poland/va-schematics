@@ -16,7 +16,8 @@ describe('reducer', () => {
   const ngrxOpts: NgrxSchema = {
     name: 'test',
     module: '/libs/testlib/src/lib/testlib.module.ts',
-    facade: true
+    facade: true,
+    creators: false
   };
 
   const classOpts: ClassSchema = {

@@ -30,6 +30,7 @@ export function reducer(options: ReducerSchema): Rule {
     const reducerSpecSourceFile = readIntoSourceFile(host, stateDir.reducerSpec);
     const selectorsSourceFile = readIntoSourceFile(host, stateDir.selectors);
     const selectorsSpecSourceFile = readIntoSourceFile(host, stateDir.selectorsSpec);
+    const facadeSourceFile = readIntoSourceFile(host, stateDir.facade);
     const parsedReducerFile = options.creators
       ? parseReducerWithCreator(reducerSourceFile)
       : parseReducerWithSwitch(reducerSourceFile);
@@ -55,7 +56,7 @@ export function reducer(options: ReducerSchema): Rule {
             updateSelectorsSpec(selectorsSpecSourceFile, stateDir, options)
           ]
         : []),
-      ...(options.facade ? [updateFacade(options)] : []),
+      ...(options.facade ? [updateFacade(facadeSourceFile, stateDir, options)] : []),
       formatFiles({ skipFormat: !!options.skipFormat })
     ];
 

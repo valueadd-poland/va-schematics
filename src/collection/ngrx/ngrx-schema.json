@@ -55,7 +55,7 @@
       "default": false,
       "description": "Do not add NgRx dependencies to package.json (e.g., --skipPackageJson)"
     },
-    "creator": {
+    "creators": {
       "type": "boolean",
       "default": true,
       "description": "Generate store using Creators",
