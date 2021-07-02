@@ -3,6 +3,7 @@ import { Change, InsertChange } from '@schematics/angular/utility/change';
 import { insert } from '../../../utils/ast.utils';
 import { insertTypeImport } from '../../../utils/import.utils';
 import { names, toPropertyName } from '../../../utils/name.utils';
+import { camelize } from '../../../utils/string.utils';
 import { findClassBodyInFile } from '../../../utils/ts.utils';
 import { getRequestPayloadClass } from '../../data-service/utils/request-payload.utils';
 import { CrudOptions } from '../index';
@@ -15,11 +16,15 @@ function getSelectorTemplate(statePropertyName: string, queryName: string): stri
 function getMethodTemplate(
   actionNamespace: string,
   actionName: string,
-  payload: string = ''
+  payload: string = '',
+  creators: boolean
 ): string {
   const actionNames = names(actionName);
+  const toDispatch = creators
+    ? `${actionNamespace}.${camelize(actionNames.className)}(${payload ? '{payload: data}' : ''})`
+    : `new ${actionNamespace}.${actionNames.className}(${payload ? 'data' : ''})`;
   return `\n\n${actionNames.propertyName}(${payload ? 'data: ' + payload : ''}): void {
-    this.store.dispatch(new ${actionNamespace}.${actionNames.className}(${payload ? 'data' : ''}));
+    this.store.dispatch(${toDispatch});
   }`;
 }
 
@@ -56,7 +61,8 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
         getMethodTemplate(
           actionsAliasName,
           `Get${entity.name}`,
-          getRequestPayloadClass(`Get${entity.name}`)
+          getRequestPayloadClass(`Get${entity.name}`),
+          options.creators
         )
       )
     );
@@ -88,7 +94,8 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
         getMethodTemplate(
           actionsAliasName,
           `Get${entity.name}Collection`,
-          getRequestPayloadClass(`Get${entity.name}Collection`)
+          getRequestPayloadClass(`Get${entity.name}Collection`),
+          options.creators
         )
       )
     );
@@ -115,7 +122,8 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
         getMethodTemplate(
           actionsAliasName,
           `Create${entity.name}`,
-          getRequestPayloadClass(`Create${entity.name}`)
+          getRequestPayloadClass(`Create${entity.name}`),
+          options.creators
         )
       )
     );
@@ -142,7 +150,8 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
         getMethodTemplate(
           actionsAliasName,
           `Update${entity.name}`,
-          getRequestPayloadClass(`Update${entity.name}`)
+          getRequestPayloadClass(`Update${entity.name}`),
+          options.creators
         )
       )
     );
@@ -169,7 +178,8 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
         getMethodTemplate(
           actionsAliasName,
           `Remove${entity.name}`,
-          getRequestPayloadClass(`Remove${entity.name}`)
+          getRequestPayloadClass(`Remove${entity.name}`),
+          options.creators
         )
       )
     );

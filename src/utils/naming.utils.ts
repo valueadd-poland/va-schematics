@@ -25,8 +25,8 @@ export function createActionImportAlias(actionPath: string): string {
 
 export function createActionAliasName(actionPath: string): string {
   const aliasNamePrefix = 'from';
-  // extract file name rom the path e.g  /libs/test/lib/+state/auth.actions.ts into auth.actions.ts
-  const actionFileName = actionPath.replace(/^.*[\\\/]/, '');
+  // extract file name from the path e.g  /libs/test/lib/+state/old-syntax.actions.ts into old.syntax.actions.ts
+  const actionFileName = actionPath.replace(/^.*[\\\/]/, '').replace('-', '.');
   // remove extension from the file name and transform it into array e.g from auth.actions.ts into [auth, actions]
   const actionFileNameChunksArray = actionFileName.split('.').slice(0, -1);
   // capitalize name chunks and join them with prefix to create action file name alias eg. fromAuthActions

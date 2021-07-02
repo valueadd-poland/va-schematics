@@ -3,6 +3,7 @@ import { Change, InsertChange } from '@schematics/angular/utility/change';
 import { findDescribeBlockNode, insert } from '../../../utils/ast.utils';
 import { insertTypeImport } from '../../../utils/import.utils';
 import { names } from '../../../utils/name.utils';
+import { camelize } from '../../../utils/string.utils';
 import { readIntoSourceFile } from '../../../utils/ts.utils';
 import { CrudOptions } from '../index';
 
@@ -10,17 +11,21 @@ function getMethodTestTemplate(
   options: CrudOptions,
   actionName: string,
   method: string,
+  creators: boolean,
   methodPayload = true
 ): string {
   const { actionsAliasName } = options;
   const actionNames = names(actionName);
+  const actionToDispatch = creators
+    ? `${actionsAliasName}.${camelize(actionNames.className)}(${methodPayload ? '{payload}' : ''})`
+    : `new ${actionsAliasName}.${actionNames.className}(${methodPayload ? 'payload' : ''})`;
 
   return `\n\ndescribe('#${method}', () => {
-    test('should dispatch ${actionsAliasName}.${actionNames.className} action', () => {
+    test('should dispatch ${actionsAliasName}.${
+    creators ? camelize(actionNames.className) : actionNames.className
+  } action', () => {
       ${methodPayload ? 'const payload = {} as any;' : ''}
-      const action = new ${actionsAliasName}.${actionNames.className}(${
-    methodPayload ? 'payload' : ''
-  });
+      const action = ${actionToDispatch};
 
       facade.${method}(${methodPayload ? 'payload' : ''});
       expect(store.dispatch).toHaveBeenCalledWith(action);
@@ -51,7 +56,7 @@ function createCrudFacadeSpec(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         stateDir.facadeSpec,
         pos,
-        getMethodTestTemplate(options, `Get${entity.name}`, `get${entity.name}`)
+        getMethodTestTemplate(options, `Get${entity.name}`, `get${entity.name}`, options.creators)
       )
     );
   }
@@ -61,7 +66,12 @@ function createCrudFacadeSpec(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         stateDir.facadeSpec,
         pos,
-        getMethodTestTemplate(options, `Get${entity.name}Collection`, `get${entity.name}Collection`)
+        getMethodTestTemplate(
+          options,
+          `Get${entity.name}Collection`,
+          `get${entity.name}Collection`,
+          options.creators
+        )
       )
     );
   }
@@ -71,7 +81,12 @@ function createCrudFacadeSpec(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         stateDir.facadeSpec,
         pos,
-        getMethodTestTemplate(options, `Create${entity.name}`, `create${entity.name}`)
+        getMethodTestTemplate(
+          options,
+          `Create${entity.name}`,
+          `create${entity.name}`,
+          options.creators
+        )
       )
     );
   }
@@ -81,7 +96,12 @@ function createCrudFacadeSpec(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         stateDir.facadeSpec,
         pos,
-        getMethodTestTemplate(options, `Update${entity.name}`, `update${entity.name}`)
+        getMethodTestTemplate(
+          options,
+          `Update${entity.name}`,
+          `update${entity.name}`,
+          options.creators
+        )
       )
     );
   }
@@ -91,7 +111,12 @@ function createCrudFacadeSpec(host: Tree, options: CrudOptions): Change[] {
       new InsertChange(
         stateDir.facadeSpec,
         pos,
-        getMethodTestTemplate(options, `Remove${entity.name}`, `remove${entity.name}`)
+        getMethodTestTemplate(
+          options,
+          `Remove${entity.name}`,
+          `remove${entity.name}`,
+          options.creators
+        )
       )
     );
   }

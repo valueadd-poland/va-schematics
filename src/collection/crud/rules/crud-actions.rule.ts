@@ -9,29 +9,29 @@ import { CrudOptions } from '../index';
 function createActionRules(options: CrudOptions): Rule[] {
   const { toGenerate, entity, actionPrefix, statePath } = options;
   const rules: Rule[] = [];
+  const genericOptions = {
+    prefix: actionPrefix,
+    stateDir: statePath,
+    skipFormat: true,
+    creators: options.creators
+  };
 
   if (toGenerate.read) {
     rules.push(
       action({
         payload: getRequestPayloadClass(`Get${entity.name}`),
         name: `Get${entity.name}`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       }),
       action({
         payload: 'HttpErrorResponse',
         name: `Get${entity.name}Fail`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       }),
       action({
         payload: `${entity.name}`,
         name: `Get${entity.name}Success`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       })
     );
   }
@@ -41,23 +41,17 @@ function createActionRules(options: CrudOptions): Rule[] {
       action({
         payload: getRequestPayloadClass(`Get${entity.name}Collection`),
         name: `Get${entity.name}Collection`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       }),
       action({
         payload: 'HttpErrorResponse',
         name: `Get${entity.name}CollectionFail`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       }),
       action({
         payload: `${entity.name}[]`,
         name: `Get${entity.name}CollectionSuccess`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       })
     );
   }
@@ -67,23 +61,17 @@ function createActionRules(options: CrudOptions): Rule[] {
       action({
         payload: getRequestPayloadClass(`Create${entity.name}`),
         name: `Create${entity.name}`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       }),
       action({
         payload: 'HttpErrorResponse',
         name: `Create${entity.name}Fail`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       }),
       action({
         payload: entity.name,
         name: `Create${entity.name}Success`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       })
     );
   }
@@ -93,23 +81,17 @@ function createActionRules(options: CrudOptions): Rule[] {
       action({
         payload: getRequestPayloadClass(`Update${entity.name}`),
         name: `Update${entity.name}`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       }),
       action({
         payload: 'HttpErrorResponse',
         name: `Update${entity.name}Fail`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       }),
       action({
         payload: entity.name,
         name: `Update${entity.name}Success`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       })
     );
   }
@@ -119,23 +101,17 @@ function createActionRules(options: CrudOptions): Rule[] {
       action({
         payload: getRequestPayloadClass(`Remove${entity.name}`),
         name: `Remove${entity.name}`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       }),
       action({
         payload: 'HttpErrorResponse',
         name: `Remove${entity.name}Fail`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       }),
       action({
         payload: getRequestPayloadClass(`Remove${entity.name}`),
         name: `Remove${entity.name}Success`,
-        prefix: actionPrefix,
-        stateDir: statePath,
-        skipFormat: true
+        ...genericOptions
       })
     );
   }

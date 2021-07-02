@@ -9,4 +9,8 @@ export interface CrudSchema {
   operation: string[];
   responseType?: string;
   stateDir: string;
+  /**
+   * Specifies whether to use creator NgRx syntax.
+   */
+  creators?: boolean;
 }
