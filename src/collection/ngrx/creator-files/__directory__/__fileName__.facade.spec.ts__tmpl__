@@ -1,0 +1,42 @@
+import { NgModule } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { provideMockActions } from '@ngrx/effects/testing';
+import { Store } from '@ngrx/store';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { NxModule } from '@nrwl/angular';
+import { Observable } from 'rxjs';
+import { <%= className %>Facade } from './<%= fileName %>.facade';
+
+describe('<%= className %>Facade', () => {
+  let actions: Observable<any>;
+  let facade: <%= className %>Facade;
+  let store: MockStore;
+
+  describe('used in NgModule', () => {
+
+    beforeEach(() => {
+      @NgModule({
+        imports: [],
+        providers: [
+          <%= className %>Facade,
+          provideMockStore(),
+          provideMockActions(() => actions)
+        ]
+      })
+      class CustomFeatureModule {}
+
+      @NgModule({
+        imports: [
+          NxModule.forRoot(),
+          CustomFeatureModule,
+        ]
+      })
+      class RootModule {}
+
+      TestBed.configureTestingModule({ imports: [RootModule] });
+      facade = TestBed.inject(<%= className %>Facade);
+      store = TestBed.inject(MockStore);
+      jest.spyOn(store, 'dispatch');
+    });
+  });
+});
