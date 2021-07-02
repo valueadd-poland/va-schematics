@@ -54,6 +54,12 @@
       "type": "boolean",
       "default": false,
       "description": "Do not add NgRx dependencies to package.json (e.g., --skipPackageJson)"
+    },
+    "creator": {
+      "type": "boolean",
+      "default": true,
+      "description": "Generate store using Creators",
+      "x-prompt": "Would you like to use creator functions?"
     }
   },
   "required": ["module"]

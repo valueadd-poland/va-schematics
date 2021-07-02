@@ -33,8 +33,9 @@ function generateNgrxFilesFromTemplates(options: NgrxSchema): Rule {
   const name = options.name;
   const moduleDir = path.dirname(options.module);
   const excludeFacade = (p: any) => p.match(/^((?!facade).)*$/);
+  const sourceUrl = options.creators ? './creator-files' : './files';
 
-  const templateSource = apply(url('./files'), [
+  const templateSource = apply(url(sourceUrl), [
     !options.facade ? filter(excludeFacade) : noop(),
     template({ ...options, tmpl: '', ...names(name) }),
     move(moduleDir)

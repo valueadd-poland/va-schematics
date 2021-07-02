@@ -1,0 +1,9 @@
+import { Injectable } from '@angular/core';
+import { select, Store } from '@ngrx/store';
+import { <%= className %>PartialState } from './<%= fileName %>.reducer';
+import { <%= propertyName %>Query } from './<%= fileName %>.selectors';
+
+@Injectable()
+export class <%= className %>Facade {
+  constructor(private store: Store<<%= className %>PartialState>) {}
+}

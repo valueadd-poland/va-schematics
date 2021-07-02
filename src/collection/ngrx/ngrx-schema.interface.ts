@@ -8,4 +8,5 @@ export interface NgrxSchema {
   root?: boolean;
   skipFormat?: boolean;
   skipPackageJson?: boolean;
+  creators?: boolean;
 }
