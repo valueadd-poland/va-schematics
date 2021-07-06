@@ -2,6 +2,7 @@ import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import { Schema as ClassSchema } from '@schematics/angular/class/schema';
 import * as path from 'path';
+import { camelize, capitalize } from '../../utils/string.utils';
 import { createApp, createEmptyWorkspace, createLib } from '../../utils/testing.utils';
 import { ActionSchema } from '../action/action-schema.interface';
 import { NgrxSchema } from '../ngrx/ngrx-schema.interface';
@@ -137,9 +138,68 @@ describe('reducer', () => {
       };
       appTree = await runner.runSchematicAsync('reducer', reducerCreatorOpts, appTree).toPromise();
 
-      /*@const content = appTree.readContent('/libs/testlib/src/lib/+state/test.reducer.ts');
-      const content2 = appTree.readContent('/libs/testlib/src/lib/+state/test.selectors.spec.ts');
-      console.log(content2);*/
+      const reducerContent = appTree.readContent('/libs/testlib/src/lib/+state/test.reducer.ts');
+      const selectorsContent = appTree.readContent(
+        '/libs/testlib/src/lib/+state/test.selectors.ts'
+      );
+
+      expect(reducerContent).toContain(
+        `export interface ${capitalize(ngrxOpts.name)}State {\n` +
+          `  loadingTest: boolean;\n` +
+          `  test: Test;\n` +
+          `  loadingTestApiError: ApiError | null;\n` +
+          `}`
+      );
+
+      expect(reducerContent).toContain(
+        `export const initialState: ${capitalize(ngrxOpts.name)}State = {\n` +
+          `  loadingTest: false,\n` +
+          `  test: null,\n` +
+          `  loadingTestApiError: null\n` +
+          `};`
+      );
+
+      expect(reducerContent).toContain(
+        `export const ${ngrxOpts.name}Reducer = createReducer(\n` +
+          `  initialState,\n` +
+          `  on(\n` +
+          `    from${capitalize(ngrxOpts.name)}Actions.${camelize(
+            reducerCreatorOpts.actionName
+          )},\n` +
+          `    (state, action): ${capitalize(ngrxOpts.name)}State => ({\n` +
+          `      ...state,\n` +
+          `      loadingTest: false,\n` +
+          `      test: action.payload,\n` +
+          `      loadingTestApiError: null\n` +
+          `    })\n` +
+          `  )\n` +
+          `);`
+      );
+
+      expect(selectorsContent).toContain(
+        `const getLoadingTest = createSelector(get${capitalize(
+          ngrxOpts.name
+        )}State, state => state.loadingTest);`
+      );
+
+      expect(selectorsContent).toContain(
+        `const getTest = createSelector(get${capitalize(ngrxOpts.name)}State, state => state.test);`
+      );
+
+      expect(selectorsContent).toContain(
+        `const getLoadingTestApiError = createSelector(get${capitalize(
+          ngrxOpts.name
+        )}State, state => state.loadingTestApiError);`
+      );
+
+      expect(selectorsContent).toContain(
+        `export const testQuery = {\n` +
+          `  getLoadingTest,\n` +
+          `  getTest,\n` +
+          `  getLoadingTestApiError\n` +
+          `};`
+      );
+
       done();
     });
   });

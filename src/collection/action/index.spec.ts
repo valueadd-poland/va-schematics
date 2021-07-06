@@ -138,16 +138,32 @@ describe('action', () => {
       )}'`
     );
 
-    expect(content).toMatch(
-      new RegExp(`export const ${camelize(updateTestOpts.name)} = createAction`)
+    expect(content).toContain(
+      `export const ${camelize(getTestOpts.name)} = createAction(Types.${
+        getTestOpts.name
+      }, props<{ payload: ${getTestOpts.payload} }>());`
+    );
+    expect(content).toContain(
+      `${classify(getTestOpts.name)} = '[${classify(getTestOpts.prefix)}] ${splitPascalCase(
+        getTestOpts.name
+      )}'`
+    );
+
+    expect(content).toContain(
+      `export const ${camelize(updateTestOpts.name)} = createAction(Types.${
+        updateTestOpts.name
+      }, props<{ payload: ${updateTestOpts.payload} }>());`
     );
     expect(content).toContain(
       `${classify(updateTestOpts.name)} = '[${classify(updateTestOpts.prefix)}] ${splitPascalCase(
         updateTestOpts.name
       )}'`
     );
-    expect(content).toMatch(
-      new RegExp(`export const ${camelize(removeTestOpts.name)} = createAction`)
+
+    expect(content).toContain(
+      `export const ${camelize(removeTestOpts.name)} = createAction(Types.${
+        removeTestOpts.name
+      }, props<{ payload: ${removeTestOpts.payload} }>());`
     );
     expect(content).toContain(
       `${classify(removeTestOpts.name)} = '[${classify(removeTestOpts.prefix)}] ${splitPascalCase(
