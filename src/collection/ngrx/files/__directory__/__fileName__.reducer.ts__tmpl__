@@ -1,4 +1,4 @@
-import * as from<%= className %>Actions from './<%= fileName %>.actions';
+import { from<%= className %>Actions } from './<%= fileName %>.actions';
 
 export const <%= className.toUpperCase() %>_FEATURE_KEY = '<%= propertyName %>';
 

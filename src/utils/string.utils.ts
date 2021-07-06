@@ -10,6 +10,7 @@ const STRING_DECAMELIZE_REGEXP = /([a-z\d])([A-Z])/g;
 const STRING_CAMELIZE_REGEXP = /(-|_|\.|\s)+(.)?/g;
 const STRING_UNDERSCORE_REGEXP_1 = /([a-z\d])([A-Z]+)/g;
 const STRING_UNDERSCORE_REGEXP_2 = /-|\s+/g;
+const STRING_SPLIT_UPPER_CAMEL_REGEXP = /[A-Z]/g;
 
 /**
  * Converts a camelized string into all lower case separated by underscores.
@@ -133,4 +134,8 @@ export function capitalize(str: string): string {
 
 export function formatToCompare(str: string): string {
   return str.replace(/\n|\r|\s+/g, '');
+}
+
+export function splitUpperCamel(str: string): string {
+  return str.replace(STRING_SPLIT_UPPER_CAMEL_REGEXP, (match: string) => ' ' + match);
 }

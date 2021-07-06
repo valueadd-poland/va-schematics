@@ -10,7 +10,11 @@ import {
   StateProperty
 } from '../../../utils/options-parsing.utils';
 import { classify } from '../../../utils/string.utils';
-import { findClassBodyInFile, readIntoSourceFile } from '../../../utils/ts.utils';
+import {
+  findClassBodyInFile,
+  findNamespaceName,
+  readIntoSourceFile
+} from '../../../utils/ts.utils';
 import { ReducerSchema } from '../reducer-schema.interface';
 
 function getSelectorTemplate(prop: StateProperty, queryName: string): string {
@@ -40,7 +44,9 @@ export function updateFacade(
   }
 
   return (host: Tree) => {
-    const namespace = createActionAliasName(stateDir.actions);
+    const namespace = options.creators
+      ? createActionAliasName(stateDir.actions)
+      : findNamespaceName(host, stateDir.actions);
     const stateProperties = parsePropsToUpdate(options.propsToUpdate);
     const facadeClass = findClassBodyInFile(host, stateDir.facade);
     const queryDeclarations = getSourceNodes(readIntoSourceFile(host, stateDir.selectors))
