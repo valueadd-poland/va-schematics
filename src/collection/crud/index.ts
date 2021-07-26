@@ -16,6 +16,7 @@ import { formatFiles } from '../../utils/rules/format-files';
 import {
   findClassNameInFile,
   findDeclarationNodeByPartialName,
+  findNamespaceName,
   readIntoSourceFile
 } from '../../utils/ts.utils';
 import { DataServiceBackend } from '../data-service/data-service-schema';
@@ -37,7 +38,7 @@ export interface CrudGenerate {
 
 export interface CrudOptions {
   actionPrefix: string;
-  actionsAliasName: string;
+  actionsImportName: string;
   dataService: {
     names: Names;
     path: string;
@@ -140,7 +141,9 @@ export function parseOptions(host: Tree, options: CrudSchema): CrudOptions {
   const deleteResponseType = responseTypeParts.find(rtp => rtp.startsWith('d:'));
 
   return {
-    actionsAliasName: createActionAliasName(parsedStateDir.actions),
+    actionsImportName: options.creators
+      ? createActionAliasName(parsedStateDir.actions)
+      : findNamespaceName(host, parsedStateDir.actions),
     effects: {
       name: findClassNameInFile(host, parsedStateDir.effects)
     },

@@ -14,14 +14,14 @@ function getMethodTestTemplate(
   creators: boolean,
   methodPayload = true
 ): string {
-  const { actionsAliasName } = options;
+  const { actionsImportName } = options;
   const actionNames = names(actionName);
   const actionToDispatch = creators
-    ? `${actionsAliasName}.${camelize(actionNames.className)}(${methodPayload ? '{payload}' : ''})`
-    : `new ${actionsAliasName}.${actionNames.className}(${methodPayload ? 'payload' : ''})`;
+    ? `${actionsImportName}.${camelize(actionNames.className)}(${methodPayload ? '{payload}' : ''})`
+    : `new ${actionsImportName}.${actionNames.className}(${methodPayload ? 'payload' : ''})`;
 
   return `\n\ndescribe('#${method}', () => {
-    test('should dispatch ${actionsAliasName}.${
+    test('should dispatch ${actionsImportName}.${
     creators ? camelize(actionNames.className) : actionNames.className
   } action', () => {
       ${methodPayload ? 'const payload = {} as any;' : ''}
@@ -126,11 +126,11 @@ function createCrudFacadeSpec(host: Tree, options: CrudOptions): Change[] {
 
 export function crudFacadeSpec(options: CrudOptions): Rule {
   return (host: Tree, context: SchematicContext) => {
-    const { actionsAliasName, stateDir } = options;
+    const { actionsImportName, stateDir } = options;
 
     insert(host, stateDir.facadeSpec, createCrudFacadeSpec(host, options));
 
-    insertTypeImport(host, stateDir.facadeSpec, actionsAliasName);
+    insertTypeImport(host, stateDir.facadeSpec, actionsImportName);
 
     return host;
   };

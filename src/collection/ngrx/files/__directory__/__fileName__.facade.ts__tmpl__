@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { <%= className %>PartialState } from './<%= fileName %>.reducer';
 import { <%= propertyName %>Query } from './<%= fileName %>.selectors';
-import * as from<%= className %>Actions from './<%= fileName %>.actions';
+import { from<%= className %>Actions } from './<%= fileName %>.actions';
 
 @Injectable()
 export class <%= className %>Facade {

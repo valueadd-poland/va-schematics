@@ -1,11 +1,11 @@
 import { chain, Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { parseReducerWithCreator, parseReducerWithSwitch } from '../../utils/file-parsing.utils';
-import { createActionAliasName, createActionImportAlias } from '../../utils/naming.utils';
+import { createActionAliasName, findActionsNamespace } from '../../utils/naming.utils';
 import { parseStateDir } from '../../utils/options-parsing.utils';
 import { formatFiles } from '../../utils/rules/format-files';
 import { readIntoSourceFile } from '../../utils/ts.utils';
 import { ReducerSchema } from './reducer-schema.interface';
-import { insertActionsAliasImport } from './rules/insert-actions-alias-import.rule';
+import { insertActionsImport } from './rules/insert-actions-alias-import.rule';
 import { updateFacade } from './rules/update-facade.rule';
 import { updateReducerSpec } from './rules/update-reducer-spec.rule';
 import { updateReducer } from './rules/update-reducer.rule';
@@ -25,7 +25,9 @@ export function reducer(options: ReducerSchema): Rule {
     }
 
     const stateDir = parseStateDir(options.stateDir, host);
-    const actionAliasName = createActionAliasName(stateDir.actions);
+    const actionImportName = options.creators
+      ? createActionAliasName(stateDir.actions)
+      : findActionsNamespace(readIntoSourceFile(host, stateDir.actions));
     const reducerSourceFile = readIntoSourceFile(host, stateDir.reducer);
     const reducerSpecSourceFile = readIntoSourceFile(host, stateDir.reducerSpec);
     const selectorsSourceFile = readIntoSourceFile(host, stateDir.selectors);
@@ -36,17 +38,12 @@ export function reducer(options: ReducerSchema): Rule {
       : parseReducerWithSwitch(reducerSourceFile);
 
     const rules: Rule[] = [
-      insertActionsAliasImport(
-        reducerSourceFile,
-        stateDir,
-        createActionImportAlias(stateDir.actions),
-        true
-      ),
-      updateReducer(reducerSourceFile, parsedReducerFile, actionAliasName, stateDir, options),
+      insertActionsImport(reducerSourceFile, stateDir, actionImportName, !!options.creators),
+      updateReducer(reducerSourceFile, parsedReducerFile, actionImportName, stateDir, options),
       updateReducerSpec(
         reducerSpecSourceFile,
         parsedReducerFile,
-        actionAliasName,
+        actionImportName,
         stateDir,
         options
       ),
