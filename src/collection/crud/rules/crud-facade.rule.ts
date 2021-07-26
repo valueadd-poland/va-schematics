@@ -29,7 +29,7 @@ function getMethodTemplate(
 }
 
 function createFacade(host: Tree, options: CrudOptions): Change[] {
-  const { toGenerate, entity, stateDir, facade, actionsAliasName } = options;
+  const { toGenerate, entity, stateDir, facade, actionsImportName } = options;
   const entityPropertyName = toPropertyName(entity.name);
   const selectorChanges: Change[] = [];
   const methodsChanges: Change[] = [];
@@ -59,7 +59,7 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
         stateDir.facade,
         facadeClassBody.getEnd(),
         getMethodTemplate(
-          actionsAliasName,
+          actionsImportName,
           `Get${entity.name}`,
           getRequestPayloadClass(`Get${entity.name}`),
           options.creators
@@ -92,7 +92,7 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
         stateDir.facade,
         facadeClassBody.getEnd(),
         getMethodTemplate(
-          actionsAliasName,
+          actionsImportName,
           `Get${entity.name}Collection`,
           getRequestPayloadClass(`Get${entity.name}Collection`),
           options.creators
@@ -120,7 +120,7 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
         stateDir.facade,
         facadeClassBody.getEnd(),
         getMethodTemplate(
-          actionsAliasName,
+          actionsImportName,
           `Create${entity.name}`,
           getRequestPayloadClass(`Create${entity.name}`),
           options.creators
@@ -148,7 +148,7 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
         stateDir.facade,
         facadeClassBody.getEnd(),
         getMethodTemplate(
-          actionsAliasName,
+          actionsImportName,
           `Update${entity.name}`,
           getRequestPayloadClass(`Update${entity.name}`),
           options.creators
@@ -176,7 +176,7 @@ function createFacade(host: Tree, options: CrudOptions): Change[] {
         stateDir.facade,
         facadeClassBody.getEnd(),
         getMethodTemplate(
-          actionsAliasName,
+          actionsImportName,
           `Remove${entity.name}`,
           getRequestPayloadClass(`Remove${entity.name}`),
           options.creators
@@ -195,7 +195,7 @@ export function crudFacade(options: CrudOptions): Rule {
     insert(host, options.stateDir.facade, createFacade(host, options));
 
     insertTypeImport(host, options.stateDir.facade, options.facade.queryName);
-    insertTypeImport(host, options.stateDir.facade, options.actionsAliasName);
+    insertTypeImport(host, options.stateDir.facade, options.actionsImportName);
     insertTypeImport(host, options.stateDir.facade, options.entity.name);
 
     if (options.toGenerate.read) {

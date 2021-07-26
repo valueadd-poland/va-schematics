@@ -16,15 +16,15 @@ function getEffectSpecTemplate(
   actionName: string,
   actionPayload = true
 ): string {
-  const { actionsAliasName, dataService } = options;
+  const { actionsImportName, dataService } = options;
   const actionNames = names(actionName);
   const payload = actionPayload ? '{} as any' : '';
 
   return `\n\ndescribe('${actionNames.propertyName}$', () => {
     test('returns ${actionNames.className}Success action on success', () => {
       const payload = {} as any;
-      const action = new ${actionsAliasName}.${actionNames.className}(${payload});
-      const completion = new ${actionsAliasName}.${actionNames.className}Success(payload);
+      const action = new ${actionsImportName}.${actionNames.className}(${payload});
+      const completion = new ${actionsImportName}.${actionNames.className}Success(payload);
 
       actions = hot('-a', {a: action});
       const response = cold('--b|', {b: payload});
@@ -39,8 +39,8 @@ function getEffectSpecTemplate(
 
     test('returns ${actionNames.className}Fail action on fail', () => {
       const payload = {} as any;
-      const action = new ${actionsAliasName}.${actionNames.className}(${payload});
-      const completion = new ${actionsAliasName}.${actionNames.className}Fail(payload);
+      const action = new ${actionsImportName}.${actionNames.className}(${payload});
+      const completion = new ${actionsImportName}.${actionNames.className}Fail(payload);
 
       actions = hot('-a', { a: action });
       const response = cold('-#', {}, payload);
@@ -60,15 +60,15 @@ function getEffectCreatorsSpecTemplate(
   actionName: string,
   actionPayload = true
 ): string {
-  const { actionsAliasName, dataService } = options;
+  const { actionsImportName, dataService } = options;
   const actionNames = names(actionName);
   const payload = actionPayload ? '{} as any' : '';
 
   return `\n\ndescribe('${actionNames.propertyName}$', () => {
     test('returns ${actionNames.className}Success action on success', () => {
       const payload = {} as any;
-      const action = ${actionsAliasName}.${camelize(actionNames.className)}(${payload});
-      const completion = ${actionsAliasName}.${camelize(actionNames.className)}Success(payload);
+      const action = ${actionsImportName}.${camelize(actionNames.className)}(${payload});
+      const completion = ${actionsImportName}.${camelize(actionNames.className)}Success(payload);
 
       actions = hot('-a', {a: action});
       const response = cold('--b|', {b: payload});
@@ -83,8 +83,8 @@ function getEffectCreatorsSpecTemplate(
 
     test('returns ${actionNames.className}Fail action on fail', () => {
       const payload = {} as any;
-      const action = ${actionsAliasName}.${camelize(actionNames.className)}(${payload});
-      const completion = ${actionsAliasName}.${camelize(actionNames.className)}Fail(payload);
+      const action = ${actionsImportName}.${camelize(actionNames.className)}(${payload});
+      const completion = ${actionsImportName}.${camelize(actionNames.className)}Fail(payload);
 
       actions = hot('-a', { a: action });
       const response = cold('-#', {}, payload);
@@ -104,41 +104,41 @@ function getEffectFetchTemplate(
   actionName: string,
   actionPayload = true
 ): string {
-  const { actionsAliasName } = options;
+  const { actionsImportName } = options;
   const actionNames = names(actionName);
   const payload = actionPayload ? 'action.payload' : '';
 
   return `@Effect()
-  ${actionNames.propertyName}$ = this.dp.fetch(${actionsAliasName}.${config.action.typesEnumName}.${actionNames.className}, {
+  ${actionNames.propertyName}$ = this.dp.fetch(${actionsImportName}.${config.action.typesEnumName}.${actionNames.className}, {
     id: () => {},
-    run: (action: ${actionsAliasName}.${actionNames.className}) => {
+    run: (action: ${actionsImportName}.${actionNames.className}) => {
       return this.${options.dataService.names.propertyName}
         .${actionNames.propertyName}(${payload})
-        .pipe(map(data => new ${actionsAliasName}.${actionNames.className}Success(data)));
+        .pipe(map(data => new ${actionsImportName}.${actionNames.className}Success(data)));
     },
-    onError: (action: ${actionsAliasName}.${actionNames.className}, error: HttpErrorResponse) => {
-      return new ${actionsAliasName}.${actionNames.className}Fail(error);
+    onError: (action: ${actionsImportName}.${actionNames.className}, error: HttpErrorResponse) => {
+      return new ${actionsImportName}.${actionNames.className}Fail(error);
     }
   });\n\n`;
 }
 
 function getEffectCreatorFetchTemplate(options: CrudOptions, actionName: string): string {
-  const { actionsAliasName } = options;
+  const { actionsImportName } = options;
   const actionNames = names(actionName);
 
   return `${actionNames.propertyName}$ = createEffect(() => this.actions$.pipe(
-  ofType(${actionsAliasName}.${camelize(actionNames.className)}),
+  ofType(${actionsImportName}.${camelize(actionNames.className)}),
   fetch({
     id: () => {},
     run: ({payload}) => {
       return this.${options.dataService.names.propertyName}
         .${actionNames.propertyName}(payload)
-        .pipe(map(data => ${actionsAliasName}.${camelize(
+        .pipe(map(data => ${actionsImportName}.${camelize(
     actionNames.className
   )}Success({payload: data})));
     },
     onError: (action, error: HttpErrorResponse) => {
-      return ${actionsAliasName}.${camelize(actionNames.className)}Fail({payload: error});
+      return ${actionsImportName}.${camelize(actionNames.className)}Fail({payload: error});
     }
   })
   )
@@ -151,22 +151,22 @@ function getEffectUpdateTemplate(
   update: 'pessimistic' | 'optimistic',
   successPayload?: string
 ): string {
-  const { actionsAliasName } = options;
+  const { actionsImportName } = options;
   const actionNames = names(actionName);
 
   return `@Effect()
-  ${actionNames.propertyName}$ = this.dp.${update}Update(${actionsAliasName}.${
+  ${actionNames.propertyName}$ = this.dp.${update}Update(${actionsImportName}.${
     config.action.typesEnumName
   }.${actionNames.className}, {
-    run: (action: ${actionsAliasName}.${actionNames.className}) => {
+    run: (action: ${actionsImportName}.${actionNames.className}) => {
       return this.${options.dataService.names.propertyName}
         .${actionNames.propertyName}(action.payload)
-        .pipe(map(data => new ${actionsAliasName}.${actionNames.className}Success(${
+        .pipe(map(data => new ${actionsImportName}.${actionNames.className}Success(${
     successPayload || 'data'
   })));
     },
-    onError: (action: ${actionsAliasName}.${actionNames.className}, error: HttpErrorResponse) => {
-      return new ${actionsAliasName}.${actionNames.className}Fail(error);
+    onError: (action: ${actionsImportName}.${actionNames.className}, error: HttpErrorResponse) => {
+      return new ${actionsImportName}.${actionNames.className}Fail(error);
     }
   });\n\n`;
 }
@@ -177,21 +177,21 @@ function getEffectCreatorUpdateTemplate(
   update: 'pessimistic' | 'optimistic',
   successPayload?: string
 ): string {
-  const { actionsAliasName } = options;
+  const { actionsImportName } = options;
   const actionNames = names(actionName);
 
   return `${actionNames.propertyName}$ = createEffect(() => this.actions$.pipe(
-  ofType(${actionsAliasName}.${camelize(actionNames.className)}),
+  ofType(${actionsImportName}.${camelize(actionNames.className)}),
   ${update}Update({
     run: ({payload}) => {
       return this.${options.dataService.names.propertyName}
         .${actionNames.propertyName}(payload)
-        .pipe(map(data => ${actionsAliasName}.${camelize(actionNames.className)}Success(${
+        .pipe(map(data => ${actionsImportName}.${camelize(actionNames.className)}Success(${
     successPayload || '{payload: data}'
   })));
     },
     onError: (action, error: HttpErrorResponse) => {
-      return ${actionsAliasName}.${camelize(actionNames.className)}Fail({payload: error});
+      return ${actionsImportName}.${camelize(actionNames.className)}Fail({payload: error});
     }
   })
   )
@@ -392,7 +392,7 @@ export function crudEffects(options: CrudOptions): Rule {
   return (host: Tree, context: SchematicContext) => {
     context.logger.info(`Generating effects.`);
 
-    const { actionsAliasName, dataService, stateDir, statePartialName } = options;
+    const { actionsImportName, dataService, stateDir, statePartialName } = options;
 
     insertConstructorArguments(host, options.stateDir.effects, [
       {
@@ -420,7 +420,7 @@ export function crudEffects(options: CrudOptions): Rule {
     insertCustomImport(host, stateDir.effects, 'HttpErrorResponse', '@angular/common/http');
     insertCustomImport(host, stateDir.effects, 'map', 'rxjs/operators');
 
-    insertTypeImport(host, stateDir.effectsSpec, actionsAliasName);
+    insertTypeImport(host, stateDir.effectsSpec, actionsImportName);
     insertTypeImport(host, stateDir.effectsSpec, dataService.names.className);
     options.creators
       ? insertEffectCreatorPersistenceFunctions(host, stateDir.effectsSpec, options.toGenerate)
