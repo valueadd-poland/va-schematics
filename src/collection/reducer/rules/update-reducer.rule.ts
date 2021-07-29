@@ -59,17 +59,21 @@ function createStateProperties(
 ): InsertChange[] {
   const changes: InsertChange[] = [];
   const initializer = reducerFile.initialState.initializer as ts.ObjectLiteralExpression;
-  let leadingComma = initializer.properties ? !!initializer.properties.length : true;
+  const addTrailingComma =
+    initializer.properties.hasTrailingComma || !initializer.properties.length;
+  const callExpression = findNode(reducerFile.initialState, ts.SyntaxKind.CallExpression);
+  const objectLiteral = callExpression
+    ? findNode(callExpression, ts.SyntaxKind.ObjectLiteralExpression)
+    : null;
+  const initialStatePos = objectLiteral
+    ? objectLiteral.getEnd() - 1
+    : reducerFile.initialState.getEnd() - 1;
+
+  if (!addTrailingComma) {
+    changes.push(new InsertChange(filePath, initialStatePos - 1, `,`));
+  }
 
   stateProperties.forEach(stateProperty => {
-    const callExpression = findNode(reducerFile.initialState, ts.SyntaxKind.CallExpression);
-    const objectLiteral = callExpression
-      ? findNode(callExpression, ts.SyntaxKind.ObjectLiteralExpression)
-      : null;
-    const initialStatePos = objectLiteral
-      ? objectLiteral.getEnd() - 1
-      : reducerFile.initialState.getEnd() - 1;
-
     // if there is no property in interface, add it to interface and initial state
     if (!interfaceProps.find(prop => prop[0].getText() === stateProperty.key)) {
       changes.push(
@@ -84,12 +88,9 @@ function createStateProperties(
         new InsertChange(
           filePath,
           initialStatePos,
-          `${leadingComma ? ',' : ''}${stateProperty.key}: ${guessInitialValue(
-            stateProperty.type
-          )}\n`
+          `${stateProperty.key}: ${guessInitialValue(stateProperty.type)},\n`
         )
       );
-      leadingComma = true;
     }
   });
 

@@ -22,7 +22,10 @@ export function addActionType(options: ActionSchema, stateDir: StateFilePaths): 
     }
 
     let enumMember = `${options.name} = '[${options.prefix}] ${splitPascalCase(options.name)}'`;
-    enumMember = enumDeclaration.members.length ? ',' + enumMember : enumMember;
+    enumMember =
+      enumDeclaration.members.hasTrailingComma || !enumDeclaration.members.length
+        ? enumMember
+        : ',' + enumMember;
 
     const change = new InsertChange(stateDir.actions, enumDeclaration.end - 1, enumMember);
     const recorder = host.beginUpdate(stateDir.actions);
