@@ -32,7 +32,7 @@ function parseSchema(schema: DataServiceHttpMethodSchema): Options {
     methodName: schema.methodName || methodName,
     methodProperties: schema.methodProperties || methodProperties,
     methodReturnType:
-      schema.methodReturnType || getDefaultCrudMethodReturnType(schema.entity, collection),
+      schema.methodReturnType || getDefaultCrudMethodReturnType(schema.entity || 'any', collection),
     operation: schema.operation,
     methodPropertyMapping: schema.methodProperties
       ? ''
