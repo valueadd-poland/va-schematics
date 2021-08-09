@@ -148,6 +148,7 @@ ng g @valueadd/schematics:data-service
 * propsToUpdate – properties to update. Follow pattern: {propertyName}:{value}:{?type}. You can separate multiple properties with comma
 * selectors – generate selectors for given properties
 * facade – generate facade
+* creators - whether to use creator NgRx syntax
   
 **Example:**
 
