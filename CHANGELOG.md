@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.1.1](https://github.com/valueadd-poland/va-schematics/compare/v3.1.0...v3.1.1) (2021-08-09)
+
+
+### Bug Fixes
+
+* **readme:** add creators flag for readme ([b47479b](https://github.com/valueadd-poland/va-schematics/commit/b47479bef7c983e07bb8068471f3b91baa399414))
+
 ## [3.1.0](https://github.com/valueadd-poland/va-schematics/compare/v3.0.0...v3.1.0) (2021-08-09)
 
 
