@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.0](https://github.com/valueadd-poland/va-schematics/compare/v3.0.0...v3.1.0) (2021-08-09)
+
+
+### Features
+
+* **action:** add support for action creators syntax ([4207f8d](https://github.com/valueadd-poland/va-schematics/commit/4207f8dcfea911d49f19933fdb23d01526ce651c))
+* **crud:** add support for new syntax ([d104a46](https://github.com/valueadd-poland/va-schematics/commit/d104a46861516bbadd5225682f2d5fa3aaa6d50e))
+* **ngrx:** add creator files ([4e340cc](https://github.com/valueadd-poland/va-schematics/commit/4e340ccdfb6055085ba2612d6034dbf0316ac524))
+* **project:** add support for new import syntax ([b3d692c](https://github.com/valueadd-poland/va-schematics/commit/b3d692cb007f4f4784b8a6370941add329b4acdd))
+* **project:** add support for new import syntax ([f660af9](https://github.com/valueadd-poland/va-schematics/commit/f660af9b345bd9a175329b5a1bb11578ad943447))
+* **project:** add tests for creators syntax ([0a24831](https://github.com/valueadd-poland/va-schematics/commit/0a248313e2461682fa7fc15725c313703f20b203))
+* **project:** support trailing commas ([67129b6](https://github.com/valueadd-poland/va-schematics/commit/67129b681473cb4820e97360f2f28c212ec30654))
+* **readme:** update readme ([ad14fcb](https://github.com/valueadd-poland/va-schematics/commit/ad14fcb38f3d7f23ffa7c8502a9a36fabd74a41c))
+* **reducer:** add error handling for selectors and facade, changed creator-files imports ([23e92d6](https://github.com/valueadd-poland/va-schematics/commit/23e92d623b2926e9729c38b647ccb0f4fa4dee14))
+* **reducer:** add support for new syntax ([4ef6173](https://github.com/valueadd-poland/va-schematics/commit/4ef617332098661067a3f6eb5e7155dcb8822336))
+
+
+### Bug Fixes
+
+* **project:** add default return type ([a3a91e6](https://github.com/valueadd-poland/va-schematics/commit/a3a91e646fb167fa6a5e8b688eb8d77dad036c47))
+* **project:** revert new import for old syntax ([f72f416](https://github.com/valueadd-poland/va-schematics/commit/f72f41665487dd9e6908d6718fde3381483f8522))
+
 ## [3.0.0](https://github.com/valueadd-poland/va-schematics/compare/v2.0.1...v3.0.0) (2020-12-10)
 
 
