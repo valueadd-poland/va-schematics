@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "id": "SchematicsVaDataServiceEmptyMethod",
+  "$id": "SchematicsVaDataServiceEmptyMethod",
   "title": "Data service empty method schematic.",
   "type": "object",
   "properties": {

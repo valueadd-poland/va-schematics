@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "id": "SchematicsVaAction",
+  "$id": "SchematicsVaAction",
   "title": "Create action in ngrx store module.",
   "type": "object",
   "properties": {
