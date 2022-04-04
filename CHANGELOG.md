@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://github.com/valueadd-poland/va-schematics/compare/v3.1.1...v3.2.0) (2022-04-04)
+
+
+### Features
+
+* **project:** angular 13 support ([2649c71](https://github.com/valueadd-poland/va-schematics/commit/2649c71697cfb2e2540bc7191e96e3ef1581dee1))
+
 ### [3.1.1](https://github.com/valueadd-poland/va-schematics/compare/v3.1.0...v3.1.1) (2021-08-09)
 
 
