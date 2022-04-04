@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "id": "SchematicsVaCrud",
+  "$id": "SchematicsVaCrud",
   "title": "Create crud operation in data access module",
   "type": "object",
   "properties": {

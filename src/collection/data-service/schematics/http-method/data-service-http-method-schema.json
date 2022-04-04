@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "id": "SchematicsVaDataServiceHttpMethod",
+  "$id": "SchematicsVaDataServiceHttpMethod",
   "title": "Data service http method schematic.",
   "type": "object",
   "properties": {
